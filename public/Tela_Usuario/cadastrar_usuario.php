@@ -2,7 +2,7 @@
 
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
-require_once "visualizacao_cadastro.php";
+require_once "visualizacao_usuario.php";
 
 exigir_login();
 
