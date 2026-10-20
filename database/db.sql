@@ -20,6 +20,18 @@ create table sensores (
 
 create table trens (
     id_trem INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(100) NOT NULL
+    nome VARCHAR(100) NOT NULL,
+    velocidade_max FLOAT NOT NULL,
+    tipo ENUM('Velocidade', 'Temperatura','Status') NOT NULL,
+    id_rota INT NOT NULL,
+
+    FOREIGN KEY (id_rota) REFERENCES rotas(id_rota)
 );
 
+create table rotas (
+    id_rotas INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    extensao FLOAT NOT NULL,
+    tempo INT NOT NULL,
+);
+  
