@@ -1,3 +1,92 @@
+<?php
+
+require_once "../../infra/conexao.php";
+require_once "../../infra/auth.php";
+require_once "visualizacao_sensores.php";
+
+exigir_login();
+
+$ehAdministrador =
+    strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
+
+$mensagem = '';
+$mensagemAcesso = '';
+$busca = trim($_GET['buscar'] ?? '');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!$ehAdministrador) {
+        http_response_code(403);
+        $mensagemAcesso = 'Você não tem permissão para cadastrar sensores.';
+    } else {
+        verificar_csrf();
+
+        $nome = trim($_POST['nome'] ?? '');
+        $tipo = trim($_POST['tipo'] ?? '');
+        $trem = trim($_POST['trem'] ?? '');
+        $rota = trim($_POST['rota'] ?? '');
+
+        $tiposPermitidos = ['Velocidade', 'Temperatura', 'Status'];
+
+        if ($nome === '' || $trem === '' || $rota === '') {
+            $mensagem = 'Preencha todos os campos.';
+        } elseif (!in_array($tipo, $tiposPermitidos, true)) {
+            $mensagem = 'Tipo de dado inválido.';
+        } else {
+            $sql = "INSERT INTO sensores (nome, tipo, trem, rota)
+                    VALUES (?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+
+            if (!$stmt) {
+                error_log('Erro ao preparar cadastro de sensor: ' . $conn->error);
+                $mensagem = 'Não foi possível concluir o cadastro.';
+            } else {
+                $stmt->bind_param('ssss', $nome, $tipo, $trem, $rota);
+
+                if ($stmt->execute()) {
+                    $_SESSION['mensagem_cadastro'] =
+                        'Sensor cadastrado com sucesso!';
+                    header('Location: cadastrar_sensores.php');
+                    exit;
+                }
+
+                error_log('Erro ao cadastrar sensor: ' . $stmt->error);
+                $mensagem = 'Não foi possível concluir o cadastro.';
+                $stmt->close();
+            }
+        }
+    }
+}
+
+if (isset($_SESSION['mensagem_cadastro'])) {
+    $mensagem = $_SESSION['mensagem_cadastro'];
+    unset($_SESSION['mensagem_cadastro']);
+}
+
+$textoBusca = '%' . $busca . '%';
+
+$sql = "SELECT id_sensor, nome, tipo, trem, rota FROM sensores WHERE nome LIKE ? OR tipo LIKE ? OR trem LIKE ? OR rota LIKE ? ORDER BY nome";
+
+$stmtBusca = $conn->prepare($sql);
+
+if ($stmtBusca) {
+    $stmtBusca->bind_param('ssss', $textoBusca, $textoBusca, $textoBusca, $textoBusca);
+
+    if ($stmtBusca->execute()) {
+        $resultado = $stmtBusca->get_result();
+    } else {
+        error_log('Erro ao consultar sensores: ' . $stmtBusca->error);
+        $resultado = false;
+        $mensagemAcesso = 'Não foi possível carregar os sensores.';
+    }
+
+    $stmtBusca->close();
+} else {
+    error_log('Erro ao preparar consulta de sensores: ' . $conn->error);
+    $resultado = false;
+    $mensagemAcesso = 'Não foi possível carregar os sensores.';
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -152,7 +241,7 @@
             </form>
         </section>
       
-      <?php mostrar_usuarios($resultado); ?>
+      <?php mostrar_sensores($resultado); ?>
     </main>
 </div>
 
