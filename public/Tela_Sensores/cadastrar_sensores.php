@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Cadastro de Sensores</title>
+  <title>Cadastro Sensores</title>
 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link rel="stylesheet" href="../../assets/style/style.css">
 
 </head>
@@ -60,8 +61,8 @@
 </a>
     </aside>
 
-    <main class="content">
-      <p class="painel">PAINEL ADMINISTRATIVO</p>
+    <main class="content-user">
+      <p class="painel-user">PAINEL ADMINISTRATIVO</p>
           <h1>Controle de sensores cadastrados</h1>
           <h2>Sensores do sistema</h2>
 
@@ -69,8 +70,8 @@
             <p role="alert"><?= escapar($mensagemAcesso) ?></p>
         <?php endif; ?>
 
-   <div class="admin_area">
-    <div class="avatar_area"></div>
+  <div class="admin-badge-user">
+    <div class="avatar-user"></div>
     <div>
         <strong>
             <?= strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0
@@ -82,24 +83,24 @@
 </div>
         <?php if ($ehAdministrador): ?>
 
-    <div class="admin_area">
-        <div class="avatar_area"></div>
+    <div class="admin-badge-user">
+        <div class="avatar-user"></div>
         <div>
             <strong>Admin</strong>
             <span><?= escapar($_SESSION['nome'] ?? 'Administrador') ?></span>
         </div>
     </div>
 
-      <button class="btn-cadastrar" type="button">
+      <button class="btn-cadastrar-user" type="button">
                 CADASTRAR NOVO SENSOR
             </button>
 
-       <section class="cadastro-sensores" id="cadastro">
+       <section class="cadastro-usuario" id="cadastro">
           
-          <form class="form-cadastro" method="POST">
+      <form class="form-cadastro-user" method="POST" onsubmit="return validar_usuario()">
             <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
             
-            <div class="campo">
+      <div class="campo-user">
               <label for="nome">Nome do sensor</label>
               <input type="text" id="nome" name="nome" placeholder="Nome do sensor" required>
             </div>
@@ -135,14 +136,14 @@
                         <p role="alert"><?= escapar($mensagem) ?></p>
                     <?php endif; ?>
 
-                    <button class="btn-cadastrar" type="submit">
+                    <button class="btn-cadastrar-form" type="submit">
                         CADASTRAR NOVO USUÁRIO
                     </button>
                 </form>
             </section>
         <?php endif; ?>
       
-     <section class="buscar_sensor">
+        <section class="buscar-box-user">
             <form method="GET">
                 <label for="buscar">Buscar</label>
                 <input type="text" id="buscar" name="buscar" placeholder="Nome"

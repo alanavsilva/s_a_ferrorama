@@ -236,7 +236,7 @@ if ($stmtBusca) {
         <section class="buscar-box-user">
         <form method="GET">
         <label for="buscar">Buscar</label>
-        <input type="text" id="buscar" name="buscar" placeholder="Nome ou email" value="<?= escapar($busca) ?>" >
+        <input type="text" id="buscar" name="buscar" placeholder="Nome ou email" value="<?= escapar($busca) ?>">
                 <button type="submit">Buscar</button>
             </form>
         </section>
