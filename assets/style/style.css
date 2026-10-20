@@ -1,16 +1,5 @@
-/* configurações gerais */
-
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    background: #eeeeee;
-    font-family: Arial, Helvetica, sans-serif;
-    color: #1a1a1a;
 }
 
 .body_geral {
@@ -19,12 +8,14 @@ body {
   font-family: Arial, sans-serif;
 }
 
+.pagina-login {
+  background: #eeeded;
+}
+
 .pagina {
   display: flex;
   min-height: 100vh;
 }
-
-/* menu lateral */
 
 .menu {
   width: 215px;
@@ -99,17 +90,9 @@ body {
   bottom: 18px;
 }
 
-/* conteúdo e cabeçalho */
-
 .conteudo {
   width: 100%;
   padding: 28px 42px;
-}
-
-.content {
-    flex: 1;
-    padding: 32px 48px;
-    position: relative;
 }
 
 header {
@@ -134,30 +117,6 @@ h2 {
   font-size: 16px;
 }
 
-.painel {
-    color: #6e1423;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin: 0 0 4px;
-}
-
-.content > h1 {
-    margin: 0 0 6px;
-    font-size: 24px;
-    font-weight: 700;
-    color: #1a1a1a;
-}
-
-.content > h2 {
-    margin: 0 0 28px;
-    font-size: 20px;
-    font-weight: 700;
-    color: #6e1423;
-}
-
-/* perfil do usuário */
-
 .admin {
   display: flex;
   gap: 9px;
@@ -178,6 +137,69 @@ h2 {
   height: 25px;
   border-radius: 50%;
   background: #680004;
+}
+
+.campo_inteiro {
+  grid-column: 1 / -1;
+}
+
+.botao {
+  display: flex;
+  width: 92%;
+  margin: 0 auto 20px;
+  padding: 13px;
+  border: 0;
+  border-radius: 25px;
+  color: white;
+  background: #650003;
+  font-size: 11px;
+  font-weight: bold;
+  align-items: center;
+  justify-content: center;
+}
+
+.botao_largo {
+  display: flex;
+  width: 92%;
+  margin: 0 auto 20px;
+  padding: 13px;
+  border: 0;
+  border-radius: 25px;
+  color: white;
+  background: #650003;
+  font-size: 11px;
+  font-weight: bold;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: center;
+}
+
+.content {
+    flex: 1;
+    padding: 32px 48px;
+    position: relative;
+}
+
+.painel {
+    color: #6e1423;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 0 0 4px;
+}
+
+.content > h1 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.content > h2 {
+    margin: 0 0 28px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #6e1423;
 }
 
 .admin_area {
@@ -213,35 +235,7 @@ h2 {
     font-size: 11px;
 }
 
-.campo_inteiro {
-  grid-column: 1 / -1;
-}
-
-/* botões gerais */
-
-.botao,
-.botao_largo {
-  display: flex;
-  width: 92%;
-  margin: 0 auto 20px;
-  padding: 13px;
-  border: 0;
-  border-radius: 25px;
-  color: white;
-  background: #650003;
-  font-size: 11px;
-  font-weight: bold;
-  align-items: center;
-  justify-content: center;
-   cursor: pointer;
-}
-
-.botao_largo {
-  grid-column: 1 / -1;
-}
-
-.btn-cadastrar,
-.btn-cadastrar-user  {
+.btn-cadastrar {
     display: block;
     width: 100%;
     max-width: 810px;
@@ -258,397 +252,10 @@ h2 {
     transition: background 0.2s;
 }
 
-.btn-cadastrar:hover,
-.btn-cadastrar-user:hover {
+.btn-cadastrar:hover {
     background: #6e1423;
 }
 
-/* formulários e campos gerais */
-
-.formulario {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px 28px;
-    padding: 14px 20px 18px;
-    margin-bottom: 12px;
-    background: white;
-}
-
-label {
-    display: block;
-    color: #7b1318;
-    font-size: 10px;
-    font-weight: bold;
-}
-
-input,
-select {
-    width: 100%;
-    height: 37px;
-    margin-top: 5px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    background: white;
-    font-size: 10px;
-}
-
-.escondido {
-    display: none;
-}
-
-.voltar {
-    padding: 5px;
-    margin-bottom: 8px;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-}
-
-.voltar img {
-    width: 22px;
-    height: 22px;
-}
-
-/* tela login */
-
-  .pagina-login {
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  
-  
-    .login-vizualização {
-      width: 100%;
-      min-height: 632px;
-      display: flex;
-      background-color: white;
-    }
-  
-  
-    .painel-introducao {
-      width: 50%;
-      background: linear-gradient(135deg, #7e0606, #8d3434);
-      color: white;
-      padding: 180px 40px 40px 40px;
-      border-radius: 15px 15px 0 0;
-    }
-  
-    .inicio_login {
-      font-size: 13px;
-      font-weight: bold;
-      margin-bottom: 15px;
-    }
-  
-    .painel-introducao h1 {
-      font-size: 40px;
-      font-weight: 400;
-      line-height: 1.4;
-      max-width: 450px;
-    }
-  
-    .introducao_login {
-      display: none;
-    }
-  
-    #login-cadastro {
-      width: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #ffffff;
-    }
-  
-    .login-painel {
-      width: 285px;
-      padding: 28px 25px 35px 25px;
-      background-color: #faf9fc;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-    }
-  
-    .introducao_formulario {
-      color: #141313;
-      font-size: 12px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-  
-    .login-painel h2 {
-      font-size: 23px;
-      font-weight: 400;
-      margin-bottom: 18px;
-    }
-  
-    .login-painel label {
-      display: block;
-      font-size: 12px;
-      font-weight: bold;
-      margin-bottom: 18px;
-    }
-  
-    .login-painel input {
-      width: 100%;
-      height: 40px;
-      margin-top: 5px;
-      padding: 0 8px;
-      border: 1px solid #ccc;
-      background-color: white;
-      font-size: 12px;
-    }
-  
-    .login-painel input:focus {
-      outline: none;
-      border-color: #792626;
-    }
-  
-    #botao-envio {
-      width: 100%;
-      height: 40px;
-      border: none;
-      border-radius: 25px;
-      background-color: #860f0f;
-      color: white;
-      font-size: 13px;
-      cursor: pointer;
-    }
-  
-    #botao-envio:hover {
-      background-color: #7a1111;
-    }
-  
-    #mensagem {
-      margin-top: 10px;
-      font-size: 12px;
-      color: #6e1a1a;
-    }
-    
-    /* crud usários */
-   
-    .cadastro-usuario {
-      display: none;
-    }
-    
-    .cadastro-usuario.ativo {
-      display: block;
-      max-width: 900px;
-      margin: 20px auto;
-      background: #fff;
-      border-radius: 16px;
-      padding: 30px 40px 40px;
-      position: relative;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-    
-    .cadastro-usuario .painel-user {
-      color: #6e1423;
-      font-weight: 700;
-      font-size: 13px;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
-    }
-    
-    .cadastro-usuario h1 {
-      color: #1a1a1a;
-      font-size: 26px;
-      font-weight: 700;
-      margin-bottom: 18px;
-    }
-    
-    .cadastro-usuario h2 {
-      color: #6e1423;
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 20px;
-    }
-    
-    .cadastro-usuario .admin-badge-user {
-      position: absolute;
-      top: 24px;
-      right: 30px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 8px 16px;
-      font-size: 13px;
-    }
-    
-    .cadastro-usuario .avatar-user {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: #6e1423;
-    }
-    
-    .cadastro-usuario .admin-badge-user strong {
-      display: block;
-      color: #1a1a1a;
-    }
-    
-    .cadastro-usuario .admin-badge-user span {
-      color: #6e1423;
-      font-weight: 600;
-    }
-    
-    .cadastro-usuario .form-cadastro-user {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px 30px;
-    }
-    
-    .cadastro-usuario .campo-user label {
-      display: block;
-      color: #6e1423;
-      font-weight: 700;
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-    
-    .cadastro-usuario .campo-user input,
-    .cadastro-usuario .campo-user select {
-      width: 100%;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 14px;
-      outline: none;
-    }
-    
-    .cadastro-usuario .campo-user input:focus,
-    .cadastro-usuario .campo-user select:focus {
-      border-color: #6e1423;
-    }
-    
-    .cadastro-usuario .btn-cadastrar-form {
-      display: block;
-      width: 100%;
-      margin-top: 30px;
-      background: #4a0f18;
-      color: #fff;
-      border: none;
-      border-radius: 30px;
-      padding: 16px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    
-    .cadastro-usuario .btn-cadastrar-form:hover {
-      background: #6e1423;
-    }
-    
-    
-    .voltar {
-      padding: 5px;
-      margin-bottom: 8px;
-      border: 0;
-      background: transparent;
-      cursor: pointer;
-    }
-    
-    .voltar img {
-      width: 22px;
-      height: 22px;
-    }
-    
-    .buscar {
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      background: white;
-    }
-    
-    label {
-      display: block;
-      color: #7b1318;
-      font-size: 10px;
-      font-weight: bold;
-    }
-    
-    input,
-    select {
-      width: 100%;
-      height: 37px;
-      margin-top: 5px;
-      padding: 8px;
-      border: 1px solid #ccc;
-      background: white;
-      font-size: 10px;
-    }
-    
-    .buscar input {
-      width: 212px;
-      height: 25px;
-    }
-    
-    .formulario {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px 28px;
-      padding: 14px 20px 18px;
-      margin-bottom: 12px;
-      background: white;
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      font-size: 12px;
-    }
-    
-    th {
-      padding: 10px;
-      background: #d9d9d9;
-      color: black;
-      font-size: 11px;
-    }
-    
-    td {
-      padding: 10px;
-      border: 1px solid #eee;
-      color: #741016;
-      text-align: center;
-      font-weight: bold;
-    }
-    
-    .escondido {
-      display: none;
-    }
-    
-    .acao_user {
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .icon_editar,
-    .icon_excluir {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-    }
-    
-    .icon_excluir {
-        background-color: #6D0404; 
-    }
-    
-    .icon_editar {
-        background-color: #490404;  
-    }
-    
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
   .cadastro-sensores {
   display: none;
 }
@@ -854,13 +461,349 @@ select {
     background: #f5e6e8;
 }
 
+.cadastro-usuario {
+  display: none;
+}
+
+.cadastro-usuario.ativo {
+  display: block;
+  max-width: 900px;
+  margin: 20px auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 30px 40px 40px;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.cadastro-usuario .painel-user {
+  color: #6e1423;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.cadastro-usuario h1 {
+  color: #1a1a1a;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+.cadastro-usuario h2 {
+  color: #6e1423;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.cadastro-usuario .admin-badge-user {
+  position: absolute;
+  top: 24px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.cadastro-usuario .avatar-user {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #6e1423;
+}
+
+.cadastro-usuario .admin-badge-user strong {
+  display: block;
+  color: #1a1a1a;
+}
+
+.cadastro-usuario .admin-badge-user span {
+  color: #6e1423;
+  font-weight: 600;
+}
+
+.cadastro-usuario .form-cadastro-user {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 30px;
+}
+
+.cadastro-usuario .campo-user label {
+  display: block;
+  color: #6e1423;
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.cadastro-usuario .campo-user input,
+.cadastro-usuario .campo-user select {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 14px;
+  outline: none;
+}
+
+.cadastro-usuario .campo-user input:focus,
+.cadastro-usuario .campo-user select:focus {
+  border-color: #6e1423;
+}
+
+.cadastro-usuario .btn-cadastrar-form {
+  display: block;
+  width: 100%;
+  margin-top: 30px;
+  background: #4a0f18;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  padding: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cadastro-usuario .btn-cadastrar-form:hover {
+  background: #6e1423;
+}
 
 
+.voltar {
+  padding: 5px;
+  margin-bottom: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.voltar img {
+  width: 22px;
+  height: 22px;
+}
+
+.buscar {
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  background: white;
+}
+
+label {
+  display: block;
+  color: #7b1318;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+input,
+select {
+  width: 100%;
+  height: 37px;
+  margin-top: 5px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  background: white;
+  font-size: 10px;
+}
+
+.buscar input {
+  width: 212px;
+  height: 25px;
+}
+
+.formulario {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 28px;
+  padding: 14px 20px 18px;
+  margin-bottom: 12px;
+  background: white;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 12px;
+}
+
+th {
+  padding: 10px;
+  background: #d9d9d9;
+  color: black;
+  font-size: 11px;
+}
+
+td {
+  padding: 10px;
+  border: 1px solid #eee;
+  color: #741016;
+  text-align: center;
+  font-weight: bold;
+}
+
+.escondido {
+  display: none;
+}
+
+.acao_user {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon_editar,
+.icon_excluir {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.icon_excluir {
+    background-color: #6D0404; 
+}
+
+.icon_editar {
+    background-color: #490404;  
+}
 
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 
+.pagina-login {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
+
+  .login-vizualização {
+    width: 100%;
+    min-height: 632px;
+    display: flex;
+    background-color: white;
+  }
+
+
+  .painel-introducao {
+    width: 50%;
+    background: linear-gradient(135deg, #7e0606, #8d3434);
+    color: white;
+    padding: 180px 40px 40px 40px;
+    border-radius: 15px 15px 0 0;
+  }
+
+  .inicio_login {
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+
+  .painel-introducao h1 {
+    font-size: 40px;
+    font-weight: 400;
+    line-height: 1.4;
+    max-width: 450px;
+  }
+
+  .introducao_login {
+    display: none;
+  }
+
+
+  #login-cadastro {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+  }
+
+  .login-painel {
+    width: 285px;
+    padding: 28px 25px 35px 25px;
+    background-color: #faf9fc;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  }
+
+
+  .introducao_formulario {
+    color: #141313;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  .login-painel h2 {
+    font-size: 23px;
+    font-weight: 400;
+    margin-bottom: 18px;
+  }
+
+  .login-painel label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 18px;
+  }
+
+  .login-painel input {
+    width: 100%;
+    height: 40px;
+    margin-top: 5px;
+    padding: 0 8px;
+    border: 1px solid #ccc;
+    background-color: white;
+    font-size: 12px;
+  }
+
+  .login-painel input:focus {
+    outline: none;
+    border-color: #792626;
+  }
+
+
+  #botao-envio {
+    width: 100%;
+    height: 40px;
+    border: none;
+    border-radius: 25px;
+    background-color: #860f0f;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  #botao-envio:hover {
+    background-color: #7a1111;
+  }
+
+  #mensagem {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #6e1a1a;
+  }
+
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
