@@ -11,10 +11,11 @@ function mostrar_usuarios($resultado): void
         return;
     }
 
-    if ($resultado->num_rows === 0) {
-        echo "<p>Nenhum usuário encontrado.</p>";
-        return;
-    }
+if ($resultado->num_rows === 0) {
+    echo '<p class="mensagem_vazia">Nenhum usuário encontrado.</p>';
+    return;
+}
+
 ?>
 
 <table class="tabela-usuarios">

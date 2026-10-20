@@ -196,57 +196,31 @@ if ($stmtBusca) {
       
        <section class="cadastro-usuario" id="cadastro">
 
-      <form
-                    class="form-cadastro-user"
-                    method="POST"
-                    onsubmit="return validar_usuario()"
-                >
-                    <input
-                        type="hidden"
-                        name="csrf_token"
-                        value="<?= escapar(token_csrf()) ?>"
-                    >
+      <form class="form-cadastro-user" method="POST" onsubmit="return validar_usuario()">
+        <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
 
-                    <div class="campo-user">
-                        <label for="nome">Nome de usuário</label>
-                        <input
-                            type="text"
-                            id="nome"
-                            name="nome"
-                            placeholder="Nome completo"
-                            required
-                        >
-                    </div>
+        <div class="campo-user">
+        <label for="nome">Nome de usuário</label>
+        <input type="text" id="nome" name="nome" placeholder="Nome completo" required>
+        </div>
 
-                    <div class="campo-user">
-                        <label for="email">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            placeholder="Email"
-                            required
-                        >
-                    </div>
+        <div class="campo-user">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Email" required>
+        </div>
 
-                    <div class="campo-user">
-                        <label for="senha">Senha</label>
-                        <input
-                            type="password"
-                            id="senha"
-                            name="senha"
-                            placeholder="Senha"
-                            required
-                        >
-                    </div>
+        <div class="campo-user">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" placeholder="Senha" required>
+        </div>
 
-                    <div class="campo-user">
-                        <label for="tipo">Tipo de usuário</label>
-                        <select id="tipo" name="tipo">
-                            <option value="Funcionário">Funcionário</option>
-                            <option value="Administrador">Administrador</option>
-                        </select>
-                    </div>
+        <div class="campo-user">
+        <label for="tipo">Tipo de usuário</label>
+        <select id="tipo" name="tipo">
+        <option value="Funcionário">Funcionário</option>
+        <option value="Administrador">Administrador</option>
+        </select>
+        </div>
 
                     <?php if ($mensagem !== ''): ?>
                         <p role="alert"><?= escapar($mensagem) ?></p>
@@ -260,15 +234,9 @@ if ($stmtBusca) {
         <?php endif; ?>
 
         <section class="buscar-box-user">
-            <form method="GET">
-                <label for="buscar">Buscar</label>
-                <input
-                    type="text"
-                    id="buscar"
-                    name="buscar"
-                    placeholder="Nome ou email"
-                    value="<?= escapar($busca) ?>"
-                >
+        <form method="GET">
+        <label for="buscar">Buscar</label>
+        <input type="text" id="buscar" name="buscar" placeholder="Nome ou email" value="<?= escapar($busca) ?>" >
                 <button type="submit">Buscar</button>
             </form>
         </section>

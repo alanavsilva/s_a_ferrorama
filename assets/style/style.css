@@ -18,9 +18,9 @@
 }
 
 .menu {
-  width: 215px;
+  width: 280px;
   min-height: 100vh;
-  padding: 18px 12px;
+  padding: 25px 18px;
   position: relative;
   color: white;
   background: linear-gradient(135deg, #260002, #7a151b);
@@ -28,16 +28,16 @@
 
 .logo-trem {
   display: block;
-  width: 75px;
-  height: 75px;
+  width: 100px;
+  height: 100px;
   margin: auto;
   object-fit: contain;
 }
 
 .marca {
-  margin: 0 0 20px;
+  margin: 0 0 28px;
   text-align: center;
-  font-size: 9px;
+  font-size: 14px;
   font-weight: bold;
 }
 
@@ -48,21 +48,21 @@
 
 .menu a {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
-  padding: 11px 14px;
+  padding: 14px 16px;
   color: white;
   text-decoration: none;
   border-radius: 25px;
-  font-size: 11px;
+  font-size: 16px;
   font-weight: bold;
 
 }
 
 .icone {
   display: inline-block;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   background-color: currentColor;
   -webkit-mask-image: var(--icon);
   mask-image: var(--icon);
@@ -461,224 +461,86 @@ h2 {
     background: #f5e6e8;
 }
 
-.cadastro-usuario {
-  display: none;
+/* Cadastrar usuáro */
+* {
+  font-family: Arial, Helvetica, sans-serif;
+  }
+
+body.body_geral {
+  margin: 0;
+  min-height: 100vh;
+  background: #efefef;
+  color: #202020;
 }
 
-.cadastro-usuario.ativo {
-  display: block;
-  max-width: 900px;
-  margin: 20px auto;
-  background: #fff;
-  border-radius: 16px;
-  padding: 30px 40px 40px;
-  position: relative;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+.pagina {
+  min-height: 100vh;
 }
 
-.cadastro-usuario .painel-user {
-  color: #6e1423;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
+.content-user {
+  width: min(100% - 290px, 1500px);
+  min-height: 100vh;
+  margin-left: 50px;
+  padding: 30px clamp(24px, 5vw, 65px) 55px;
 }
 
-.cadastro-usuario h1 {
-  color: #1a1a1a;
-  font-size: 26px;
-  font-weight: 700;
-  margin-bottom: 18px;
+.content-user > p {
+  font-family: inherit;
 }
 
-.cadastro-usuario h2 {
-  color: #6e1423;
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-
-.cadastro-usuario .admin-badge-user {
-  position: absolute;
-  top: 24px;
-  right: 30px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 8px 16px;
-  font-size: 13px;
-}
-
-.cadastro-usuario .avatar-user {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #6e1423;
-}
-
-.cadastro-usuario .admin-badge-user strong {
-  display: block;
-  color: #1a1a1a;
-}
-
-.cadastro-usuario .admin-badge-user span {
-  color: #6e1423;
-  font-weight: 600;
-}
-
-.cadastro-usuario .form-cadastro-user {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px 30px;
-}
-
-.cadastro-usuario .campo-user label {
-  display: block;
-  color: #6e1423;
-  font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.cadastro-usuario .campo-user input,
-.cadastro-usuario .campo-user select {
-  width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 12px 16px;
-  font-size: 14px;
-  outline: none;
-}
-
-.cadastro-usuario .campo-user input:focus,
-.cadastro-usuario .campo-user select:focus {
-  border-color: #6e1423;
-}
-
-.cadastro-usuario .btn-cadastrar-form {
-  display: block;
-  width: 100%;
-  margin-top: 30px;
-  background: #4a0f18;
-  color: #fff;
-  border: none;
-  border-radius: 30px;
-  padding: 16px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.cadastro-usuario .btn-cadastrar-form:hover {
-  background: #6e1423;
-}
-
-
-.voltar {
-  padding: 5px;
-  margin-bottom: 8px;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.voltar img {
-  width: 22px;
-  height: 22px;
-}
-
-.buscar {
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  background: white;
-}
-
-label {
-  display: block;
-  color: #7b1318;
-  font-size: 10px;
-  font-weight: bold;
-}
-
-input,
-select {
-  width: 100%;
-  height: 37px;
-  margin-top: 5px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  background: white;
-  font-size: 10px;
-}
-
-.buscar input {
-  width: 212px;
-  height: 25px;
-}
-
-.formulario {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px 28px;
-  padding: 14px 20px 18px;
-  margin-bottom: 12px;
-  background: white;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  font-size: 12px;
-}
-
-th {
-  padding: 10px;
-  background: #d9d9d9;
-  color: black;
-  font-size: 11px;
-}
-
-td {
-  padding: 10px;
-  border: 1px solid #eee;
-  color: #741016;
+.mensagem_vazia {
+  font-family: inherit;
   text-align: center;
-  font-weight: bold;
 }
 
-.escondido {
-  display: none;
+.painel-user {
+  margin: 0 0 5px;
+  color: #6f0006;
+  font-size: 20px;
 }
 
-.acao_user {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    align-items: center;
+
+.buscar-box-user button {
+  padding: 0 24px;
+  font-size: 15px;
 }
 
-.icon_editar,
-.icon_excluir {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+.content-user table {
+  width: 100%;
+  margin: 0 0 24px;
+  overflow: hidden;
+  border-collapse: collapse;
+  border-radius: 8px;
+  background: #fff;
 }
 
-.icon_excluir {
-    background-color: #6D0404; 
+.content-user th,
+.content-user td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e5e5;
+  text-align: left;
+  vertical-align: middle;
 }
 
-.icon_editar {
-    background-color: #490404;  
+.content-user th {
+  background: #6f0006;
+  color: #fff;
+  font-size: 15px;
 }
 
+.content-user td {
+  font-size: 15px;
+}
+
+.content-user tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.content-user tbody tr:hover {
+  background: #faf5f5;
+}
+
+/* Login */
 
 * {
   margin: 0;
