@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>TremTech</title>
+  <title>Cadastro de Sensores</title>
 
   <link rel="stylesheet" href="../../assets/style/style.css">
 
@@ -60,97 +60,101 @@
 </a>
     </aside>
 
-    <main class="conteudo">
-      <header>
-        <div>
-          <small>PAINEL ADMINISTRATIVO</small>
+    <main class="content">
+      <p class="painel">PAINEL ADMINISTRATIVO</p>
           <h1>Controle de sensores cadastrados</h1>
           <h2>Sensores do sistema</h2>
+
+     <?php if ($mensagemAcesso !== ''): ?>
+            <p role="alert"><?= escapar($mensagemAcesso) ?></p>
+        <?php endif; ?>
+
+   <div class="admin_area">
+    <div class="avatar_area"></div>
+    <div>
+        <strong>
+            <?= strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0
+                ? 'Administrador'
+                : 'Funcionário' ?>
+        </strong>
+        <span><?= escapar($_SESSION['nome'] ?? '') ?></span>
+    </div>
+</div>
+        <?php if ($ehAdministrador): ?>
+
+    <div class="admin_area">
+        <div class="avatar_area"></div>
+        <div>
+            <strong>Admin</strong>
+            <span><?= escapar($_SESSION['nome'] ?? 'Administrador') ?></span>
         </div>
+    </div>
 
-        <div class="admin">
-          <div class="foto"></div>
+      <button class="btn-cadastrar" type="button">
+                CADASTRAR NOVO SENSOR
+            </button>
 
-          <b>
-            Admin<br>
-            <span>alana.veiga</span>
-          </b>
-        </div>
-      </header>
-
-  <section id="visualizacao">
-       <details>
-
-        <summary class="botao">
-          CADASTRAR NOVO SENSOR
-        </summary>
-
-      
-        <tbody id="tabela-sensores">
+       <section class="cadastro-sensores" id="cadastro">
           
-          <form class="formulario" method="POST">
-            <div>
+          <form class="form-cadastro" method="POST">
+            <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
+            
+            <div class="campo">
               <label for="nome">Nome do sensor</label>
-              <input type="text" id="nome" placeholder="Nome do sensor" required>
+              <input type="text" id="nome" name="nome" placeholder="Nome do sensor" required>
             </div>
             
-            <div>
+            <div class="campo-user">             
               <label for="tipo">Tipo de dado coletado</label>
-              <select id="tipo" required>
-                <option>Selecione o tipo</option>
-                <option>Velocidade</option>
-                <option>Temperatura</option>
-                <option>Status</option>
+              <select id="tipo" name="tipo" required>
+                <option value="Velocidade">Velocidade</option>
+                <option value="Temperatura">Temperatura</option>
+                <option value="Status">Status</option>
                 </select>
               </div>
               
-              <div>
-                <label for="trem">Trem vinculado</label>
-                <select id="trem" required>
-                  <option>Trem</option>
+            <div class="campo-user">          
+              <label for="trem">Trem vinculado</label>
+                <select id="trem" name="trem" required>
                   <option>Trem 01</option>
                   <option>Trem 02</option>
                   <option>Trem 03</option>
                 </select>
               </div>
               
-              <div>
-                <label for="rota">Rota vinculada</label>
-                <select id="rota" required>
-                  <option>Rota</option>
+            <div class="campo-user">          
+              <label for="rota">Rota vinculada</label>
+                <select id="rota" name= "rota" required>
                   <option>Rota Norte</option>
               <option>Rota Sul</option>
               <option>Rota Leste</option>
               <option>Rota Oeste</option>
             </select>
           </div>
-          <button class="botao_largo" type="submit">Cadastrar Sensor</button>
-        </form>
-      </details>
-      
-      <div class="buscar">
-        <label for="pesquisa">Buscar</label>
-        <input id="pesquisa" type="text" placeholder="Nome do sensor">
-      </div>
-      
-      <table>
-        <thead>
-          <tr>
-            <th>ID do Sensor</th>
-            <th>Nome do sensor</th>
-            <th>Trem vinculado</th>
-            <th>Rota vinculada</th>
-            <th>Dados Monitorados</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-    </tbody>
-  </table>
-</section>
-</main>
+           <?php if ($mensagem !== ''): ?>
+                        <p role="alert"><?= escapar($mensagem) ?></p>
+                    <?php endif; ?>
 
- <script src="validacao.js"></script>
- <link rel="stylesheet" href="../../assets/style/style.css">
+                    <button class="btn-cadastrar" type="submit">
+                        CADASTRAR NOVO USUÁRIO
+                    </button>
+                </form>
+            </section>
+        <?php endif; ?>
+      
+     <section class="buscar_sensor">
+            <form method="GET">
+                <label for="buscar">Buscar</label>
+                <input type="text" id="buscar" name="buscar" placeholder="Nome"
+                    value="<?= escapar($busca) ?>">
+                <button type="submit">Buscar</button>
+            </form>
+        </section>
+      
+      <?php mostrar_usuarios($resultado); ?>
+    </main>
+</div>
 
+<script src="../../script/validacao.js"></script>
 </body>
 </html>
