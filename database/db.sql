@@ -22,7 +22,7 @@ create table rotas (
     id_rotas INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
     extensao FLOAT NOT NULL,
-    tempo INT NOT NULL,
+    tempo INT NOT NULL
 );
 
 create table trens (
@@ -35,4 +35,11 @@ create table trens (
     FOREIGN KEY (id_rotas) REFERENCES rotas(id_rotas)
 );
 
-  
+  CREATE TABLE falhas_operacionais (
+    id_falha INT PRIMARY KEY AUTO_INCREMENT,
+    id_sensor INT NOT NULL,
+    descricao VARCHAR(200) NOT NULL,
+    data_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    resolvida TINYINT(1) NOT NULL DEFAULT 0,
+    FOREIGN KEY (id_sensor) REFERENCES sensores(id_sensor)
+);

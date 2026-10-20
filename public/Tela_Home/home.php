@@ -8,8 +8,17 @@ $nome = $_SESSION['nome'] ?? 'Usuário';
 $totalUsuarios = $conn->query( "SELECT COUNT(*) AS total FROM usuarios")->fetch_assoc()['total'];
 $totalSensores = $conn->query( "SELECT COUNT(*) AS total FROM sensores")->fetch_assoc()['total'];
 $totalTrens = $conn->query( "SELECT COUNT(*) AS total FROM trens")->fetch_assoc()['total'];
+$totalRotas = $conn->query( "SELECT COUNT(*) AS total FROM rotas")->fetch_assoc()['total'];
 $velocidadeMedia = $conn->query( "SELECT AVG(velocidade) AS media FROM sensores")->fetch_assoc()['media'] ?? 0;
+$totalFalhas = $conn->query( "SELECT COUNT(*) AS total FROM falhas_operacionais WHERE resolvida = 0")->fetch_assoc()['total'];
+$faltas = $conn->query("SELECT falhas_operacionais.id_falha, falhas_operacionais.descricao, falhas_operacionais.data_registro, falhas_operacionais.resolvida, sensores.nome AS nome_sensor
+FROM falhas_operacionais LEFT JOIN sensores ON falhas_operacionais.id_sensor = sensores.id_sensor ORDER BY falhas_operacionais.data_registro DESC");
 
+$usuarios = $conn->query(
+    "SELECT id_usuario, nome, email, tipo
+     FROM usuarios
+     ORDER BY nome"
+);
 $sql = "SELECT id_sensor, nome, trem_vinculado, direcao, temperatura, velocidade FROM sensores ORDER BY id_sensor DESC";
 
 $sensores = $conn->query($sql);
@@ -29,109 +38,186 @@ $sensores = $conn->query($sql);
 
 <body>
 
-<nav class="barra">
-    <div class="menu">
-        <a class="marca" href="home.php">🚆 SISTEMA TREMTECH</a>
+<nav class="home_barra">
+<a class="home_logo" href="home.php"> <img class="home-imagem-trem" src="https://img.icons8.com/ios/50/ffffff/train.png" alt="Ícone de trem"> SISTEMA TREMTECH </a>
+    <a class="home_link" href="home.php">Home</a>
 
-        <a class="link-menu" href="home.php">Home</a>
+    <a class="home_link" href="../../public/Tela_Usuario/cadastrar_usuario.php">
+        Usuários
+    </a>
 
-        <a class="link-menu" href="../../public/Tela_Usuario/cadastrar_usuario.php">
-            Usuários
-        </a>
+    <a class="home_link" href="../../public/Tela_Sensores/cadastrar_sensores.php">
+        Sensores
+    </a>
 
-        <a class="link-menu" href="../../public/Tela_Sensores/cadastrar_sensores.php">
-            Sensores
-        </a>
+    <a class="home_link" href="../../public/Tela_Relatorios/relatorios.php">
+        Relatórios
+    </a>
 
-        <a class="link-menu" href="../../public/Tela_Relatorios/relatorios.php">
-            Relatórios
-        </a>
+    <div class="home_usuario">
+        <div class="home_bolinha"></div>
 
-        <div class="usuario">
-            <strong><?= escapar($_SESSION['tipo'] ?? 'Usuário') ?></strong><br>
-            <small><?= escapar($nome) ?></small>
-        </div>
+        <div class="home_nome_usuario"> <strong><?= escapar($_SESSION['tipo'] ?? 'Usuário') ?></strong><br> <?= escapar($nome) ?> </div>
     </div>
 </nav>
 
-<main class="conteudo">
+<main class="home_conteudo">
 
-    <section class="boas-vindas">
-        <p>Bem-vindo de volta!</p>
-        <h1>Monitore usuários, trens e sensores em um só lugar.</h1>
-    </section>
-
-    <section class="indicadores">
-
-        <div class="indicador">
-            <div class="nome_indicador">Usuários cadastrados</div>
-            <div class="numero"><?= (int) $totalUsuarios ?></div>
+    <section class="home_boas_vindas">
+        <div>
+            <p>Bem-vindo de volta!</p>
+            <h1>Monitore usuários, rotas e operações em um só lugar.</h1>
         </div>
 
-        <div class="indicador">
-            <div class="nome_indicador">Trens cadastrados</div>
-            <div class="numero"><?= (int) $totalTrens ?></div>
-        </div>
-
-        <div class="indicador">
-            <div class="nome_indicador">Sensores cadastrados</div>
-            <div class="numero"><?= (int) $totalSensores ?></div>
-        </div>
-
-        <div class="indicador">
-            <div class="nome_indicador">Velocidade média</div>
-            <div class="numero">
-                <?= number_format((float) $velocidadeMedia, 0, ',', '.') ?>
+        <div class="home_status">
+            <div class="home_status_titulo">Velocidade média</div>
+            <div class="home_status_valor">
+                <?= number_format((float)$velocidadeMedia, 0, ',', '.') ?> km/h
             </div>
-            <small>km/h</small>
+        </div>
+    </section>
+
+    <section class="home_indicadores">
+
+        <div class="home_indicador">
+            <div class="home_indicador_nome">Usuários cadastrados</div>
+            <div class="home_indicador_numero"> <?= (int)$totalUsuarios ?> </div>
+        </div>
+
+        <div class="home_indicador">
+            <div class="home_indicador_nome">Rotas cadastradas</div>
+            <div class="home_indicador_numero"> <?= (int)$totalRotas ?> </div>
+        </div>
+
+        <div class="home_indicador">
+            <div class="home_indicador_nome">Sensores cadastrados</div>
+            <div class="home_indicador_numero"><?= (int)$totalSensores ?></div>
+        </div> 
+
+        <div class="home_indicador">
+            <div class="home_indicador_nome">Trens cadastrados</div>
+            <div class="home_indicador_numero"> <?= (int)$totalTrens ?> </div>
         </div>
 
     </section>
 
-      <section class="botoes">
-        <a class="botao_cadastro" href="../../public/Tela_Sensores/cadastrar_sensores.php"> Cadastro de Sensores e Trens </a>
-        <a class="botao_cadastro" href="../../public/Tela_Usuario/cadastrar_usuario.php" > Cadastro de Usuário </a>
-      </section>
+    <section class="home_botoes">
+        <a class="home_botao" href="../../public/Tela_Sensores/cadastrar_sensores.php"> Cadastro de Sensores e Trens </a>
 
-    <section class="caixa_sensores">  
-    <h2 class="titulo">Sensores cadastrados</h2>
+        <a class="home_botao" href="../../public/Tela_Usuario/cadastrar_usuario.php"> Cadastro de Usuários </a>
+    </section>
 
-        <table class="tabela_sensores">
+    <section class="home_caixa_sensores">
+        <h2 class="home_titulo_tabela">Sensores cadastrados</h2>
+
+        <table class="home_tabela">
+            <thead>
+                <tr>
+                    <th>ID do Sensor</th>
+                    <th>Nome do Sensor</th>
+                    <th>Trem</th>
+                    <th>Direção</th>
+                    <th>Temperatura</th>
+                    <th>Velocidade</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <?php if ($sensores && $sensores->num_rows > 0): ?>
+
+                    <?php while ($sensor = $sensores->fetch_assoc()): ?>
+                        <tr>
+                            <td><?= (int)$sensor['id_sensor'] ?></td>
+                            <td class="home-nome-sensor">
+                                <?= escapar($sensor['nome']) ?>
+                            </td>
+                            <td><?= escapar($sensor['trem_vinculado']) ?></td>
+                            <td><?= escapar($sensor['direcao']) ?></td>
+                            <td><?= escapar((string)$sensor['temperatura']) ?> °C</td>
+                            <td><?= escapar((string)$sensor['velocidade']) ?> km/h</td>
+                        </tr>
+                    <?php endwhile; ?>
+
+                <?php else: ?>
+
+                    <tr>
+                        <td colspan="6">Nenhum sensor cadastrado.</td>
+                    </tr>
+
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </section>
+
+            <section class="home_caixa_sensores" id="falhas">
+            <h2 class="home_titulo_tabela">Falhas operacionais</h2>
+
+    <p>Falhas não resolvidas: <strong><?= (int)$totalFalhas ?></strong></p>
+
+    <table class="home_tabela">
         <thead>
-                <tr>
-                  <th>ID do sensor</th>
-                  <th>Nome do sensor</th>
-                  <th>Trem</th>
-                  <th>Direção</th>
-                  <th>Temperatura</th>
-                  <th>Velocidade</th>
-                </tr>
+            <tr>
+                <th>Sensor</th>
+                <th>Descrição</th>
+                <th>Data</th>
+                <th>Status</th>
+            </tr>
         </thead>
-     <tbody>
-      <?php if ($sensores && $sensores->num_rows > 0): ?>
-      <?php while ($sensor = $sensores->fetch_assoc()): ?>
+
+        <tbody>
+            <?php if ($faltas && $faltas->num_rows > 0): ?>
+                <?php while ($falha = $faltas->fetch_assoc()): ?>
+                    <tr>
+                        <td><?= escapar($falha['nome_sensor'] ?? 'Sensor removido') ?></td>
+                        <td><?= escapar($falha['descricao']) ?></td>
+                        <td><?= escapar($falha['data_registro']) ?></td>
+                        <td>
+                            <?= $falha['resolvida'] ? 'Resolvida' : 'Não resolvida' ?>
+                        </td>
+                    </tr>
+                <?php endwhile; ?>
+            <?php else: ?>
                 <tr>
-                  <td><?= (int) $sensor['id_sensor'] ?></td>
-                  <td class="sensor-destaque"> <?= escapar($sensor['nome']) ?> </td>
-                  <td><?= escapar($sensor['trem_vinculado']) ?></td>
-                  <td><?= escapar($sensor['direcao']) ?></td>
-                  <td> <?= escapar((string) $sensor['temperatura']) ?> °C </td>
-                  <td> <?= escapar((string) $sensor['velocidade']) ?> km/h </td>
+                    <td colspan="4">Nenhuma falha cadastrada.</td>
                 </tr>
-      <?php endwhile; ?>
-      <?php else: ?>
-
-                 <tr>
-                  <td class="sem-sensores" colspan="6"> Nenhum sensor cadastrado </td> 
-                </tr>
-
-      <?php endif; ?>
-            
-    </tbody>
+            <?php endif; ?>
+        </tbody>
     </table>
+</section>
+
+<section class="home_caixa_sensores">
+    <h2 class="home_titulo_tabela">Usuários cadastrados</h2>
+
+    <table class="home_tabela">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Tipo</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <?php if ($usuarios && $usuarios->num_rows > 0): ?>
+                <?php while ($usuario = $usuarios->fetch_assoc()): ?>
+                    <tr>
+                        <td><?= (int)$usuario['id_usuario'] ?></td>
+                        <td><?= escapar($usuario['nome']) ?></td>
+                        <td><?= escapar($usuario['email']) ?></td>
+                        <td><?= escapar($usuario['tipo']) ?></td>
+                    </tr>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <tr>
+                    <td colspan="4">Nenhum usuário cadastrado.</td>
+                </tr>
+            <?php endif; ?>
+        </tbody>
+
+        </table>
     </section>
 
 </main>
 
 </body>
-</html>
