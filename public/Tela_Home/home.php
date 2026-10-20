@@ -35,3 +35,37 @@
         </div>
     </div>
 </nav>
+
+<main class="conteudo">
+
+    <section class="boas-vindas">
+        <p>Bem-vindo de volta!</p>
+        <h1>Monitore usuários, trens e sensores em um só lugar.</h1>
+    </section>
+
+    <section class="indicadores">
+
+        <div class="indicador">
+            <div class="nome_indicador">Usuários cadastrados</div>
+            <div class="numero"><?= (int) $totalUsuarios ?></div>
+        </div>
+
+        <div class="indicador">
+            <div class="nome_indicador">Trens cadastrados</div>
+            <div class="numero"><?= (int) $totalTrens ?></div>
+        </div>
+
+        <div class="indicador">
+            <div class="nome_indicador">Sensores cadastrados</div>
+            <div class="numero"><?= (int) $totalSensores ?></div>
+        </div>
+
+        <div class="indicador">
+            <div class="nome_indicador">Velocidade média</div>
+            <div class="numero">
+                <?= number_format((float) $velocidadeMedia, 0, ',', '.') ?>
+            </div>
+            <small>km/h</small>
+        </div>
+
+    </section>
