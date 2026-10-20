@@ -1,3 +1,21 @@
+<?php
+require_once "../../infra/conexao.php";
+require_once "../../infra/auth.php";
+
+exigir_login();
+
+$nome = $_SESSION['nome'] ?? 'Usuário';
+$totalUsuarios = $conn->query( "SELECT COUNT(*) AS total FROM usuarios")->fetch_assoc()['total'];
+$totalSensores = $conn->query( "SELECT COUNT(*) AS total FROM sensores")->fetch_assoc()['total'];
+$totalTrens = $conn->query( "SELECT COUNT(*) AS total FROM trens")->fetch_assoc()['total'];
+$velocidadeMedia = $conn->query( "SELECT AVG(velocidade) AS media FROM sensores")->fetch_assoc()['media'] ?? 0;
+
+$sql = "SELECT id_sensor, nome, trem_vinculado, direcao, temperatura, velocidade FROM sensores ORDER BY id_sensor DESC";
+
+$sensores = $conn->query($sql);
+
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
