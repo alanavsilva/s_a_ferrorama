@@ -1661,3 +1661,22 @@ body.pagina-relatorios {
         padding: 20px;
     }
 }
+
+.cadastro-usuario .campo-user input,
+.cadastro-usuario .campo-user select {
+  width: 100%;
+  height: auto;
+  margin-top: 0;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+}
+
+.cadastro-usuario .form-cadastro-user [role="alert"],
+.cadastro-usuario .btn-cadastrar-form {
+  grid-column: 1 / -1;
+}
+
+/* Home */
