@@ -42,19 +42,44 @@ function validar_usuario() {
     return true;
 }
 
+//cadastro sensores
 
-// abrir e fechar formulário de cadastro de usuário
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
+    const botaoAbrir = document.querySelector(".btn-cadastrar-user");
+    const formularioCadastro = document.querySelector(".cadastro-usuario");
 
-    const btnAbrir = document.querySelector('.btn-cadastrar-user');
-    const formCadastro = document.querySelector('.cadastro-usuario');
+    if (botaoAbrir && formularioCadastro) {
+        formularioCadastro.style.display = "none";
 
-    if (btnAbrir && formCadastro) {
+        botaoAbrir.addEventListener("click", () => {
+            const estaFechado = formularioCadastro.style.display === "none";
 
-        btnAbrir.addEventListener('click', () => {
-            formCadastro.classList.toggle('ativo');
+            formularioCadastro.style.display = estaFechado ? "block" : "none";
         });
+    }
+});
 
+function validar_sensor() {
+    const nome = document.getElementById("nome_sensor").value.trim();
+    const tipo = document.getElementById("tipo_dado").value;
+    const localizacao = document.getElementById("localizacao").value.trim();
+    const rota = document.getElementById("id_rota").value;
+
+    if (!nome || !tipo || !localizacao || !rota) {
+        alert("Preencha todos os campos.");
+        return false;
     }
 
+    return true;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const botao = document.getElementById("btnAbrirCadastro");
+    const formulario = document.getElementById("cadastro");
+
+    if (botao && formulario) {
+        botao.addEventListener("click", () => {
+            formulario.hidden = !formulario.hidden;
+        });
+    }
 });

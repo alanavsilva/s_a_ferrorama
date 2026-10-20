@@ -222,15 +222,19 @@ if ($stmtBusca) {
     </div>
 
     <div class="campo-user">
-        <label for="localizacao">Localização</label>
-        <input
-            type="text"
-            id="localizacao"
-            name="localizacao"
-            placeholder="Localização do sensor"
-            required
-        >
-    </div>
+    <label for="id_trem">Localização / trem vinculado</label>
+    <select id="id_trem" name="id_trem" required>
+        <option value="">Selecione um trem</option>
+
+        <?php if ($resultadoTrens): ?>
+            <?php while ($trem = $resultadoTrens->fetch_assoc()): ?>
+                <option value="<?= (int) $trem['id_trem'] ?>">
+                    <?= escapar($trem['nome']) ?>
+                </option>
+            <?php endwhile; ?>
+        <?php endif; ?>
+    </select>
+</div>
 
     <div class="campo-user">
         <label for="id_rota">Rota vinculada</label>
@@ -275,6 +279,6 @@ if ($stmtBusca) {
     <?php mostrar_sensores($resultado); ?>
     </main>
 </div>
-
+<script src="../../script/validacao.js"></script>
 </body>
 </html>
