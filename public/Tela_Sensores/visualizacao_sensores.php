@@ -1,11 +1,13 @@
 <?php
 
-function mostrar_sensores($resultado): void
+function mostrar_sensores($resultado, bool $mostrarAcoes = true): void
 {
     $ehAdministrador =
         strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
 
-    if ($resultado === false) {
+      $exibirAcoes = $mostrarAcoes && $ehAdministrador;
+
+    if ($resultado === false || $resultado === null) {
         echo '<p>Não foi possível carregar os sensores.</p>';
         return;
     }
@@ -22,11 +24,10 @@ function mostrar_sensores($resultado): void
                 <th>ID</th>
                 <th>Nome do sensor</th>
                 <th>Trem vinculado</th>
-                <th>Direção</th>
-                <th>Temperatura</th>
-                <th>Velocidade</th>
+                <th>Tipo de dado registrado</th>
+                <th>Rota vinculada</th>
 
-                <?php if ($ehAdministrador): ?>
+                <?php if ($exibirAcoes): ?>
                     <th>Ações</th>
                 <?php endif; ?>
             </tr>
@@ -36,13 +37,12 @@ function mostrar_sensores($resultado): void
             <?php while ($sensor = $resultado->fetch_assoc()): ?>
                 <tr>
                     <td><?= (int) $sensor['id_sensor'] ?></td>
-                    <td><?= escapar($sensor['nome']) ?></td>
-                    <td><?= escapar($sensor['trem_vinculado']) ?></td>
-                    <td><?= escapar($sensor['direcao']) ?></td>
-                    <td><?= escapar($sensor['temperatura']) ?></td>
-                    <td><?= escapar($sensor['velocidade']) ?></td>
+                    <td><?= escapar($sensor['nome_sensor']) ?></td>
+                    <td><?= escapar($sensor['tipo_dado']) ?></td>
+                    <td><?= escapar($sensor['localizacao']) ?></td>
+                    <td><?= escapar($sensor['rota_vinculada']) ?></td>
 
-            <?php if ($ehAdministrador): ?>
+            <?php if ($exibirAcoes): ?>
             <td class="acao_sensor">
             <a href="editar_s.php?id=<?= (int) $sensor['id_sensor'] ?>" class="icon_editar" aria-label="Editar sensor">
             <img src="https://img.icons8.com/ios-filled/18/ffffff/edit.png" alt="" >

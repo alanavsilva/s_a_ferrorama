@@ -1,6 +1,7 @@
 <?php
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
+require_once "../Tela_Sensores/visualizacao_sensores.php";
 
 exigir_login();
 
@@ -13,15 +14,8 @@ $velocidadeMedia = $conn->query( "SELECT AVG(velocidade) AS media FROM sensores"
 $totalFalhas = $conn->query( "SELECT COUNT(*) AS total FROM falhas_operacionais WHERE resolvida = 0")->fetch_assoc()['total'];
 $faltas = $conn->query("SELECT falhas_operacionais.id_falha, falhas_operacionais.descricao, falhas_operacionais.data_registro, falhas_operacionais.resolvida, sensores.nome AS nome_sensor
 FROM falhas_operacionais LEFT JOIN sensores ON falhas_operacionais.id_sensor = sensores.id_sensor ORDER BY falhas_operacionais.data_registro DESC");
-
-$usuarios = $conn->query(
-    "SELECT id_usuario, nome, email, tipo
-     FROM usuarios
-     ORDER BY nome"
-);
-$sql = "SELECT id_sensor, nome, trem_vinculado, direcao, temperatura, velocidade FROM sensores ORDER BY id_sensor DESC";
-
-$sensores = $conn->query($sql);
+$usuarios = $conn->query( "SELECT id_usuario, nome, email, tipo FROM usuarios ORDER BY nome");
+$sensores = $conn->query("SELECT id_sensor, nome, trem_vinculado, direcao, temperatura, velocidade FROM sensores ORDER BY id_sensor DESC" );
 
 ?>
 
@@ -107,60 +101,22 @@ $sensores = $conn->query($sql);
         <a class="home_botao" href="../../public/Tela_Usuario/cadastrar_usuario.php"> Cadastro de Usuários </a>
     </section>
 
-    <section class="home_caixa_sensores">
-        <h2 class="home_titulo_tabela">Sensores cadastrados</h2>
+ <section class="home_caixa_sensores" id="falhas">
+    <h2 class="home_titulo_tabela">Falhas operacionais</h2>
 
-        <table class="home_tabela">
-            <thead>
-                <tr>
-                    <th>ID do Sensor</th>
-                    <th>Nome do Sensor</th>
-                    <th>Trem</th>
-                    <th>Direção</th>
-                    <th>Temperatura</th>
-                    <th>Velocidade</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <?php if ($sensores && $sensores->num_rows > 0): ?>
-
-                    <?php while ($sensor = $sensores->fetch_assoc()): ?>
-                        <tr>
-                            <td><?= (int)$sensor['id_sensor'] ?></td>
-                            <td class="home-nome-sensor">
-                                <?= escapar($sensor['nome']) ?>
-                            </td>
-                            <td><?= escapar($sensor['trem_vinculado']) ?></td>
-                            <td><?= escapar($sensor['direcao']) ?></td>
-                            <td><?= escapar((string)$sensor['temperatura']) ?> °C</td>
-                            <td><?= escapar((string)$sensor['velocidade']) ?> km/h</td>
-                        </tr>
-                    <?php endwhile; ?>
-
-                <?php else: ?>
-
-                    <tr>
-                        <td colspan="6">Nenhum sensor cadastrado.</td>
-                    </tr>
-
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </section>
-
-            <section class="home_caixa_sensores" id="falhas">
-            <h2 class="home_titulo_tabela">Falhas operacionais</h2>
-
-    <p>Falhas não resolvidas: <strong><?= (int)$totalFalhas ?></strong></p>
+    <p>
+        Falhas não resolvidas:
+        <strong><?= (int) $totalFalhas ?></strong>
+    </p>
 
     <table class="home_tabela">
         <thead>
             <tr>
-                <th>Sensor</th>
-                <th>Descrição</th>
-                <th>Data</th>
-                <th>Status</th>
+                <th>ID Sensor</th>
+                <th>Nome Sensor</th>
+                <th>Tipo de dado coletado</th>
+                <th>Trem vinculado</th>
+                <th>Rota vinculada</th>
             </tr>
         </thead>
 
@@ -191,7 +147,7 @@ $sensores = $conn->query($sql);
     <table class="home_tabela">
         <thead>
             <tr>
-                <th>ID</th>
+                <th>ID Usuário</th>
                 <th>Nome</th>
                 <th>E-mail</th>
                 <th>Tipo</th>
@@ -202,7 +158,7 @@ $sensores = $conn->query($sql);
             <?php if ($usuarios && $usuarios->num_rows > 0): ?>
                 <?php while ($usuario = $usuarios->fetch_assoc()): ?>
                     <tr>
-                        <td><?= (int)$usuario['id_usuario'] ?></td>
+                        <td><?= (int) $usuario['id_usuario'] ?></td>
                         <td><?= escapar($usuario['nome']) ?></td>
                         <td><?= escapar($usuario['email']) ?></td>
                         <td><?= escapar($usuario['tipo']) ?></td>
@@ -214,9 +170,14 @@ $sensores = $conn->query($sql);
                 </tr>
             <?php endif; ?>
         </tbody>
+    </table>
+</section>
 
-        </table>
-    </section>
+<section class="home_caixa_sensores">
+    <h2 class="home_titulo_tabela">Sensores cadastrados</h2>
+
+    <?php mostrar_sensores($sensores, false); ?>
+</section>
 
 </main>
 
