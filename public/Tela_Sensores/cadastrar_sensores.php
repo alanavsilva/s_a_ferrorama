@@ -9,7 +9,8 @@ exigir_login();
 $ehAdministrador =
     strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
 
-$mensagem = '';
+$mensagem = $_SESSION['mensagem_cadastro'] ?? '';
+unset($_SESSION['mensagem_cadastro']);
 $mensagemAcesso = '';
 $busca = trim($_GET['buscar'] ?? '');
 
@@ -20,31 +21,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         verificar_csrf();
 
-        $nome = trim($_POST['nome'] ?? '');
-        $tipo = trim($_POST['tipo'] ?? '');
-        $trem = trim($_POST['trem'] ?? '');
-        $rota = trim($_POST['rota'] ?? '');
+        $nomeSensor = trim($_POST['nome_sensor'] ?? '');
+        $tipoDado = trim($_POST['tipo_dado'] ?? '');
+        $localizacao = trim($_POST['localizacao'] ?? '');
+        $idRota = filter_input(INPUT_POST, 'id_rota', FILTER_VALIDATE_INT);
 
-        $tiposPermitidos = ['Velocidade', 'Temperatura', 'Status'];
-
-        if ($nome === '' || $trem === '' || $rota === '') {
-            $mensagem = 'Preencha todos os campos.';
-        } elseif (!in_array($tipo, $tiposPermitidos, true)) {
-            $mensagem = 'Tipo de dado inválido.';
+       if ($nomeSensor === '' || $tipoDado === '' || $localizacao === '' || !$idRota) {
+            $mensagem = 'Preencha todos os campos corretamente.';
         } else {
-            $sql = "INSERT INTO sensores (nome, tipo, trem, rota)
-                    VALUES (?, ?, ?, ?)";
+            $sql = "INSERT INTO sensores (nome_sensor, tipo_dado, localizacao, id_rota) VALUES (?, ?, ?, ?)";
+
             $stmt = $conn->prepare($sql);
 
             if (!$stmt) {
                 error_log('Erro ao preparar cadastro de sensor: ' . $conn->error);
                 $mensagem = 'Não foi possível concluir o cadastro.';
             } else {
-                $stmt->bind_param('ssss', $nome, $tipo, $trem, $rota);
+                $stmt->bind_param('sssi', $nomeSensor, $tipoDado, $localizacao, $idRota);
 
                 if ($stmt->execute()) {
-                    $_SESSION['mensagem_cadastro'] =
-                        'Sensor cadastrado com sucesso!';
+                    $_SESSION['mensagem_cadastro'] = 'Sensor cadastrado com sucesso!';
                     header('Location: cadastrar_sensores.php');
                     exit;
                 }
@@ -57,33 +53,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-if (isset($_SESSION['mensagem_cadastro'])) {
-    $mensagem = $_SESSION['mensagem_cadastro'];
-    unset($_SESSION['mensagem_cadastro']);
+$sqlRotas = "SELECT id_rotas, nome FROM rotas ORDER BY nome";
+$resultadoRotas = $conn->query($sqlRotas);
+
+if (!$resultadoRotas) {
+    error_log('Erro ao carregar rotas: ' . $conn->error);
+    $mensagemAcesso = 'Não foi possível carregar as rotas.';
 }
 
 $textoBusca = '%' . $busca . '%';
 
-$sql = "SELECT id_sensor, nome, tipo, trem, rota FROM sensores WHERE nome LIKE ? OR tipo LIKE ? OR trem LIKE ? OR rota LIKE ? ORDER BY nome";
+$sql = "SELECT id_sensor, nome, trem_vinculado, direcao, temperatura, velocidade
+        FROM sensores
+        WHERE nome LIKE ?
+           OR trem_vinculado LIKE ?
+           OR direcao LIKE ?
+        ORDER BY id_sensor";
 
 $stmtBusca = $conn->prepare($sql);
 
 if ($stmtBusca) {
-    $stmtBusca->bind_param('ssss', $textoBusca, $textoBusca, $textoBusca, $textoBusca);
+    $stmtBusca->bind_param(
+        'sss',
+        $textoBusca,
+        $textoBusca,
+        $textoBusca
+    );
 
     if ($stmtBusca->execute()) {
         $resultado = $stmtBusca->get_result();
     } else {
-        error_log('Erro ao consultar sensores: ' . $stmtBusca->error);
         $resultado = false;
         $mensagemAcesso = 'Não foi possível carregar os sensores.';
     }
 
     $stmtBusca->close();
 } else {
-    error_log('Erro ao preparar consulta de sensores: ' . $conn->error);
     $resultado = false;
-    $mensagemAcesso = 'Não foi possível carregar os sensores.';
+    $mensagemAcesso = 'Não foi possível preparar a consulta dos sensores.';
 }
 ?>
 
@@ -186,65 +193,88 @@ if ($stmtBusca) {
 
        <section class="cadastro-usuario" id="cadastro">
           
-      <form class="form-cadastro-user" method="POST" onsubmit="return validar_usuario()">
-            <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
-            
-      <div class="campo-user">
-              <label for="nome">Nome do sensor</label>
-              <input type="text" id="nome" name="nome" placeholder="Nome do sensor" required>
-            </div>
-            
-            <div class="campo-user">             
-              <label for="tipo">Tipo de dado coletado</label>
-              <select id="tipo" name="tipo" required>
-                <option value="Velocidade">Velocidade</option>
-                <option value="Temperatura">Temperatura</option>
-                <option value="Status">Status</option>
-                </select>
-              </div>
-              
-            <div class="campo-user">          
-              <label for="trem">Trem vinculado</label>
-                <select id="trem" name="trem" required>
-                  <option>Trem 01</option>
-                  <option>Trem 02</option>
-                  <option>Trem 03</option>
-                </select>
-              </div>
-              
-            <div class="campo-user">          
-              <label for="rota">Rota vinculada</label>
-                <select id="rota" name= "rota" required>
-                  <option>Rota Norte</option>
-              <option>Rota Sul</option>
-              <option>Rota Leste</option>
-              <option>Rota Oeste</option>
-            </select>
-          </div>
-           <?php if ($mensagem !== ''): ?>
-                        <p role="alert"><?= escapar($mensagem) ?></p>
-                    <?php endif; ?>
+      <form class="form-cadastro-user" method="POST">
+    <input
+        type="hidden"
+        name="csrf_token"
+        value="<?= escapar(token_csrf()) ?>"
+    >
 
-                    <button class="btn-cadastrar-form" type="submit">
-                        CADASTRAR NOVO USUÁRIO
-                    </button>
-                </form>
-            </section>
-        <?php endif; ?>
-      
-        <section class="buscar-box-user">
-            <form method="GET">
-                <label for="buscar">Buscar</label>
-                <input type="text" id="buscar" name="buscar" placeholder="Nome"
-                    value="<?= escapar($busca) ?>">
-                <button type="submit">Buscar</button>
-            </form>
+    <div class="campo-user">
+        <label for="nome_sensor">Nome do sensor</label>
+        <input
+            type="text"
+            id="nome_sensor"
+            name="nome_sensor"
+            placeholder="Nome do sensor"
+            required
+        >
+    </div>
+
+    <div class="campo-user">
+        <label for="tipo_dado">Tipo de dado coletado</label>
+        <select id="tipo_dado" name="tipo_dado" required>
+            <option value="">Selecione</option>
+            <option value="Velocidade">Velocidade</option>
+            <option value="Temperatura">Temperatura</option>
+            <option value="Status">Status</option>
+        </select>
+    </div>
+
+    <div class="campo-user">
+        <label for="localizacao">Localização</label>
+        <input
+            type="text"
+            id="localizacao"
+            name="localizacao"
+            placeholder="Localização do sensor"
+            required
+        >
+    </div>
+
+    <div class="campo-user">
+        <label for="id_rota">Rota vinculada</label>
+        <select id="id_rota" name="id_rota" required>
+            <option value="">Selecione uma rota</option>
+
+            <?php if ($resultadoRotas): ?>
+                <?php while ($rota = $resultadoRotas->fetch_assoc()): ?>
+                    <option value="<?= (int) $rota['id_rotas'] ?>">
+                    <?= escapar($rota['nome']) ?>
+                    </option>
+                <?php endwhile; ?>
+            <?php endif; ?>
+        </select>
+    </div>
+
+    <?php if ($mensagem !== ''): ?>
+        <p role="alert"><?= escapar($mensagem) ?></p>
+    <?php endif; ?>
+
+    <button class="btn-cadastrar-form" type="submit">
+        CADASTRAR NOVO SENSOR
+    </button>
+</form>
         </section>
-      
-      <?php mostrar_sensores($resultado); ?>
+    <?php endif; ?>
+
+    <section class="buscar-box-user">
+        <form method="GET">
+            <label for="buscar">Buscar</label>
+            <input
+                type="text"
+                id="buscar"
+                name="buscar"
+                placeholder="Nome, tipo, localização ou rota"
+                value="<?= escapar($busca) ?>"
+            >
+            <button type="submit">Buscar</button>
+        </form>
+    </section>
+
+    <?php mostrar_sensores($resultado); ?>
     </main>
 </div>
 
-<script src="../../script/validacao.js"></script>
 </body>
 </html>

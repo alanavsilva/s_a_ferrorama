@@ -11,11 +11,13 @@ create table usuarios (
 
 create table sensores (
     id_sensor INT PRIMARY KEY AUTO_INCREMENT,
-    nome VARCHAR(100) NOT NULL,
-    trem_vinculado VARCHAR(100) NOT NULL,
-    direcao VARCHAR(50) NOT NULL,
-    temperatura DECIMAL(5,2) NOT NULL,
-    velocidade DECIMAL(5,2) NOT NULL
+    nome_sensor VARCHAR(100) NOT NULL,
+    tipo_dado ENUM('Velocidade', 'Temperatura', 'Status') NOT NULL,
+    id_trem INT NOT NULL,
+    id_rotas INT NOT NULL,
+
+    FOREIGN KEY (id_trem) REFERENCES rotas(id_trem)
+    FOREIGN KEY (id_rotas) REFERENCES rotas(id_rotas)
 );
 
 create table rotas (
