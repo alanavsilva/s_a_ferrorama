@@ -69,3 +69,51 @@
         </div>
 
     </section>
+
+      <section class="botoes">
+        <a class="botao_cadastro" href="../../public/Tela_Sensores/cadastrar_sensores.php"> Cadastro de Sensores e Trens </a>
+        <a class="botao_cadastro" href="../../public/Tela_Usuario/cadastrar_usuario.php" > Cadastro de Usuário </a>
+      </section>
+
+    <section class="caixa_sensores">  
+    <h2 class="titulo">Sensores cadastrados</h2>
+
+        <table class="tabela_sensores">
+        <thead>
+                <tr>
+                  <th>ID do sensor</th>
+                  <th>Nome do sensor</th>
+                  <th>Trem</th>
+                  <th>Direção</th>
+                  <th>Temperatura</th>
+                  <th>Velocidade</th>
+                </tr>
+        </thead>
+     <tbody>
+      <?php if ($sensores && $sensores->num_rows > 0): ?>
+      <?php while ($sensor = $sensores->fetch_assoc()): ?>
+                <tr>
+                  <td><?= (int) $sensor['id_sensor'] ?></td>
+                  <td class="sensor-destaque"> <?= escapar($sensor['nome']) ?> </td>
+                  <td><?= escapar($sensor['trem_vinculado']) ?></td>
+                  <td><?= escapar($sensor['direcao']) ?></td>
+                  <td> <?= escapar((string) $sensor['temperatura']) ?> °C </td>
+                  <td> <?= escapar((string) $sensor['velocidade']) ?> km/h </td>
+                </tr>
+      <?php endwhile; ?>
+      <?php else: ?>
+
+                 <tr>
+                  <td class="sem-sensores" colspan="6"> Nenhum sensor cadastrado </td> 
+                </tr>
+
+      <?php endif; ?>
+            
+    </tbody>
+    </table>
+    </section>
+
+</main>
+
+</body>
+</html>
