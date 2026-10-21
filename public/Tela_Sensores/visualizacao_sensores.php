@@ -38,10 +38,10 @@ function mostrar_sensores($resultado, bool $mostrarAcoes = true): void
             <?php while ($sensor = $resultado->fetch_assoc()): ?>
                 <tr>
                     <td><?= (int) $sensor['id_sensor'] ?></td>
-                    <td><?= escapar($sensor['nome_sensor']) ?></td>
-                    <td><?= escapar($sensor['trem_vinculado']) ?></td>
-                    <td><?= escapar($sensor['tipo_dado']) ?></td>
-                    <td><?= escapar($sensor['rota_vinculada']) ?></td>
+                    <td><?= escapar($sensor['nome_sensor'] ?? '') ?></td>
+                    <td><?= escapar($sensor['trem_vinculado'] ?? '') ?></td>
+                    <td><?= escapar($sensor['tipo_dado'] ?? '') ?></td>
+                    <td><?= escapar($sensor['rota_vinculada'] ?? '') ?></td>
 
             <?php if ($exibirAcoes): ?>
             <td class="acao_sensor">
@@ -50,7 +50,7 @@ function mostrar_sensores($resultado, bool $mostrarAcoes = true): void
             <img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt="" >
             </a>
 
-            <form method="POST" action="excluir_s.php" onsubmit="return confirm('Deseja realmente excluir este sensor?');">
+            <form method="POST" action="excluir_s.php" class="js-confirmar-exclusao" data-titulo="Excluir sensor" data-mensagem="Tem certeza de que deseja excluir este sensor? Essa ação não pode ser desfeita.">
             
             <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
             <input type="hidden" name="id" value="<?= (int) $sensor['id_sensor'] ?>">
@@ -66,6 +66,40 @@ function mostrar_sensores($resultado, bool $mostrarAcoes = true): void
             <?php endwhile; ?>
         </tbody>
     </table>
+
+    <dialog class="modal-confirmacao" aria-labelledby="tituloConfirmacaoSensor">
+        <div class="modal-confirmacao-icone" aria-hidden="true">!</div>
+        <h2 id="tituloConfirmacaoSensor">Excluir sensor?</h2>
+        <p class="modal-confirmacao-mensagem">Essa ação não pode ser desfeita.</p>
+        <div class="modal-confirmacao-acoes">
+            <button type="button" class="modal-btn-cancelar">Cancelar</button>
+            <button type="button" class="modal-btn-excluir">Excluir sensor</button>
+        </div>
+    </dialog>
+    <script>
+    (() => {
+        const modal = document.querySelector('.modal-confirmacao');
+        if (!modal) return;
+        let formularioPendente = null;
+        document.querySelectorAll('.js-confirmar-exclusao').forEach((formulario) => {
+            formulario.addEventListener('submit', (evento) => {
+                evento.preventDefault();
+                formularioPendente = formulario;
+                modal.querySelector('h2').textContent = formulario.dataset.titulo || 'Confirmar exclusão';
+                modal.querySelector('.modal-confirmacao-mensagem').textContent = formulario.dataset.mensagem || 'Essa ação não pode ser desfeita.';
+                modal.querySelector('.modal-btn-excluir').textContent = 'Excluir sensor';
+                modal.showModal();
+            });
+        });
+        modal.querySelector('.modal-btn-cancelar').addEventListener('click', () => modal.close());
+        modal.querySelector('.modal-btn-excluir').addEventListener('click', () => {
+            if (formularioPendente) formularioPendente.submit();
+        });
+        modal.addEventListener('click', (evento) => {
+            if (evento.target === modal) modal.close();
+        });
+    })();
+    </script>
 
     <?php
 }

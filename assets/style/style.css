@@ -506,6 +506,8 @@ h2 {
     border-bottom: none;
 }
 
+
+
 .btn-lixeira {
     width: 40px;
     height: 40px;
@@ -2118,4 +2120,161 @@ body {
 
 .content-user .acao_user .acao-icone:hover {
   background: #f5e6e8;
+}
+
+.home_tabela_sensores .tabela-sensores {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.home_tabela_sensores .tabela-sensores th {
+    padding: 16px 12px;
+    background-color: #d8d8d8;
+    font-size: 15px;
+}
+
+.home_tabela_sensores .tabela-sensores td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #dddddd;
+    font-size: 15px;
+    color: #222;
+    font-weight: normal;
+}
+
+.home_tabela_sensores .tabela-sensores tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Edição no mesmo padrão visual das telas de cadastro */
+.formulario-edicao {
+    display: block;
+    max-width: 900px;
+    margin-top: 16px;
+}
+
+.formulario-edicao > h2 {
+    margin: 0 0 22px;
+    color: #701015;
+    font-size: 22px;
+}
+
+.link-voltar-edicao {
+    display: inline-block;
+    margin-top: 22px;
+    color: #701015;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.link-voltar-edicao:hover,
+.acoes-form-edicao a:hover {
+    text-decoration: underline;
+}
+
+.acoes-form-edicao {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    grid-column: 1 / -1;
+    margin-top: 8px;
+}
+
+.acoes-form-edicao a {
+    color: #701015;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ajuda-edicao {
+    display: block;
+    margin-top: 7px;
+    color: #666;
+    font-size: 13px;
+}
+
+.modal-confirmacao {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: min(430px, calc(100% - 32px));
+    max-height: calc(100vh - 32px);
+    margin: 0;
+    padding: 30px;
+    border: 0;
+    border-radius: 18px;
+    color: #292929;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 24px 80px #16020555;
+}
+
+.modal-confirmacao::backdrop {
+    background: #16020599;
+    backdrop-filter: blur(3px);
+}
+
+.modal-confirmacao-icone {
+    display: grid;
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 15px;
+    place-items: center;
+    border-radius: 50%;
+    background: #fff0ed;
+    color: #9e2924;
+    font-size: 29px;
+    font-weight: 700;
+}
+
+.modal-confirmacao h2 {
+    margin: 0 0 9px;
+    color: #3b1015;
+    font-size: 21px;
+}
+
+.modal-confirmacao-mensagem {
+    margin: 0;
+    color: #666;
+    line-height: 1.55;
+}
+
+.modal-confirmacao-acoes {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.modal-confirmacao-acoes button {
+    min-height: 42px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 9px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.modal-btn-cancelar {
+    background: #f0eeee;
+    color: #3f3f3f;
+}
+
+.modal-btn-excluir {
+    background: #7a151b;
+    color: white;
+}
+
+.modal-btn-excluir:hover {
+    background: #5d0d12;
+}
+
+@media (max-width: 760px) {
+    .pagina-edicao .pagina { display: block; }
+    .pagina-edicao .menu { width: 100%; min-height: auto; padding-bottom: 20px; }
+    .pagina-edicao .menu .logout { position: static; }
+    .pagina-edicao .content-user { padding: 24px 18px; }
+    .pagina-edicao .form-cadastro-user { grid-template-columns: 1fr; }
+    .acoes-form-edicao { flex-wrap: wrap; }
 }

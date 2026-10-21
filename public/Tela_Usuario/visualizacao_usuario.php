@@ -59,7 +59,9 @@ if ($resultado->num_rows === 0) {
                             method="POST"
                             action="excluir_u.php"
                             style="display:inline;"
-                            onsubmit="return confirm('Deseja realmente excluir este usuário?');"
+                            class="js-confirmar-exclusao"
+                            data-titulo="Excluir usuário"
+                            data-mensagem="Tem certeza de que deseja excluir este usuário? Essa ação não pode ser desfeita."
                         >
                             <input
                                 type="hidden"
@@ -90,6 +92,40 @@ if ($resultado->num_rows === 0) {
         <?php } ?>
     </tbody>
 </table>
+
+<dialog class="modal-confirmacao" aria-labelledby="tituloConfirmacaoUsuario">
+    <div class="modal-confirmacao-icone" aria-hidden="true">!</div>
+    <h2 id="tituloConfirmacaoUsuario">Excluir usuário?</h2>
+    <p class="modal-confirmacao-mensagem">Essa ação não pode ser desfeita.</p>
+    <div class="modal-confirmacao-acoes">
+        <button type="button" class="modal-btn-cancelar">Cancelar</button>
+        <button type="button" class="modal-btn-excluir">Excluir usuário</button>
+    </div>
+</dialog>
+<script>
+(() => {
+    const modal = document.querySelector('.modal-confirmacao');
+    if (!modal) return;
+    let formularioPendente = null;
+    document.querySelectorAll('.js-confirmar-exclusao').forEach((formulario) => {
+        formulario.addEventListener('submit', (evento) => {
+            evento.preventDefault();
+            formularioPendente = formulario;
+            modal.querySelector('h2').textContent = formulario.dataset.titulo || 'Confirmar exclusão';
+            modal.querySelector('.modal-confirmacao-mensagem').textContent = formulario.dataset.mensagem || 'Essa ação não pode ser desfeita.';
+            modal.querySelector('.modal-btn-excluir').textContent = 'Excluir usuário';
+            modal.showModal();
+        });
+    });
+    modal.querySelector('.modal-btn-cancelar').addEventListener('click', () => modal.close());
+    modal.querySelector('.modal-btn-excluir').addEventListener('click', () => {
+        if (formularioPendente) formularioPendente.submit();
+    });
+    modal.addEventListener('click', (evento) => {
+        if (evento.target === modal) modal.close();
+    });
+})();
+</script>
 
 <?php
 }

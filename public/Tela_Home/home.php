@@ -255,8 +255,9 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 
 <section class="home_caixa_sensores">
     <h2 class="home_titulo_tabela">Sensores cadastrados</h2>
-
+<div class="home_tabela_sensores">
     <?php mostrar_sensores($sensores, false); ?>
+</div>
 </section>
 
 </main>
