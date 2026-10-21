@@ -949,6 +949,56 @@ body {
   background: #6e1423;
 }
 
+.content-user .tabela-usuarios {
+  width: 100%;
+  max-width: 810px;
+  margin: 0 auto 24px;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.content-user .tabela-usuarios th {
+  padding: 16px 20px;
+  background: #d9d9d9;
+  color: #1a1a1a;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.content-user .tabela-usuarios td {
+  padding: 18px 20px;
+  color: #6e1423;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 1px solid #eee;
+}
+
+.content-user .tabela-usuarios tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.content-user .tabela-usuarios tbody tr:hover {
+  background: #faf5f5;
+}
+
+.content-user .tabela-usuarios .btn-lixeira-user {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: #760b0b;
+  color: #fff;
+  cursor: pointer;
+}
+
+.content-user .tabela-usuarios .btn-lixeira-user::before {
+  content: "🗑";
+  font-size: 20px;
+}
 
 .buscar-box-user {
   display: block;

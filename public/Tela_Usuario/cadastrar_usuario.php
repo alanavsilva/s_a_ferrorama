@@ -66,6 +66,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
   }
     }
+
+$manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST';
+
     $busca = trim($_GET['buscar'] ?? '');
 $textoBusca = "%" . $busca . "%";
 
@@ -189,14 +192,10 @@ if ($stmtBusca) {
         </div>
     </div>
 
-            <button class="btn-cadastrar-user" type="button">
-                CADASTRAR NOVO USUÁRIO
-            </button>
+            <button class="btn-cadastrar-user" type="button" onclick="alternarCadastroUsuario()">CADASTRAR NOVO USUÁRIO</button>
 
-      
-       <section class="cadastro-usuario" id="cadastro">
-
-      <form class="form-cadastro-user" method="POST" onsubmit="return validar_usuario()">
+<section class="cadastro-usuario <?= $manterFormularioAberto ? 'ativo' : '' ?>" id="cadastro">    
+        <form class="form-cadastro-user" method="POST" onsubmit="return validar_usuario()">
         <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
 
         <div class="campo-user">
@@ -223,12 +222,10 @@ if ($stmtBusca) {
         </div>
 
                     <?php if ($mensagem !== ''): ?>
-                        <p role="alert"><?= escapar($mensagem) ?></p>
+                        <p class="mensagem-cadastro" role="alert"><?= escapar($mensagem) ?></p>
                     <?php endif; ?>
 
-                    <button class="btn-cadastrar-form" type="submit">
-                        CADASTRAR NOVO USUÁRIO
-                    </button>
+                    <button class="btn-cadastrar-form" type="submit"> CADASTRAR NOVO USUÁRIO</button>
                 </form>
             </section>
         <?php endif; ?>
@@ -246,6 +243,6 @@ if ($stmtBusca) {
     </main>
 </div>
 
-<script src="../../script/validacao.js"></script>
+<script src="../../script/validacao.js?v=20261021-3"></script>
 </body>
 </html>

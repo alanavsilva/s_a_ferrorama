@@ -14,12 +14,11 @@ function cadastrarSensor() {
 
 //cadastro usuário
 function validar_usuario() {
+    const nome = document.getElementById("nome").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const senha = document.getElementById("senha").value;
 
-    let nome = document.getElementById("nome").value;
-    let email = document.getElementById("email").value;
-    let senha = document.getElementById("senha").value;
-
-    if (nome == "" || email == "" || senha == "") {
+    if (nome === "" || email === "" || senha === "") {
         alert("Preencha todos os campos.");
         return false;
     }
@@ -42,22 +41,20 @@ function validar_usuario() {
     return true;
 }
 
-//cadastro sensores
+function alternarCadastroUsuario() {
+    const formulario = document.getElementById("cadastro");
+    if (!formulario) return;
 
-document.addEventListener("DOMContentLoaded", () => {
-    const botaoAbrir = document.querySelector(".btn-cadastrar-user");
-    const formularioCadastro = document.querySelector(".cadastro-usuario");
+    const mensagem = formulario.querySelector(".mensagem-cadastro");
+    const estaAberto = formulario.classList.contains("ativo");
 
-    if (botaoAbrir && formularioCadastro) {
-        formularioCadastro.style.display = "none";
-
-        botaoAbrir.addEventListener("click", () => {
-            const estaFechado = formularioCadastro.style.display === "none";
-
-            formularioCadastro.style.display = estaFechado ? "block" : "none";
-        });
+    if (estaAberto) {
+        formulario.classList.remove("ativo");
+        if (mensagem) mensagem.remove();
+    } else {
+        formulario.classList.add("ativo");
     }
-});
+}
 
 function validar_sensor() {
     const nome = document.getElementById("nome_sensor").value.trim();
