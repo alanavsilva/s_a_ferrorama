@@ -46,11 +46,11 @@ if ($resultado->num_rows === 0) {
                     <td class="acao_user">
                         <a
                             href="editar_u.php?id=<?= (int)$usuario['id_usuario'] ?>"
-                            class="icon_editar"
+                            class="acao-icone editar-user"
                             aria-label="Editar usuário"
                         >
                             <img
-                                src="https://img.icons8.com/ios-filled/18/ffffff/edit.png"
+                                src="https://img.icons8.com/ios-filled/18/701015/edit.png"
                                 alt=""
                             >
                         </a>
@@ -75,11 +75,11 @@ if ($resultado->num_rows === 0) {
 
                             <button
                                 type="submit"
-                                class="icon_excluir"
+                                class="acao-icone excluir-user"
                                 aria-label="Excluir usuário"
                             >
                                 <img
-                                    src="https://img.icons8.com/ios-filled/18/ffffff/trash.png"
+                                    src="https://img.icons8.com/ios-filled/18/701015/trash.png"
                                     alt=""
                                 >
                             </button>

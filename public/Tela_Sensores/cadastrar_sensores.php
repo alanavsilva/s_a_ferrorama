@@ -9,8 +9,10 @@ exigir_login();
 $ehAdministrador =
     strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
 
-$mensagem = $_SESSION['mensagem_cadastro'] ?? '';
+$mensagemSucesso = $_SESSION['mensagem_cadastro'] ?? '';
 unset($_SESSION['mensagem_cadastro']);
+
+$mensagem = '';
 $mensagemAcesso = '';
 $busca = trim($_GET['buscar'] ?? '');
 
@@ -23,13 +25,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $nomeSensor = trim($_POST['nome_sensor'] ?? '');
         $tipoDado = trim($_POST['tipo_dado'] ?? '');
-        $localizacao = trim($_POST['localizacao'] ?? '');
-        $idRota = filter_input(INPUT_POST, 'id_rota', FILTER_VALIDATE_INT);
+        $idTrem = filter_input(INPUT_POST, 'id_trem', FILTER_VALIDATE_INT);
+        $idRotas = filter_input(INPUT_POST, 'id_rotas', FILTER_VALIDATE_INT);
+        $tiposPermitidos = ['Velocidade', 'Temperatura', 'Status'];
 
-       if ($nomeSensor === '' || $tipoDado === '' || $localizacao === '' || !$idRota) {
+
+       if ($nomeSensor === '' || !in_array($tipoDado, $tiposPermitidos, true) || !$idTrem || !$idRotas) {
             $mensagem = 'Preencha todos os campos corretamente.';
         } else {
-            $sql = "INSERT INTO sensores (nome_sensor, tipo_dado, localizacao, id_rota) VALUES (?, ?, ?, ?)";
+            $sql = "INSERT INTO sensores (nome_sensor, tipo_dado, id_trem, id_rotas) VALUES (?, ?, ?, ?)";
 
             $stmt = $conn->prepare($sql);
 
@@ -37,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 error_log('Erro ao preparar cadastro de sensor: ' . $conn->error);
                 $mensagem = 'Não foi possível concluir o cadastro.';
             } else {
-                $stmt->bind_param('sssi', $nomeSensor, $tipoDado, $localizacao, $idRota);
+                $stmt->bind_param('ssii', $nomeSensor, $tipoDado, $idTrem, $idRotas);
 
                 if ($stmt->execute()) {
                     $_SESSION['mensagem_cadastro'] = 'Sensor cadastrado com sucesso!';
@@ -53,6 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+$sqlTrens = "SELECT id_trem, nome FROM trens ORDER BY nome";
+$resultadoTrens = $conn->query($sqlTrens);
+
+if (!$resultadoTrens) {
+    error_log('Erro ao carregar trens: ' . $conn->error);
+    $mensagemAcesso = 'Não foi possível carregar os trens.';
+}
+
 $sqlRotas = "SELECT id_rotas, nome FROM rotas ORDER BY nome";
 $resultadoRotas = $conn->query($sqlRotas);
 
@@ -63,39 +75,46 @@ if (!$resultadoRotas) {
 
 $textoBusca = '%' . $busca . '%';
 
-$sql = "SELECT id_sensor, nome, trem_vinculado, direcao, temperatura, velocidade
-        FROM sensores
-        WHERE nome LIKE ?
-           OR trem_vinculado LIKE ?
-           OR direcao LIKE ?
-        ORDER BY id_sensor";
+$sql = "
+    SELECT
+        s.id_sensor,
+        s.nome_sensor,
+        s.tipo_dado,
+        t.nome AS trem_vinculado,
+        r.nome AS rota_vinculada
+    FROM sensores AS s
+    LEFT JOIN trens AS t ON t.id_trem = s.id_trem
+    LEFT JOIN rotas AS r ON r.id_rotas = s.id_rotas
+    WHERE s.nome_sensor LIKE ?
+       OR s.tipo_dado LIKE ?
+       OR t.nome LIKE ?
+       OR r.nome LIKE ?
+    ORDER BY s.id_sensor
+";
 
 $stmtBusca = $conn->prepare($sql);
 
 if ($stmtBusca) {
-    $stmtBusca->bind_param(
-        'sss',
-        $textoBusca,
-        $textoBusca,
-        $textoBusca
-    );
+    $stmtBusca->bind_param('ssss', $textoBusca, $textoBusca, $textoBusca, $textoBusca);
 
     if ($stmtBusca->execute()) {
         $resultado = $stmtBusca->get_result();
     } else {
+        error_log('Erro ao consultar sensores: ' . $stmtBusca->error);
         $resultado = false;
         $mensagemAcesso = 'Não foi possível carregar os sensores.';
     }
 
     $stmtBusca->close();
 } else {
+    error_log('Erro ao preparar consulta dos sensores: ' . $conn->error);
     $resultado = false;
     $mensagemAcesso = 'Não foi possível preparar a consulta dos sensores.';
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -162,6 +181,10 @@ if ($stmtBusca) {
           <h1>Controle de sensores cadastrados</h1>
           <h2>Sensores do sistema</h2>
 
+          <?php if ($mensagemSucesso !== ''): ?>
+            <p class="mensagem-sucesso" role="status"> <?= escapar($mensagemSucesso) ?></p>
+        <?php endif; ?>
+
      <?php if ($mensagemAcesso !== ''): ?>
             <p role="alert"><?= escapar($mensagemAcesso) ?></p>
         <?php endif; ?>
@@ -170,45 +193,22 @@ if ($stmtBusca) {
     <div class="avatar-user"></div>
     <div>
         <strong>
-            <?= strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0
-                ? 'Administrador'
-                : 'Funcionário' ?>
+            <?= $ehAdministrador ? 'Administrador' : 'Funcionário' ?>
         </strong>
         <span><?= escapar($_SESSION['nome'] ?? '') ?></span>
     </div>
 </div>
-        <?php if ($ehAdministrador): ?>
+    <?php if ($ehAdministrador): ?>
+      <button class="btn-cadastrar-user" id="btnAbrirCadastro" type="button" aria-expanded="false" aria-controls="cadastro"> CADASTRAR NOVO SENSOR </button>
 
-    <div class="admin-badge-user">
-        <div class="avatar-user"></div>
-        <div>
-            <strong>Admin</strong>
-            <span><?= escapar($_SESSION['nome'] ?? 'Administrador') ?></span>
-        </div>
-    </div>
-
-      <button class="btn-cadastrar-user" type="button">
-                CADASTRAR NOVO SENSOR
-            </button>
-
-       <section class="cadastro-usuario" id="cadastro">
+       <section class="cadastro-usuario" id="cadastro" hidden>
           
-      <form class="form-cadastro-user" method="POST">
-    <input
-        type="hidden"
-        name="csrf_token"
-        value="<?= escapar(token_csrf()) ?>"
-    >
+      <form class="form-cadastro-user" method="POST" onsubmit="return validar_sensor()">
+    <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
 
     <div class="campo-user">
         <label for="nome_sensor">Nome do sensor</label>
-        <input
-            type="text"
-            id="nome_sensor"
-            name="nome_sensor"
-            placeholder="Nome do sensor"
-            required
-        >
+        <input type="text" id="nome_sensor" name="nome_sensor" placeholder="Nome do sensor" required >
     </div>
 
     <div class="campo-user">
@@ -222,7 +222,7 @@ if ($stmtBusca) {
     </div>
 
     <div class="campo-user">
-    <label for="id_trem">Localização / trem vinculado</label>
+    <label for="id_trem">Trem vinculado</label>
     <select id="id_trem" name="id_trem" required>
         <option value="">Selecione um trem</option>
 
@@ -237,8 +237,8 @@ if ($stmtBusca) {
 </div>
 
     <div class="campo-user">
-        <label for="id_rota">Rota vinculada</label>
-        <select id="id_rota" name="id_rota" required>
+        <label for="id_rotas">Rota vinculada</label>
+        <select id="id_rotas" name="id_rotas" required>
             <option value="">Selecione uma rota</option>
 
             <?php if ($resultadoRotas): ?>
@@ -265,13 +265,7 @@ if ($stmtBusca) {
     <section class="buscar-box-user">
         <form method="GET">
             <label for="buscar">Buscar</label>
-            <input
-                type="text"
-                id="buscar"
-                name="buscar"
-                placeholder="Nome, tipo, localização ou rota"
-                value="<?= escapar($busca) ?>"
-            >
+            <input type="text" id="buscar" name="buscar" placeholder="Nome, tipo, trem ou rota" value="<?= escapar($busca) ?>" >
             <button type="submit">Buscar</button>
         </form>
     </section>

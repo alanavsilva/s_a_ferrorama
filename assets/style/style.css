@@ -371,6 +371,77 @@ h2 {
   background: #6e1423;
 }
 
+.content-user .tabela-sensores {
+  width: 100%;
+  max-width: 810px;
+  margin: 0 auto 24px;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.content-user .tabela-sensores th {
+  padding: 16px 20px;
+  background: #d9d9d9;
+  color: #1a1a1a;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.content-user .tabela-sensores td {
+  padding: 18px 20px;
+  color: #6e1423;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 1px solid #eee;
+}
+
+.content-user .tabela-sensores tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.content-user .tabela-sensores tbody tr:hover {
+  background: #faf5f5;
+}
+
+.content-user .acao_sensor {
+  white-space: nowrap;
+}
+
+.content-user .acao_sensor form {
+  display: inline;
+  margin: 0;
+}
+
+.content-user .acao_sensor .acao-icone {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 3px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  vertical-align: middle;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.content-user .acao_sensor .acao-icone img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.content-user .acao_sensor .acao-icone:hover {
+  background: #f5e6e8;
+}
+
 .buscar_sensor {
     display: block;
     background: #fff;
@@ -2011,3 +2082,40 @@ body {
          text-align: center;
       }
 
+
+/* Ícones de ação da listagem de usuários */
+.content-user .acao_user {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.content-user .acao_user form {
+  display: inline;
+  margin: 0;
+}
+
+.content-user .acao_user .acao-icone {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 3px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  vertical-align: middle;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.content-user .acao_user .acao-icone img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.content-user .acao_user .acao-icone:hover {
+  background: #f5e6e8;
+}
