@@ -151,9 +151,10 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     </section>
 
     <section class="home_botoes">
-        <a class="home_botao" href="../../public/Tela_Sensores/cadastrar_sensores.php"> Cadastro de Sensores e Trens </a>
-
-        <a class="home_botao" href="../../public/Tela_Usuario/cadastrar_usuario.php"> Cadastro de Usuários </a>
+        <a class="home_botao" href="../../public/Tela_Usuario/cadastrar_usuario.php"> Cadastrar Usuários </a>
+        <a class="home_botao" href="../../public/Tela_Sensores/cadastrar_sensores.php"> Cadastrar Sensores </a>
+        <a class="home_botao" href="../../public/Tela_Trens/cadastrar_trens.php"> Cadastrar Trens </a>
+        <a class="home_botao" href="../../public/Tela_Rotas/cadastrar_rotas.php"> Cadastrar Rotas </a>
     </section>
 
      <section class="home_caixa_falhas" id="falhas">
@@ -274,7 +275,7 @@ function mostrarTrem() {
 
     const trem = trens[indice];
 
-    document.getElementById('velocidade-titulo').textContent = 'Velocidade média — ' + trem.nome;
+    document.getElementById('velocidade-titulo').textContent = 'Velocidade média - ' + trem.nome;
 
     document.getElementById('velocidade-valor').textContent = trem.velocidade_media + ' km/h';
 

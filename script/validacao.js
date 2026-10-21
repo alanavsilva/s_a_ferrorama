@@ -1,4 +1,3 @@
-// Valida os formulários de usuários e sensores.
 function validar_usuario() {
     const nome = document.getElementById("nome")?.value.trim() ?? "";
     const email = document.getElementById("email")?.value.trim() ?? "";
