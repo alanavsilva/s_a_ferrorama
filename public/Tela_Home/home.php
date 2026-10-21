@@ -37,9 +37,13 @@ $totalSensores = $conn->query( "SELECT COUNT(*) AS total FROM sensores")->fetch_
 $totalTrens = $conn->query( "SELECT COUNT(*) AS total FROM trens")->fetch_assoc()['total'];
 $totalRotas = $conn->query( "SELECT COUNT(*) AS total FROM rotas")->fetch_assoc()['total'];
 
-$resultadoVelocidade = $conn->query("SELECT AVG(velocidade_media) AS media FROM trens");
+$resultadoTrensVelocidade = $conn->query( "SELECT nome, velocidade_media FROM trens ORDER BY id_trem");
 
-$velocidadeMedia = (float) ($resultadoVelocidade->fetch_assoc()['media'] ?? 0);
+$trensVelocidade = [];
+
+while ($trem = $resultadoTrensVelocidade->fetch_assoc()) {
+    $trensVelocidade[] = $trem;
+}
 
 $totalResolvidas = (int) ($conn->query("SELECT COUNT(*) AS total FROM falhas_operacionais WHERE resolvida = 1")->fetch_assoc()['total'] ?? 0);
 $totalNaoResolvidas = (int) ($conn->query("SELECT COUNT(*) AS total FROM falhas_operacionais WHERE resolvida = 0")->fetch_assoc()['total'] ?? 0);
@@ -116,11 +120,10 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
         </div>
 
         <div class="home_status">
-            <div class="home_status_titulo">Velocidade média</div>
-            <div class="home_status_valor">
-                <?= number_format((float)$velocidadeMedia, 0, ',', '.') ?> km/h
-            </div>
-        </div>
+    <div class="home_status_titulo" id="velocidade-titulo"> Velocidade média</div>
+
+    <div class="home_status_valor" id="velocidade-valor"> 0 km/h</div>
+</div>
     </section>
 
     <section class="home_indicadores">
@@ -257,5 +260,28 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 </section>
 
 </main>
+
+<script>
+const trens = <?= json_encode($trensVelocidade) ?>;
+let indice = 0;
+
+function mostrarTrem() {
+    if (trens.length === 0) {
+        document.getElementById('velocidade-valor').textContent = 'Nenhum trem cadastrado';
+        return;
+    }
+
+    const trem = trens[indice];
+
+    document.getElementById('velocidade-titulo').textContent = 'Velocidade média — ' + trem.nome;
+
+    document.getElementById('velocidade-valor').textContent = trem.velocidade_media + ' km/h';
+
+    indice = (indice + 1) % trens.length;
+}
+
+mostrarTrem();
+setInterval(mostrarTrem, 3000);
+</script>
 
 </body>

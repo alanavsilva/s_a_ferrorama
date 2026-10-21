@@ -12,14 +12,10 @@ function mostrar_sensores($resultado, bool $mostrarAcoes = true): void
         return;
     }
 
-    if ($resultado->num_rows === 0) {
-        echo '<p class="mensagem_vazia">Nenhum sensor encontrado.</p>';
-        return;
-    }
     ?>
 
-    <table class="tabela-sensores">
-        <thead>
+          <table class="home_tabela">
+            <thead>
             <tr>
                 <th>ID</th>
                 <th>Nome do sensor</th>
@@ -34,6 +30,12 @@ function mostrar_sensores($resultado, bool $mostrarAcoes = true): void
         </thead>
 
         <tbody>
+            <?php if ($resultado->num_rows === 0): ?>
+                <tr>
+                    <td colspan="<?= $exibirAcoes ? 6 : 5 ?>" class="mensagem_vazia">
+                        Nenhum sensor encontrado.
+                    </td>
+                </tr>            <?php else: ?>
             <?php while ($sensor = $resultado->fetch_assoc()): ?>
                 <tr>
                     <td><?= (int) $sensor['id_sensor'] ?></td>
@@ -62,6 +64,7 @@ function mostrar_sensores($resultado, bool $mostrarAcoes = true): void
                <?php endif; ?>
                 </tr>
             <?php endwhile; ?>
+            <?php endif; ?>
         </tbody>
     </table>
 
