@@ -60,7 +60,7 @@ $faltas = $conn->query($sqlFalhas);
 
 
 $usuarios = $conn->query("SELECT id_usuario, nome, email, tipo FROM usuarios ORDER BY nome");
-$sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome AS nome_trem, r.nome AS nome_rota FROM sensores AS s INNER JOIN trens AS t ON s.id_trem = t.id_trem INNER JOIN rotas AS r ON s.id_rotas = r.id_rotas ORDER BY s.id_sensor DESC");
+$sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome AS trem_vinculado, r.nome AS rota_vinculada FROM sensores AS s INNER JOIN trens AS t ON s.id_trem = t.id_trem INNER JOIN rotas AS r ON s.id_rotas = r.id_rotas ORDER BY s.id_sensor DESC");
 ?>
 
 <!DOCTYPE html>
