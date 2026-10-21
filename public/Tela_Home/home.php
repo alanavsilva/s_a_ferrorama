@@ -6,17 +6,57 @@ require_once "../Tela_Sensores/visualizacao_sensores.php";
 exigir_login();
 
 $nome = $_SESSION['nome'] ?? 'Usuário';
+$statusFiltro = $_GET['status'] ?? 'todas';
+
+if (!in_array($statusFiltro, ['todas', 'resolvidas', 'nao_resolvidas'], true)) {
+    $statusFiltro = 'todas';
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_falha'])) {
+    verificar_csrf();
+    $idFalha = filter_input(INPUT_POST, 'id_falha', FILTER_VALIDATE_INT);
+    $acaoFalha = $_POST['acao_falha'];
+
+if ($idFalha && in_array($acaoFalha, ['resolver', 'reabrir'], true)) {
+        $resolvida = $acaoFalha === 'resolver' ? 1 : 0;
+        $stmtAtualizarFalha = $conn->prepare("UPDATE falhas_operacionais SET resolvida = ? WHERE id_falha = ?");
+
+        if ($stmtAtualizarFalha) {
+            $stmtAtualizarFalha->bind_param('ii', $resolvida, $idFalha);
+            $stmtAtualizarFalha->execute();
+            $stmtAtualizarFalha->close();
+        }
+    }
+
+    header('Location: home.php?status=' . urlencode($statusFiltro) . '#falhas');
+    exit;
+}
+
 $totalUsuarios = $conn->query( "SELECT COUNT(*) AS total FROM usuarios")->fetch_assoc()['total'];
 $totalSensores = $conn->query( "SELECT COUNT(*) AS total FROM sensores")->fetch_assoc()['total'];
 $totalTrens = $conn->query( "SELECT COUNT(*) AS total FROM trens")->fetch_assoc()['total'];
 $totalRotas = $conn->query( "SELECT COUNT(*) AS total FROM rotas")->fetch_assoc()['total'];
-$velocidadeMedia = $conn->query( "SELECT AVG(velocidade) AS media FROM sensores")->fetch_assoc()['media'] ?? 0;
-$totalFalhas = $conn->query( "SELECT COUNT(*) AS total FROM falhas_operacionais WHERE resolvida = 0")->fetch_assoc()['total'];
-$faltas = $conn->query("SELECT falhas_operacionais.id_falha, falhas_operacionais.descricao, falhas_operacionais.data_registro, falhas_operacionais.resolvida, sensores.nome AS nome_sensor
-FROM falhas_operacionais LEFT JOIN sensores ON falhas_operacionais.id_sensor = sensores.id_sensor ORDER BY falhas_operacionais.data_registro DESC");
-$usuarios = $conn->query( "SELECT id_usuario, nome, email, tipo FROM usuarios ORDER BY nome");
-$sensores = $conn->query("SELECT id_sensor, nome, trem_vinculado, direcao, temperatura, velocidade FROM sensores ORDER BY id_sensor DESC" );
 
+$resultadoVelocidade = $conn->query("SELECT AVG(velocidade_media) AS media FROM trens");
+
+$velocidadeMedia = (float) ($resultadoVelocidade->fetch_assoc()['media'] ?? 0);
+
+$totalResolvidas = (int) ($conn->query("SELECT COUNT(*) AS total FROM falhas_operacionais WHERE resolvida = 1")->fetch_assoc()['total'] ?? 0);
+$totalNaoResolvidas = (int) ($conn->query("SELECT COUNT(*) AS total FROM falhas_operacionais WHERE resolvida = 0")->fetch_assoc()['total'] ?? 0);
+$sqlFalhas = "SELECT f.id_falha, f.descricao, f.data_registro, f.resolvida, s.nome_sensor, t.nome AS nome_trem FROM falhas_operacionais AS f LEFT JOIN sensores AS s ON f.id_sensor = s.id_sensor LEFT JOIN trens AS t ON s.id_trem = t.id_trem";
+
+if ($statusFiltro === 'resolvidas') {
+    $sqlFalhas .= " WHERE f.resolvida = 1";
+} elseif ($statusFiltro === 'nao_resolvidas') {
+    $sqlFalhas .= " WHERE f.resolvida = 0";
+}
+
+$sqlFalhas .= " ORDER BY f.data_registro DESC";
+$faltas = $conn->query($sqlFalhas);
+
+
+$usuarios = $conn->query("SELECT id_usuario, nome, email, tipo FROM usuarios ORDER BY nome");
+$sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome AS nome_trem, r.nome AS nome_rota FROM sensores AS s INNER JOIN trens AS t ON s.id_trem = t.id_trem INNER JOIN rotas AS r ON s.id_rotas = r.id_rotas ORDER BY s.id_sensor DESC");
 ?>
 
 <!DOCTYPE html>
@@ -42,6 +82,18 @@ $sensores = $conn->query("SELECT id_sensor, nome, trem_vinculado, direcao, tempe
 
     <a class="home_link" href="../../public/Tela_Sensores/cadastrar_sensores.php">
         Sensores
+    </a>
+
+    <a class="home_link" href="../../public/Tela_Rotas/cadastrar_rotas.php">
+        Rotas
+    </a>
+
+    <a class="home_link" href="../../public/Tela_Trens/cadastrar_trens.php">
+        Trens
+    </a>
+
+    <a class="home_link" href="../../public/Tela_Monitoramento/monitoramento.php" >
+        Monitoramento
     </a>
 
     <a class="home_link" href="../../public/Tela_Relatorios/relatorios.php">
@@ -101,45 +153,70 @@ $sensores = $conn->query("SELECT id_sensor, nome, trem_vinculado, direcao, tempe
         <a class="home_botao" href="../../public/Tela_Usuario/cadastrar_usuario.php"> Cadastro de Usuários </a>
     </section>
 
- <section class="home_caixa_sensores" id="falhas">
-    <h2 class="home_titulo_tabela">Falhas operacionais</h2>
+     <section class="home_caixa_falhas" id="falhas">
+        <div class="falhas_cabecalho">
+            <h2 class="home_titulo_tabela">Falhas operacionais</h2>
 
-    <p>
-        Falhas não resolvidas:
-        <strong><?= (int) $totalFalhas ?></strong>
-    </p>
+    <form method="GET" class="falhas_filtro">
+        <label for="status">Status</label>
+            <select id="status" name="status" onchange="this.form.submit()">
+                <option value="todas" <?= $statusFiltro === 'todas' ? 'selected' : '' ?> > Todas </option>
+                <option value="resolvidas" <?= $statusFiltro === 'resolvidas' ? 'selected' : '' ?> > Resolvidas </option>
+                <option value="nao_resolvidas" <?= $statusFiltro === 'nao_resolvidas' ? 'selected' : '' ?> > Não resolvidas </option>
+                </select>
+            </form>
+        </div>
 
-    <table class="home_tabela">
-        <thead>
-            <tr>
-                <th>ID Sensor</th>
-                <th>Nome Sensor</th>
-                <th>Tipo de dado coletado</th>
-                <th>Trem vinculado</th>
-                <th>Rota vinculada</th>
-            </tr>
-        </thead>
+        <div class="falhas_resumo">
+            <div class="falha_contador">
+                <strong><?= $totalResolvidas ?></strong>
+                <span>Resolvidas</span>
+            </div>
 
-        <tbody>
+            <div class="falha_contador">
+                <strong><?= $totalNaoResolvidas ?></strong>
+                <span>Não resolvidas</span>
+            </div>
+        </div>
+
+        <div class="falhas_lista">
             <?php if ($faltas && $faltas->num_rows > 0): ?>
-                <?php while ($falha = $faltas->fetch_assoc()): ?>
-                    <tr>
-                        <td><?= escapar($falha['nome_sensor'] ?? 'Sensor removido') ?></td>
-                        <td><?= escapar($falha['descricao']) ?></td>
-                        <td><?= escapar($falha['data_registro']) ?></td>
-                        <td>
-                            <?= $falha['resolvida'] ? 'Resolvida' : 'Não resolvida' ?>
-                        </td>
-                    </tr>
+            <?php while ($falha = $faltas->fetch_assoc()): ?>
+                <article class="falha_item">
+                    <div class="falha_dados">
+                    <h3><?= escapar($falha['descricao']) ?></h3>
+
+        <p> Sensor: <?= escapar($falha['nome_sensor'] ?? 'Removido') ?>
+        — Trem: <?= escapar($falha['nome_trem'] ?? 'Não identificado') ?>
+        — <?= escapar(date('d/m/Y H:i', strtotime($falha['data_registro']))) ?>
+       </p>
+
+        </div>
+
+    <form method="POST" class="falha_acao">
+        <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>" >
+        <input type="hidden" name="id_falha" value="<?= (int) $falha['id_falha'] ?>" >
+
+            <?php if ($falha['resolvida']): ?>
+             
+        <button type="submit" name="acao_falha" value="reabrir" class="botao_reabrir" > Reabrir </button>
+                            
+            <?php else: ?>
+
+        <button type="submit" name="acao_falha" value="resolver" class="botao_resolver" > Marcar como resolvida </button>
+                            
+            <?php endif; ?>
+                        
+     </form>
+        </article>
+
                 <?php endwhile; ?>
             <?php else: ?>
-                <tr>
-                    <td colspan="4">Nenhuma falha cadastrada.</td>
-                </tr>
+                <p class="falhas_vazias">Nenhuma falha encontrada.</p>
             <?php endif; ?>
-        </tbody>
-    </table>
-</section>
+        </div>
+    </section>
+
 
 <section class="home_caixa_sensores">
     <h2 class="home_titulo_tabela">Usuários cadastrados</h2>

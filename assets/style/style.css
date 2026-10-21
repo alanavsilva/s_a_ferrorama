@@ -1754,4 +1754,119 @@ body.pagina-relatorios {
         .home_imagem_trem {
            width: 38px;
           height: 38px;
-}
+        }
+
+        .home_caixa_falhas {
+         margin: 22px 0;
+         padding: 24px;
+         background: #fff;
+         box-shadow: 0 8px 22px #00000012;
+         }
+
+        .falhas_cabecalho {
+         display: flex;
+         align-items: end;
+         justify-content: space-between;
+         gap: 20px;
+         margin-bottom: 20px;
+      }
+
+        .falhas_cabecalho .home_titulo_tabela {
+         margin: 0;
+         color: #8a0000;
+      }
+
+        .falhas_filtro label {
+         display: block;
+         margin-bottom: 5px;
+         color: #8a0000;
+         font-weight: 700;
+      }
+
+        .falhas_filtro select {
+         min-width: 150px;
+         padding: 9px 12px;
+         border: 1px solid #aaa;
+         background: #fff;
+      }
+
+        .falhas_resumo {
+         display: grid;
+         grid-template-columns: 1fr 1fr;
+         gap: 22px;
+         margin-bottom: 22px;
+      }
+
+        .falha_contador {
+         display: flex;
+         align-items: center;
+         justify-content: space-around;
+         min-height: 68px;
+         border-left: 8px solid #850000;
+         background: #dedede;
+      }
+
+        .falha_contador strong {
+         color: #850000;
+         font-size: 36px;
+      }
+
+        .falha_contador span {
+         color: #666;
+         font-weight: 700;
+      }
+
+        .falhas_lista {
+         display: grid;
+         gap: 16px;
+      }
+
+        .falha_item {
+         display: flex;
+         align-items: center;
+         justify-content: space-between;
+         gap: 16px;
+         padding: 12px 14px;
+         border: 1px solid #aaa;
+         border-left: 8px solid #850000;
+      }
+
+        .falha_dados h3 {
+         margin: 0 0 4px;
+         color: #8a0000;
+         font-size: 18px;
+      }
+
+        .falha_dados p {
+         margin: 0;
+         color: #888;
+         font-size: 13px;
+      }
+
+        .botao_resolver,
+        .botao_reabrir {
+         min-height: 40px;
+         padding: 0 18px;
+         border: 0;
+         border-radius: 24px;
+         font-weight: 700;
+         cursor: pointer;
+      }
+
+        .botao_resolver {
+         background: #430b12;
+         color: #fff;
+      }
+
+        .botao_reabrir {
+         border: 1px solid #888;
+         background: #ddd;
+         color: #720000;
+      }
+
+        .falhas_vazias {
+         margin: 0;
+         padding: 18px;
+         text-align: center;
+      }
+

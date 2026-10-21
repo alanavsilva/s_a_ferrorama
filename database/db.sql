@@ -19,7 +19,7 @@ create table rotas (
 create table trens (
     id_trem INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
-    velocidade_max FLOAT NOT NULL,
+    velocidade_media FLOAT NOT NULL,
     tipo ENUM('Velocidade', 'Temperatura','Status') NOT NULL,
     id_rotas INT NOT NULL,
 
