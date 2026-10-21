@@ -9,17 +9,6 @@ create table usuarios (
     senha VARCHAR(255) NOT NULL
 );
 
-create table sensores (
-    id_sensor INT PRIMARY KEY AUTO_INCREMENT,
-    nome_sensor VARCHAR(100) NOT NULL,
-    tipo_dado ENUM('Velocidade', 'Temperatura', 'Status') NOT NULL,
-    id_trem INT NOT NULL,
-    id_rotas INT NOT NULL,
-
-    FOREIGN KEY (id_trem) REFERENCES rotas(id_trem)
-    FOREIGN KEY (id_rotas) REFERENCES rotas(id_rotas)
-);
-
 create table rotas (
     id_rotas INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
@@ -34,6 +23,17 @@ create table trens (
     tipo ENUM('Velocidade', 'Temperatura','Status') NOT NULL,
     id_rotas INT NOT NULL,
 
+    FOREIGN KEY (id_rotas) REFERENCES rotas(id_rotas)
+);
+
+create table sensores (
+    id_sensor INT PRIMARY KEY AUTO_INCREMENT,
+    nome_sensor VARCHAR(100) NOT NULL,
+    tipo_dado ENUM('Velocidade', 'Temperatura', 'Status') NOT NULL,
+    id_trem INT NOT NULL,
+    id_rotas INT NOT NULL,
+
+    FOREIGN KEY (id_trem) REFERENCES trens(id_trem),
     FOREIGN KEY (id_rotas) REFERENCES rotas(id_rotas)
 );
 
