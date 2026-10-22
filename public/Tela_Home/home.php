@@ -6,6 +6,7 @@ require_once "../Tela_Sensores/visualizacao_sensores.php";
 exigir_login();
 
 $nome = $_SESSION['nome'] ?? 'Usuário';
+$ehAdministrador = strcasecmp((string) ($_SESSION['tipo'] ?? ''), 'Administrador') === 0;
 $statusFiltro = $_GET['status'] ?? 'todas';
 
 if (!in_array($statusFiltro, ['todas', 'resolvidas', 'nao_resolvidas'], true)) {
@@ -13,6 +14,7 @@ if (!in_array($statusFiltro, ['todas', 'resolvidas', 'nao_resolvidas'], true)) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_falha'])) {
+    exigir_administrador();
     verificar_csrf();
     $idFalha = filter_input(INPUT_POST, 'id_falha', FILTER_VALIDATE_INT);
     $acaoFalha = $_POST['acao_falha'];
@@ -80,9 +82,11 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 <a class="home_logo" href="home.php"> <img class="home-imagem-trem" src="https://img.icons8.com/ios/50/ffffff/train.png" alt="Ícone de trem"> SISTEMA TREMTECH </a>
     <a class="home_link" href="home.php">Home</a>
 
+    <?php if ($ehAdministrador): ?>
     <a class="home_link" href="../../public/Tela_Usuario/cadastrar_usuario.php">
-        Usuários
+        Tela de Usuarios
     </a>
+    <?php endif; ?>
 
     <a class="home_link" href="../../public/Tela_Sensores/cadastrar_sensores.php">
         Sensores
@@ -150,12 +154,14 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 
     </section>
 
+    <?php if ($ehAdministrador): ?>
     <section class="home_botoes">
-        <a class="home_botao" href="../../public/Tela_Usuario/cadastrar_usuario.php"> Cadastrar Usuários </a>
-        <a class="home_botao" href="../../public/Tela_Sensores/cadastrar_sensores.php"> Cadastrar Sensores </a>
-        <a class="home_botao" href="../../public/Tela_Trens/cadastrar_trens.php"> Cadastrar Trens </a>
-        <a class="home_botao" href="../../public/Tela_Rotas/cadastrar_rotas.php"> Cadastrar Rotas </a>
+        <a class="home_botao" href="../../public/Tela_Usuario/cadastrar_usuario.php"> Tela de Usuarios </a>
+        <a class="home_botao" href="../../public/Tela_Sensores/cadastrar_sensores.php"> Tela de Sensores </a>
+        <a class="home_botao" href="../../public/Tela_Trens/cadastrar_trens.php"> Tela de Trens </a>
+        <a class="home_botao" href="../../public/Tela_Rotas/cadastrar_rotas.php"> Tela de Rotas </a>
     </section>
+    <?php endif; ?>
 
      <section class="home_caixa_falhas" id="falhas">
         <div class="falhas_cabecalho">
@@ -197,6 +203,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 
         </div>
 
+    <?php if ($ehAdministrador): ?>
     <form method="POST" class="falha_acao">
         <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>" >
         <input type="hidden" name="id_falha" value="<?= (int) $falha['id_falha'] ?>" >
@@ -212,6 +219,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
             <?php endif; ?>
                         
      </form>
+     <?php endif; ?>
         </article>
 
                 <?php endwhile; ?>
@@ -261,6 +269,10 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 </div>
 </section>
 
+    <section class="home_botoes home_logout" style="grid-column: 1 / -1; display: flex; justify-content: center; width: 100%;">
+        <a class="home_botao" href="../../logout.php">Logout</a>
+    </section>
+
 </main>
 
 <script>
@@ -287,3 +299,4 @@ setInterval(mostrarTrem, 3000);
 </script>
 
 </body>
+
