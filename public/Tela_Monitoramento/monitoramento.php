@@ -1,5 +1,6 @@
 
 <?php
+$filtro = $_GET["status"] ?? "Todas";
 $falhas = [
     [
         "titulo" => "Velocidade acima do limite",
@@ -31,6 +32,17 @@ $falhas = [
 <body>
     <main>
         <h1>Falhas operacionais</h1>
+        
+<form method="GET">
+    <label for="status">Status:</label>
+
+    <select name="status" id="status" onchange="this.form.submit()">
+        <option value="Todas">Todas</option>
+        <option value="Resolvida">Resolvidas</option>
+        <option value="Não resolvida">Não resolvidas</option>
+    </select>
+</form>
+
     </main>
 </body>
 </html>
