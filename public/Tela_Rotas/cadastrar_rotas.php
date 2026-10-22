@@ -1,3 +1,97 @@
+<?php
+require_once "../../infra/conexao.php";
+require_once "../../infra/auth.php";
+require_once "visualizacao_rotas.php";
+
+exigir_login();
+
+$ehAdministrador =
+    strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
+
+$mensagemSucesso = $_SESSION['mensagem_cadastro'] ?? '';
+unset($_SESSION['mensagem_cadastro']);
+
+$mensagem = '';
+$mensagemAcesso = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!$ehAdministrador) {
+        http_response_code(403);
+        $mensagemAcesso = 'Você não tem permissão para cadastrar rotas.';
+    } else {
+        verificar_csrf();
+
+        $nome = trim($_POST['nome'] ?? '');
+        $extensao = filter_var(
+            $_POST['extensao'] ?? '',
+            FILTER_VALIDATE_FLOAT
+        );
+        $tempo = filter_var(
+            $_POST['tempo'] ?? '',
+            FILTER_VALIDATE_INT
+        );
+
+        if (
+            $nome === ''
+            || mb_strlen($nome) > 100
+            || $extensao === false
+            || $extensao <= 0
+            || $tempo === false
+            || $tempo <= 0
+        ) {
+            $mensagem = 'Informe o nome, uma extensão e um tempo válidos.';
+        } else {
+            $stmt = $conn->prepare(
+                'INSERT INTO rotas (nome, extensao, tempo) VALUES (?, ?, ?)'
+            );
+
+            if (!$stmt) {
+                $mensagem = 'Não foi possível concluir o cadastro.';
+            } else {
+                $stmt->bind_param('sdi', $nome, $extensao, $tempo);
+
+                try {
+                    if ($stmt->execute()) {
+                        $_SESSION['mensagem_cadastro'] =
+                            'Rota cadastrada com sucesso!';
+                        header('Location: cadastrar_rotas.php');
+                        exit;
+                    }
+
+                    $mensagem = 'Não foi possível concluir o cadastro.';
+                } catch (mysqli_sql_exception $e) {
+                    error_log('Erro ao cadastrar rota: ' . $e->getMessage());
+                    $mensagem = 'Não foi possível concluir o cadastro.';
+                }
+
+                $stmt->close();
+            }
+        }
+    }
+}
+
+$busca = trim($_GET['buscar'] ?? '');
+$like = '%' . $busca . '%';
+
+$stmt = $conn->prepare(
+    'SELECT id_rotas, nome, extensao, tempo
+     FROM rotas
+     WHERE nome LIKE ?
+     ORDER BY nome'
+);
+
+if ($stmt) {
+    $stmt->bind_param('s', $like);
+    $stmt->execute();
+    $resultado = $stmt->get_result();
+    $stmt->close();
+} else {
+    error_log('Erro ao consultar rotas: ' . $conn->error);
+    $resultado = false;
+    $mensagemAcesso = 'Não foi possível carregar as rotas.';
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
