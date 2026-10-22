@@ -1,50 +1,63 @@
 
 <?php
+require_once "infra/conexao.php";
+require_once "infra/auth.php";
 
-include  "infra/conexao.php";
-
-session_start();
+$erro = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$email = trim($_POST["email"] ?? '');
+$senha = ($_POST["senha"]??'');
 
-$nome = $_POST["nome"];
-$email = $_POST["email"];
-$senha = $_POST["senha"];
+if ($email === '' || $senha === '') {
+        $erro = "Preencha todos os campos.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $erro = "Credenciais inválidas.";
+    } else {
 
-$sql = "SELECT * FROM usuarios 
-        WHERE nome = '$nome'
-        AND email = '$email'
-        AND senha = '$senha'";
+$sql = "SELECT id_usuario, nome, email, tipo, senha
+        FROM usuarios
+        WHERE email = ? 
+        LIMIT 1";
 
-$resultado = $conn->query($sql);
+  $stmt = $conn->prepare($sql);
 
-if ($resultado->num_rows > 0) {
+   if (!$stmt) {
 
-        $usuario = $resultado->fetch_assoc();
-
-        $_SESSION['id_usuario'] = $usuario['id_usuario'];
-        $_SESSION['nome'] = $usuario['nome'];
-        $_SESSION['email'] = $usuario['email'];
-        $_SESSION['tipo'] = $usuario['tipo'];
-
-        if ($usuario['tipo'] == 'administrador') {
-
-            header("Location: home.php");
-            exit;
+            $erro = "Erro ao consultar o banco de dados.";
 
         } else {
 
-            header("Location: home.php");
-            exit;
+           $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $resultado = $stmt->get_result();
+            $usuario = $resultado->fetch_assoc();
+
+
+       if ($usuario && password_verify($senha, $usuario['senha'])) {
+
+                session_regenerate_id(true);
+
+                $_SESSION['id_usuario'] = $usuario['id_usuario'];
+                $_SESSION['nome'] = $usuario['nome'];
+                $_SESSION['email'] = $usuario['email'];
+                $_SESSION['tipo'] = $usuario['tipo'];
+                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+                $stmt->close();
+
+                header("Location: public/Tela_Home/home.php");
+                exit;
+
+            } else {
+
+                $erro = "Email ou senha incorretos.";
+            }
+
+            $stmt->close();
         }
-
-    } else {
-
-        echo "Nome, email ou senha incorretos.";
-
     }
 }
-
 ?>
 
 
@@ -63,7 +76,12 @@ if ($resultado->num_rows > 0) {
         <section class="login-vizualização" id="login">
             <div class="painel-introducao">
 
-                <p class="inicio_login">Sistema TREMTECH</p>
+            <img
+        class="icone-trem"
+        src="https://img.icons8.com/ios/100/ffffff/train.png"
+        alt="Ícone de trem"
+    >
+                <p class="inicio_login">SISTEMA TREMTECH</p>
                 <h1>Controle sua ferrovia com praticidade.</h1>
                 <p class="introducao_login">
                     Painel para acompanhar usuarios, trens, passagens e rotas disponiveis.
@@ -73,14 +91,8 @@ if ($resultado->num_rows > 0) {
 
             <div id="login-cadastro">
             <form class="login-painel" id="login-formulario" method="POST">
-                    <p class="introducao_formulario">Acesso funcionário/cliente</p>
+                    <p class="introducao_formulario">Acesso administrador/funcionario</p>
                     <h2>Entrar no sistema</h2>
-
-
-                     <label for="nome">
-                        Nome usuário
-                        <input type="text" id="nome" name="nome" placeholder="Digite seu nome de usuário">
-                    </label>
 
                     <label for="email">Email:</label>
                     <input type="email" id="email" name="email" placeholder="Digite seu email" required>
@@ -90,19 +102,19 @@ if ($resultado->num_rows > 0) {
 
                     <label for="senha">
                         Senha
-                        <input type="password" id="senha" name="senha" placeholder="Digite sua senha">
                     </label>
-                    <br>
+                        <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+                   
+                <p role="alert">
+                            <?= escapar($erro) ?>
+                        </p>
+
                     <button id="botao-envio" type="submit">Entrar</button>
-                    <div id="mensagem"></div>
 </form>                   
 </div>
     </section>
 </main>
-    <footer>
-    </footer>
     <link rel="stylesheet" href="assets/style/style.css">
-    <script src="../script/validacao.js"></script>
 </body>
 </html>
 

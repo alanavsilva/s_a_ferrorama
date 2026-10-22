@@ -1,65 +1,103 @@
 <?php
 
-session_start();
+require_once "../../infra/conexao.php";
+require_once "../../infra/auth.php";
+require_once "visualizacao_usuario.php";
 
-include "../../infra/conexao.php";
-include "visualizacao_usuario.php";
+exigir_login();
+
+$ehAdministrador =
+    strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
+
+$mensagemSucesso = $_SESSION['mensagem_cadastro'] ?? '';
+unset($_SESSION['mensagem_cadastro']);
+$mensagem = '';
+$mensagemAcesso = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nome = $_POST['nome'] ?? '';
-    $email = $_POST['email'] ?? '';
+  if (!$ehAdministrador) {
+        http_response_code(403);
+        $mensagemAcesso = 'Você não tem permissão para cadastrar usuários.';
+  }else{
+  verificar_csrf();
+
+    $nome = trim ($_POST['nome'] ?? '');
+    $email = trim ($_POST['email'] ?? '');
     $senha = $_POST['senha'] ?? '';
-    $tipo = $_POST['tipo'] ?? '';
+    $tipoRecebido = $_POST['tipo'] ?? '';
 
-      if ($tipo === 'Administrador') {
-        if (!isset($_SESSION['tipo']) || $_SESSION['tipo'] !== 'admin') {
-
-            echo "Você não tem permissão para cadastrar um Administrador.";
-            exit;
-        }
-
-        $tipo = 'administrador';
-
+     if ($nome === '' || $email === '' || $senha === '') {
+        $mensagem = "Preencha todos os campos.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $mensagem = "Informe um email válido.";
+    } elseif (strlen($senha) < 8) {
+        $mensagem = "A senha deve ter pelo menos 8 caracteres.";
+    } elseif (!in_array($tipoRecebido, ['Funcionário', 'Administrador'], true)) {
+        $mensagem = "Tipo de usuário inválido.";
     } else {
-
-        $tipo = 'funcionário';
-    }
-
-      if (empty($nome) || empty($email) || empty($senha) || empty($tipo)) {
-        echo "Preencha todos os campos.";
-    } else {
+            $tipo = $tipoRecebido;
+            $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
         $sql = "INSERT INTO usuarios (nome, email, senha, tipo)
                 VALUES (?, ?, ?, ?)";
-
         $stmt = $conn->prepare($sql);
 
         if (!$stmt) {
-        echo "Erro ao preparar o cadastro.";
+            $mensagem = "Não foi possível concluir o cadastro.";
         } else {
+            $stmt->bind_param("ssss", $nome, $email, $senhaHash, $tipo);
 
-        $stmt->bind_param("ssss", $nome, $email, $senha, $tipo);
-
-        if ($stmt->execute()) {
-            echo "Usuário cadastrado com sucesso!";
-        } else {
-            echo "Não foi possível cadastrar o usuário.";
-        }
+           try {
+    if ($stmt->execute()) {
+        $_SESSION['mensagem_cadastro'] = 'Usuário cadastrado com sucesso!';
+        header('Location: cadastrar_usuario.php');
+        exit;
+    }
+    } catch (mysqli_sql_exception $e) {
+    if ((int) $e->getCode() === 1062) {
+        $mensagem = 'Este email já está cadastrado.';
+     } else {
+        error_log('Erro ao cadastrar usuário: ' . $e->getMessage());
+        $mensagem = 'Não foi possível concluir o cadastro.';
     }
 }
-    $busca = $_GET['buscar'] ?? '';
 
-    $sql = "SELECT id_usuario, nome, email, tipo FROM usuarios WHERE nome LIKE ? OR email LIKE ? ORDER BY nome";
+            $stmt->close();
+        }
+    }
+  }
+    }
 
-    $textoBusca = "%" . $busca . "%";
+$manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST';
 
-    $stmtBusca = $conn->prepare($sql);
+    $busca = trim($_GET['buscar'] ?? '');
+$textoBusca = "%" . $busca . "%";
 
+$sql = "SELECT id_usuario, nome, email, tipo
+        FROM usuarios
+        WHERE nome LIKE ? OR email LIKE ?
+        ORDER BY nome";
+
+$stmtBusca = $conn->prepare($sql);
+
+if ($stmtBusca) {
     $stmtBusca->bind_param("ss", $textoBusca, $textoBusca);
 
-    $stmtBusca->execute();
+    if ($stmtBusca->execute()) {
+        $resultado = $stmtBusca->get_result();
+    } else {
+        error_log("Erro ao consultar usuários: " . $stmtBusca->error);
+        $resultado = false;
+        $mensagemAcesso = 'Não foi possível carregar os usuários.';
+    }
 
-    $resultado = $stmtBusca->get_result();
+    $stmtBusca->close();
+} else {
+    error_log("Erro ao preparar consulta: " . $conn->error);
+    $resultado = false;
+    $mensagemAcesso = 'Não foi possível carregar os usuários.';
+}
+
 
 ?>
 
@@ -70,7 +108,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro Usuário</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="../../assets/style/style.css">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261021-4">
 
    
 </head>
@@ -119,7 +157,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </a>
 
 
-<a class="logout" href="../../index.php">
+<a class="logout" href="../../logout.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png');"></span>
   Logout
 </a>
@@ -129,74 +167,86 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <p class="painel-user">PAINEL ADMINISTRATIVO</p>
       <h1>Controle de usuários cadastrados</h1>
       <h2>Administradores e Funcionários</h2>
+      <?php if ($mensagemSucesso !== ''): ?>
+          <p class="mensagem-sucesso" role="status"><?= escapar($mensagemSucesso) ?></p>
+      <?php endif; ?>
 
+     <?php if ($mensagemAcesso !== ''): ?>
+            <p role="alert"><?= escapar($mensagemAcesso) ?></p>
+        <?php endif; ?>
 
-      <button class="btn-cadastrar-user">CADASTRAR NOVO USUÁRIO</button>
-
-      
-<section class="cadastro-usuario" id="cadastro">
-  <div class="admin-badge-user">
+   <div class="admin-badge-user">
     <div class="avatar-user"></div>
     <div>
-      <strong>Admin</strong>
-      <span>alana.veiga</span>
+        <strong>
+            <?= strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0
+                ? 'Administrador'
+                : 'Funcionário' ?>
+        </strong>
+        <span><?= escapar($_SESSION['nome'] ?? '') ?></span>
     </div>
-  </div>
+</div>
+        <?php if ($ehAdministrador): ?>
 
-  <section class="buscar-box-user">
-
-    <form method="GET">
-
-        <label for="buscar">
-            Buscar
-        </label>
-
-        <input type="text" id="buscar" name="buscar" placeholder="Nome ou email" value="<?= $busca ?>">
-
-        <button type="submit">
-            Buscar
-        </button>
-
-    </form>
-
-</section>
-
-  <form class="form-cadastro-user" method="POST" onsubmit="return validar_usuario()">
-    <div class="campo-user">
-      <label for="nome">Nome de usuário</label>
-      <input type="text" id="nome" name="nome" placeholder="Nome completo">
+    <div class="admin-badge-user">
+        <div class="avatar-user"></div>
+        <div>
+            <strong>Admin</strong>
+            <span><?= escapar($_SESSION['nome'] ?? 'Administrador') ?></span>
+        </div>
     </div>
 
-    <div class="campo-user">
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" placeholder="Email">
-    </div>
+            <button class="btn-cadastrar-user" type="button" onclick="alternarCadastroUsuario()">CADASTRAR NOVO USUÁRIO</button>
 
-    <div class="campo-user">
-      <label for="senha">Senha</label>
-      <input type="password" id="senha" name="senha" placeholder="Senha">
-    </div>
-    
+<section class="cadastro-usuario <?= $manterFormularioAberto ? 'ativo' : '' ?>" id="cadastro">    
+        <form class="form-cadastro-user" method="POST" onsubmit="return validar_usuario()">
+        <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
 
-    <div class="campo-user">
-      <label for="tipo">Tipo de usuário</label>
-      <select id="tipo" name="tipo">
-        <option>Funcionário</option>
-        <option>Administrador</option>
-      </select>
-    </div>
+        <div class="campo-user">
+        <label for="nome">Nome de usuário</label>
+        <input type="text" id="nome" name="nome" placeholder="Nome completo" required>
+        </div>
 
-    
-    <button class="btn-cadastrar-form">CADASTRAR NOVO USUÁRIO</button>
-  </form>
+        <div class="campo-user">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Email" required>
+        </div>
 
-  <?php mostrar_usuarios($resultado); ?>
+        <div class="campo-user">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" placeholder="Senha" required>
+        </div>
 
-</section>
+        <div class="campo-user">
+        <label for="tipo">Tipo de usuário</label>
+        <select id="tipo" name="tipo">
+        <option value="Funcionário">Funcionário</option>
+        <option value="Administrador">Administrador</option>
+        </select>
+        </div>
 
-      </main>
-    </div>
+                    <?php if ($mensagem !== ''): ?>
+                        <p class="mensagem-cadastro" role="alert"><?= escapar($mensagem) ?></p>
+                    <?php endif; ?>
 
-    <script src="../../script/validacao.js"></script>
-  </body>
+                    <button class="btn-cadastrar-form" type="submit"> CADASTRAR NOVO USUÁRIO</button>
+                </form>
+            </section>
+        <?php endif; ?>
+
+        <section class="buscar-box-user">
+        <form method="GET">
+        <label for="buscar">Buscar</label>
+        <input type="text" id="buscar" name="buscar" placeholder="Nome ou email" value="<?= escapar($busca) ?>">
+                <button type="submit">Buscar</button>
+            </form>
+        </section>
+
+
+        <?php mostrar_usuarios($resultado); ?>
+    </main>
+</div>
+
+<script src="../../script/validacao.js?v=20261021-4"></script>
+</body>
 </html>
