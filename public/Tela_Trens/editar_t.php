@@ -54,3 +54,11 @@ if (!$trem) {
     die("Trem não encontrado.");
 }
 ?>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar trem</title>
+    <link rel="stylesheet" href="../../assets/style/style.css">
+</head>
+<body class="body_geral">
