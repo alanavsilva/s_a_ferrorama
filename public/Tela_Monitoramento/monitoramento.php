@@ -53,6 +53,7 @@ foreach ($falhas as $falha) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoramento</title>
+    <link rel="stylesheet" href="monitoramento.css">
 </head>
 <body>
 
