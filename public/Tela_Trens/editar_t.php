@@ -62,3 +62,29 @@ if (!$trem) {
     <link rel="stylesheet" href="../../assets/style/style.css">
 </head>
 <body class="body_geral">
+    <main class="conteudo">
+    <h1>Editar trem</h1>
+
+
+    <form method="POST">
+        <div>
+            <label for="nome">Nome do trem</label>
+            <input type="text" id="nome" name="nome"
+                   value="<?= htmlspecialchars($trem['nome']) ?>" required>
+        </div>
+
+
+        <div>
+            <label for="velocidade_maxima">Velocidade máxima</label>
+            <input type="number" id="velocidade_maxima"
+                   name="velocidade_maxima"
+                   value="<?= htmlspecialchars($trem['velocidade_maxima']) ?>"
+                   required>
+        </div>
+
+
+        <div>
+            <label for="tipo">Tipo/categoria</label>
+            <input type="text" id="tipo" name="tipo"
+                   value="<?= htmlspecialchars($trem['tipo']) ?>" 
+
