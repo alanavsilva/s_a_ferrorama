@@ -117,6 +117,44 @@ foreach ($falhas as $falha) {
         </article>
 
     <?php endforeach; ?>
+    
+<?php
+$encontrou = false;
+
+foreach ($falhas as $id => $falha):
+    if (
+        $filtro != "Todas" &&
+        $falha["status"] != $filtro
+    ) {
+        continue;
+    }
+
+    $encontrou = true;
+?>
+
+    <article>
+        <h3><?= htmlspecialchars($falha["titulo"]) ?></h3>
+        <p><?= htmlspecialchars($falha["sensor"]) ?></p>
+        <p>Data: <?= htmlspecialchars($falha["data"]) ?></p>
+        <p>Status: <?= htmlspecialchars($falha["status"]) ?></p>
+
+        <?php if ($falha["status"] == "Não resolvida"): ?>
+            <a href="?acao=resolver&id=<?= $id ?>&status=<?= urlencode($filtro) ?>">
+                Marcar como resolvida
+            </a>
+        <?php else: ?>
+            <a href="?acao=reabrir&id=<?= $id ?>&status=<?= urlencode($filtro) ?>">
+                Reabrir falha
+            </a>
+        <?php endif; ?>
+    </article>
+
+<?php endforeach; ?>
+
+<?php if (!$encontrou): ?>
+    <p>Nenhuma falha encontrada.</p>
+<?php endif; ?>
+
 </section>
 
 </section>
