@@ -3,6 +3,19 @@
 $filtro = $_GET["status"] ?? "Todas";
 $falhas = [
     [
+        
+if (isset($_GET["acao"]) && isset($_GET["id"])) {
+    $id = (int) $_GET["id"];
+
+    if (isset($falhas[$id])) {
+        if ($_GET["acao"] == "resolver") {
+            $falhas[$id]["status"] = "Resolvida";
+        } elseif ($_GET["acao"] == "reabrir") {
+            $falhas[$id]["status"] = "Não resolvida";
+        }
+    }
+}
+
         "titulo" => "Velocidade acima do limite",
         "sensor" => "Sensor 001 - Linha Norte",
         "data" => "07/05/2026",
@@ -71,6 +84,27 @@ foreach ($falhas as $falha) {
             continue;
         }
         ?>
+        
+<article>
+    <h3><?= htmlspecialchars($falha["titulo"]) ?></h3>
+
+    <p><?= htmlspecialchars($falha["sensor"]) ?></p>
+
+    <p>Data: <?= htmlspecialchars($falha["data"]) ?></p>
+
+    <p>Status: <?= htmlspecialchars($falha["status"]) ?></p>
+
+    <?php if ($falha["status"] == "Não resolvida"): ?>
+        <a href="?acao=resolver&id=<?= $id ?>&status=<?= urlencode($filtro) ?>">
+            Marcar como resolvida
+        </a>
+    <?php else: ?>
+        <a href="?acao=reabrir&id=<?= $id ?>&status=<?= urlencode($filtro) ?>">
+            Reabrir falha
+        </a>
+    <?php endif; ?>
+</article>
+
 
         <article>
             <h3><?= htmlspecialchars($falha["titulo"]) ?></h3>
