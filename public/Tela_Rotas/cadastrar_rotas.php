@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>TremTech</title>
+  <title>Rotas | TremTech</title>
 
   <link rel="stylesheet" href="../../assets/style/style.css">
 
@@ -60,51 +60,94 @@
 </a>
     </aside>
 
-    <main class="conteudo">
-      <header>
-        <div>
-          <small>PAINEL ADMINISTRATIVO</small>
-          <h1>Controle de rotas cadastradas</h1>
-          <h2>Rotas do sistema</h2>
-        </div>
+    <main class="content-user">
+        <p class="painel-user">PAINEL ADMINISTRATIVO</p>
+        <h1>Controle de rotas cadastradas</h1>
+        <h2>Rotas do sistema</h2>
 
-        <div class="admin">
-          <div class="foto"></div>
+        <?php if ($mensagemSucesso !== ''): ?>
+            <p class="mensagem-sucesso" role="status">
+                <?= escapar($mensagemSucesso) ?>
+            </p>
+        <?php endif; ?>
 
-          <b>
-            Admin<br>
-            <span>alana.veiga</span>
-          </b>
-        </div>
-      </header>
+        <?php if ($mensagemAcesso !== ''): ?>
+            <p role="alert"><?= escapar($mensagemAcesso) ?></p>
+        <?php endif; ?>
 
-      <details>
-
-        <summary class="botao">
-          CADASTRAR NOVA ROTA
-        </summary>
-
-       <tbody id="tabela-rotas">
+        <?php if ($ehAdministrador): ?>
+            <button
+                class="btn-cadastrar-user"
+                id="btnAbrirCadastro"
+                type="button"
+                aria-expanded="false"
+            >
+                CADASTRAR NOVA ROTA
+            </button>
           
-          <form class="formulario" method="POST">
-            <div class="campo_inteiro">
-              <label for="nome">Nome da rota</label>
-              <input type="text" id="nome" placeholder="Nome da rota" required>
+             <section class="cadastro-usuario" id="cadastro" hidden>
+                <form class="form-cadastro-user" method="POST">            <div class="campo_inteiro">
+              <input type="hidden" name="csrf_token"value="<?= escapar(token_csrf()) ?>">
+              
+            <div class="campo-user">
+                <label for="nome">Nome da rota</label>
+              <input type="text" id="nome" name="nome" maxlength="100" placeholder="Nome da rota" required>
             </div>
 
-             <div>
+            <div class="campo-user">
               <label for="extensao">Extensão(km)</label>
-              <input type="number" id="extensao" placeholder="Ex:45" required>
+              <input type="number" id="extensao" name="extensao" min="0.01" step="0.01" placeholder="Ex:45" required>
             </div>
 
-            <div>
+            <div class="campo-user">
               <label for="minutos">Tempo estimado(min)</label>
-              <input type="number" id="minutos" placeholder="Ex:30" required>
+              <input type="number" id="minutos" name="tempo" min="1" step="1" placeholder="Ex:30" required>
             </div>
+<?php if ($mensagem !== ''): ?>
+                        <p class="mensagem-cadastro" role="alert">
+                            <?= escapar($mensagem) ?>
+                        </p>
+                    <?php endif; ?>
 
+                    <button class="btn-cadastrar-form" type="submit">
+                        CADASTRAR ROTA
+                    </button>
+                </form>
+            </section>
+        <?php endif; ?>
 
+        <section class="buscar-box-user">
+            <form method="GET">
+                <label for="buscar">Buscar rota</label>
+                <input
+                    type="search"
+                    id="buscar"
+                    name="buscar"
+                    placeholder="Nome da rota"
+                    value="<?= escapar($busca) ?>"
+                >
+                <button type="submit">Buscar</button>
+            </form>
+        </section>
 
-          <button class="botao_largo" type="submit">Cadastrar Rota</button>
-        </form>
-      </details>
+        <?php mostrar_rotas($resultado); ?>
+    </main>
+</div>
+
+<script>
+(() => {
+    const botao = document.getElementById('btnAbrirCadastro');
+    const formulario = document.getElementById('cadastro');
+
+    if (!botao || !formulario) return;
+
+    botao.addEventListener('click', () => {
+        formulario.hidden = !formulario.hidden;
+        formulario.classList.toggle('ativo', !formulario.hidden);
+        botao.setAttribute('aria-expanded', String(!formulario.hidden));
+    });
+})();
+</script>
+</body>
+</html>
       
