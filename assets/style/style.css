@@ -626,122 +626,112 @@ body.body_geral {
 }
 
 
+/* Tela de login */
 .pagina-login {
   width: 100%;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+}
 
+.pagina-login .login-vizualizacao {
+  width: 100%;
+  min-height: 632px;
+  display: flex;
+  background-color: white;
+}
 
-  .login-vizualização {
-    width: 100%;
-    min-height: 632px;
-    display: flex;
-    background-color: white;
-  }
+.pagina-login .painel-introducao {
+  width: 50%;
+  background: linear-gradient(135deg, #7e0606, #8d3434);
+  color: white;
+  padding: 180px 40px 40px 40px;
+  border-radius: 15px 15px 0 0;
+}
 
+.pagina-login .inicio_login {
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
 
-  .painel-introducao {
-    width: 50%;
-    background: linear-gradient(135deg, #7e0606, #8d3434);
-    color: white;
-    padding: 180px 40px 40px 40px;
-    border-radius: 15px 15px 0 0;
-  }
+.pagina-login .painel-introducao h1 {
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1.4;
+  max-width: 450px;
+}
 
-  .inicio_login {
-    font-size: 13px;
-    font-weight: bold;
-    margin-bottom: 15px;
-  }
+.pagina-login .introducao_login { display: none; }
 
-  .painel-introducao h1 {
-    font-size: 40px;
-    font-weight: 400;
-    line-height: 1.4;
-    max-width: 450px;
-  }
+.pagina-login #login-cadastro {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+}
 
-  .introducao_login {
-    display: none;
-  }
+.pagina-login .login-painel {
+  width: 285px;
+  padding: 28px 25px 35px 25px;
+  background-color: #faf9fc;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
 
+.pagina-login .introducao_formulario {
+  color: #141313;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
 
-  #login-cadastro {
-    width: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #ffffff;
-  }
+.pagina-login .login-painel h2 {
+  font-size: 23px;
+  font-weight: 400;
+  margin-bottom: 18px;
+}
 
-  .login-painel {
-    width: 285px;
-    padding: 28px 25px 35px 25px;
-    background-color: #faf9fc;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  }
+.pagina-login .login-painel label {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 18px;
+}
 
+.pagina-login .login-painel input {
+  width: 100%;
+  height: 40px;
+  margin-top: 5px;
+  padding: 0 8px;
+  border: 1px solid #ccc;
+  background-color: white;
+  font-size: 12px;
+}
 
-  .introducao_formulario {
-    color: #141313;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 8px;
-  }
+.pagina-login .login-painel input:focus {
+  outline: none;
+  border-color: #792626;
+}
 
-  .login-painel h2 {
-    font-size: 23px;
-    font-weight: 400;
-    margin-bottom: 18px;
-  }
+.pagina-login #botao-envio {
+  width: 100%;
+  height: 40px;
+  border: none;
+  border-radius: 25px;
+  background-color: #860f0f;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+}
 
-  .login-painel label {
-    display: block;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 18px;
-  }
+.pagina-login #botao-envio:hover { background-color: #7a1111; }
 
-  .login-painel input {
-    width: 100%;
-    height: 40px;
-    margin-top: 5px;
-    padding: 0 8px;
-    border: 1px solid #ccc;
-    background-color: white;
-    font-size: 12px;
-  }
-
-  .login-painel input:focus {
-    outline: none;
-    border-color: #792626;
-  }
-
-
-  #botao-envio {
-    width: 100%;
-    height: 40px;
-    border: none;
-    border-radius: 25px;
-    background-color: #860f0f;
-    color: white;
-    font-size: 13px;
-    cursor: pointer;
-  }
-
-  #botao-envio:hover {
-    background-color: #7a1111;
-  }
-
-  #mensagem {
-    margin-top: 10px;
-    font-size: 12px;
-    color: #6e1a1a;
-  }
-
-  box-sizing: border-box;
+.pagina-login #mensagem {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #6e1a1a;
 }
 
 body {
