@@ -76,8 +76,11 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <link rel="stylesheet" href="../../assets/style/style.css">
   </head>
 
-<body>
+<body class="body_login">
+    <main class="pagina-login">
+        <section class="login-vizualizacao" id="login">
 
+Depois apague a linha <link rel="stylesheet" href="assets/style/style.css">
 <nav class="home_barra">
 <a class="home_logo" href="home.php"> <img class="home-imagem-trem" src="https://img.icons8.com/ios/50/ffffff/train.png" alt="Ícone de trem"> SISTEMA TREMTECH </a>
     <a class="home_link" href="home.php">Home</a>
