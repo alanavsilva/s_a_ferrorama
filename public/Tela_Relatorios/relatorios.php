@@ -50,10 +50,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
    
 </head>
 
-<aside class="menu-lateral-relatorios">
+</head>
 
+<body class="pagina-relatorios">
+
+<div class="layout-relatorios">
+
+    <aside class="menu-lateral-relatorios">
 
         <aside class="menu">
+
+
+
        <img class="logo-trem"
     src="https://img.icons8.com/ios/100/ffffff/train.png"
     alt="Logo TremTech">
@@ -97,9 +105,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <a class="logout" href="../../logout.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png');"></span>
   Logout
-</a>
-    </aside>
 
+  </a>
+        </aside>
+
+    </aside>
 
     <main class="conteudo-relatorios">
 

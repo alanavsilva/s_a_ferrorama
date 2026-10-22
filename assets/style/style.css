@@ -1735,6 +1735,23 @@ body {
     .estado-vazio-relatorios {
         min-height: 240px;
     }
+
+    @media (max-width: 900px) {
+    .area-relatorios {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .menu-lateral-relatorios {
+        width: 220px;
+        min-width: 220px;
+    }
+
+    .cabecalho-relatorios {
+        flex-wrap: wrap;
+    }
+}
+
+
 }
 
 
