@@ -2,7 +2,6 @@
 
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
-require_once "visualizacao_cadastro.php";
 
 $mensagem_relatorios = "";
 $sensor_relatorios = "";
@@ -51,27 +50,62 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
    
 </head>
 
-<body class="pagina-relatorios">
 
 <div class="layout-relatorios">
 
     <aside class="menu-lateral-relatorios">
 
-        <div class="marca-relatorios">
-            <h2>SISTEMA TREMTECH</h2>
-        </div>
 
-        <div class="linha-menu-relatorios"></div>
+        <aside class="menu">
+       <img class="logo-trem"
+    src="https://img.icons8.com/ios/100/ffffff/train.png"
+    alt="Logo TremTech">
 
-        <nav class="navegacao-relatorios">
-            <a href="../home/index.php" class="item-menu-relatorios">Home</a>
-            <a href="../usuarios/listar_usuarios.php" class="item-menu-relatorios">Usuários</a>
-            <a href="../sensores/listar_sensores.php" class="item-menu-relatorios">Sensores</a>
-            <a href="../monitoramento/monitoramento.php" class="item-menu-relatorios">Monitoramento</a>
-            <a href="relatorios.php" class="item-menu-relatorios ativo-relatorios">Relatórios</a>
-            <a href="../trem/trem.php" class="item-menu-relatorios">Trem</a>
-            <a href="../rotas/rotas.php" class="item-menu-relatorios">Rotas</a>
-        </nav>
+  <p class="marca">SISTEMA TREMTECH</p>
+     <a href="../../public/Tela_Home/home.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');"></span>
+  Home
+</a>
+
+<a class="ativo" href="../../public/Tela_Usuario/cadastrar_usuario.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');"></span>
+  Usuários
+</a>
+
+<a href="../../public/Tela_Sensores/cadastrar_sensores.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');"></span>
+  Sensores
+</a>
+
+<a href="../../public/Tela_Trens/cadastrar_trens.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png');"></span>
+  Trem
+</a>
+
+<a href="../../public/Tela_Rotas/cadastrar_rotas.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png');"></span>
+  Rota
+</a>
+<a href="../../public/Tela_Monitoramento/monitoramento.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');"></span>
+  Monitoramento
+</a>
+
+<a href="../../public/Tela_Relatorios/relatorios.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png');"></span>
+  Relatórios
+</a>
+
+
+<a class="logout" href="../../logout.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png');"></span>
+  Logout
+</a>
+    </aside>
+
+
+
+        
 
         <a href="../logout.php" class="sair-relatorios">Logout</a>
 
