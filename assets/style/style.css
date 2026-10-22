@@ -2600,36 +2600,86 @@ body.body_geral {
     text-align: center;
 }
 
-@media (max-width: 850px) {
-    .body_geral .pagina {
-        flex-direction: column;
-    }
-
-    .body_geral .menu {
-        width: 100%;
-        min-width: 0;
-        min-height: auto;
-    }
-
-    .body_geral .menu a.logout {
-        margin-top: 10px;
-    }
-
-    .body_geral .conteudo {
-        padding: 22px 16px;
-    }
-
-    .body_geral .resumo-monitoramento {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .body_geral .falha_item {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .body_geral .acoes-monitoramento a {
-        white-space: normal;
-    }
+.body_geral .menu a.logout {
+  position: static;
+  margin-top: auto;
 }
+
+.home_barra,
+.home_barra * {
+    box-sizing: border-box;
+}
+
+.home_barra {
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.home_barra .home_logo {
+    flex-shrink: 0;
+}
+
+.home_barra .home_link {
+    white-space: nowrap;
+}
+
+.home_conteudo {
+    min-width: 0;
+}
+
+.home_conteudo .falhas_lista {
+    display: grid;
+    gap: 16px;
+}
+
+.home_conteudo .falha_item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 14px;
+    border: 1px solid #aaa;
+    border-left: 8px solid #850000;
+    border-radius: 0;
+    background: #fff;
+}
+
+.home_conteudo .falha_dados {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.home_conteudo .falha_dados h3 {
+    margin: 0 0 4px;
+    color: #8a0000;
+    font-size: 18px;
+}
+
+.home_conteudo .falha_dados p {
+    margin: 0;
+    color: #888;
+    font-size: 13px;
+}
+
+.home_conteudo .falha_acao {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.home_conteudo .falhas_vazias {
+    margin: 0;
+    padding: 18px;
+    text-align: center;
+}
+
+.home_conteudo .home_tabela_sensores {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.home_conteudo .home_tabela_sensores .tabela-sensores {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
