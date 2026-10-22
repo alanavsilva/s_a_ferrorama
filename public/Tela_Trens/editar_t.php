@@ -17,5 +17,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sql = "UPDATE trens
             SET nome = ?, velocidade_maxima = ?, tipo = ?, rota = ?
             WHERE id_trem = ?";
+$stmt = mysqli_prepare($conn, $sql);
 
-   
+
+    mysqli_stmt_bind_param(
+        $stmt,
+        "ssssi",
+        $nome,
+        $velocidade,
+        $tipo,
+        $rota,
+        $id
+    );
+
+
+    if (mysqli_stmt_execute($stmt)) {
+        header("Location: visualizacao_trens.php");
+        exit;
+    } else {
+        echo "Erro ao editar o trem.";
+    }
+}
+
+
+$sql = "SELECT * FROM trens WHERE id_trem = ?";
+$stmt = mysqli_prepare($conn, $sql);
+mysqli_stmt_bind_param($stmt, "i", $id);
+mysqli_stmt_execute($stmt);
+
+
+$resultado = mysqli_stmt_get_result($stmt);
+$trem = mysqli_fetch_assoc($resultado);
+
+
+if (!$trem) {
+    die("Trem não encontrado.");
+}
+?>
