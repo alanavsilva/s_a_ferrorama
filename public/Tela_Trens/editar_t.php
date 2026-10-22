@@ -87,4 +87,23 @@ if (!$trem) {
             <label for="tipo">Tipo/categoria</label>
             <input type="text" id="tipo" name="tipo"
                    value="<?= htmlspecialchars($trem['tipo']) ?>" 
+required>
+        </div>
+
+
+        <div>
+            <label for="rota">Rota</label>
+            <input type="text" id="rota" name="rota"
+                   value="<?= htmlspecialchars($trem['rota']) ?>" required>
+        </div>
+
+
+        <button type="submit">Salvar alterações</button>
+        <a href="visualizacao_trens.php">Cancelar</a>
+    </form>
+</main>
+
+
+</body>
+</html>
 
