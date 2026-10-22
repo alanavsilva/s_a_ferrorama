@@ -19,6 +19,18 @@ $falhas = [
         "sensor" => "Sensor 111 - Linha Oeste",
         "data" => "22/05/2026",
         "status" => "Não resolvida"
+      
+$resolvidas = 0;
+$naoResolvidas = 0;
+
+foreach ($falhas as $falha) {
+    if ($falha["status"] == "Resolvida") {
+        $resolvidas++;
+    } else {
+        $naoResolvidas++;
+    }
+}
+  
     ]
 ];
 ?>
@@ -40,6 +52,15 @@ $falhas = [
         <option value="Todas">Todas</option>
         <option value="Resolvida">Resolvidas</option>
         <option value="Não resolvida">Não resolvidas</option>
+        
+<section>
+    <h2><?= $resolvidas ?></h2>
+    <p>Falhas resolvidas</p>
+
+    <h2><?= $naoResolvidas ?></h2>
+    <p>Falhas não resolvidas</p>
+</section>
+
     </select>
 </form>
 
