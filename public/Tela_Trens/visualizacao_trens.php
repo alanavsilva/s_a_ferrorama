@@ -17,15 +17,8 @@ function mostrar_sensores($resultado, bool $mostrarAcoes = true): void
         return;
     }
 }
-$sql = "SELECT t.nome, t.velocidade_media, t.tipo, r.nome AS rota
-        FROM trens t
-        INNER JOIN rotas r ON r.id_rotas = t.id_rotas
-        ORDER BY t.id_trem DESC";
 
-$trens = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
-<h2 class="titulo-lista">Trens cadastrados</h2>
 
 <table class="tabela-trens">
   <thead>
@@ -34,22 +27,41 @@ $trens = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
       <th>Velocidade</th>
       <th>Tipo/Categoria</th>
       <th>Rota</th>
+
+      <?php if ($exibirAcoes): ?>
+        <th>Ações</th>
+      <?php endif; ?>
     </tr>
   </thead>
   <tbody>
-    <?php if (count($trens) === 0): ?>
+    <?php while ($trem = $resultado->fetch_assoc()): ?>
       <tr>
-        <td colspan="4" class="vazio">Nenhum trem cadastrado ainda.</td>
-      </tr>
-    <?php else: ?>
-      <?php foreach ($trens as $trem): ?>
-        <tr>
-          <td><?= htmlspecialchars($trem['nome']) ?></td>
-          <td><?= htmlspecialchars($trem['velocidade_media']) ?> km/h</td>
-          <td><?= htmlspecialchars($trem['tipo']) ?></td>
-          <td><?= htmlspecialchars($trem['rota']) ?></td>
+          <td><?= (int) $trem['id_trem'] ?></td>
+          <td><?= escapar($trem['nome_trem'] ?? '') ?></td>
+          <td><?= escapar($trem['velocidade_media'] ?? '') ?></td>
+          <td><?= escapar($trem['tipo'] ?? '') ?></td>
+          <td><?= escapar($trem['rota'] ?? '') ?></td>
+
+           <?php if ($exibirAcoes): ?>
+            <td class="acao_sensor">
+
+            <a href="editar_t.php?id=<?= (int) $trem['id_trem'] ?>" class="acao-icone" aria-label="Editar trem">
+            <img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt="" >
+            </a>
+
+            <form method="POST" action="excluir_t.php" class="js-confirmar-exclusao" data-titulo="Excluir trem" data-mensagem="Tem certeza de que deseja excluir este trem? Essa ação não pode ser desfeita.">
+            
+            <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
+            <input type="hidden" name="id" value="<?= (int) $trem['id_trem'] ?>">
+
+            <button type="submit" class="acao-icone" aria-label="Excluir trem">
+            <img src="https://img.icons8.com/ios-filled/18/701015/trash.png" alt="">
+            </button>
+
+                </form>
+                </td>
+               <?php endif; ?>
         </tr>
-      <?php endforeach; ?>
-    <?php endif; ?>
+      <?php endwhile; ?>
   </tbody>
 </table>
