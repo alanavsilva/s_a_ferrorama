@@ -2078,8 +2078,6 @@ body {
          text-align: center;
       }
 
-
-/* Ações das listagens de usuários */
 .content-user .acao_user {
   text-align: center;
   white-space: nowrap;
@@ -2140,7 +2138,6 @@ body {
     background-color: #f5f5f5;
 }
 
-/* Formulários de edição e modal de confirmação */
 .formulario-edicao {
     display: block;
     max-width: 900px;
@@ -2264,7 +2261,6 @@ body {
     background: #5d0d12;
 }
 
-/* Monitoramento */
 
 .filtro-monitoramento {
     display: flex;
