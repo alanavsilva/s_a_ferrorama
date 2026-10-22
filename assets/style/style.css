@@ -1644,10 +1644,14 @@ body {
         padding: 25px;
     }
 
-    .area-relatorios {
-        grid-template-columns: 260px minmax(250px, 1fr);
-        gap: 24px;
-    }
+.area-relatorios {
+    display: grid;
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+    width: 100%;
+    padding: 0;
+}
 
     .titulo-area-relatorios h1 {
         font-size: 23px;
@@ -1699,9 +1703,11 @@ body {
         padding-bottom: 0;
     }
 
-    .conteudo-relatorios {
-        padding: 24px 16px;
-    }
+  .conteudo-relatorios {
+    flex: 1;
+    min-width: 0;
+    padding: 28px 30px 40px;
+}
 
     .cabecalho-relatorios {
         align-items: flex-start;

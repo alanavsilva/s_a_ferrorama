@@ -50,10 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
    
 </head>
 
-
-<div class="layout-relatorios">
-
-    <aside class="menu-lateral-relatorios">
+<aside class="menu-lateral-relatorios">
 
 
         <aside class="menu">
@@ -104,22 +101,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </aside>
 
 
-
-        
-
-        <a href="../logout.php" class="sair-relatorios">Logout</a>
-
-    </aside>
-
     <main class="conteudo-relatorios">
 
         <header class="cabecalho-relatorios">
             <div class="titulo-area-relatorios">
                 <p class="sobretitulo-relatorios">
-                    PAINEL DE MONITORAMENTO
+                    PAINEL DE RELATÓRIOS
                 </p>
 
-                <h1>Monitoramento em tempo real</h1>
+                <h1>Relatórios do sistema</h1>
             </div>
 
             <div class="perfil-relatorios">
