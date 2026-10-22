@@ -2362,17 +2362,274 @@ body {
     text-align: center;
 }
 
-@media (max-width: 700px) {
-    .resumo-monitoramento {
-        grid-template-columns: 1fr;
+
+body.body_geral {
+    margin: 0;
+    padding: 0;
+    background: #f1f1f4;
+    font-family: Arial, sans-serif;
+}
+
+.body_geral .pagina {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+
+.body_geral .menu {
+    width: 259px;
+    min-width: 259px;
+    min-height: 100vh;
+    padding: 22px 14px;
+    box-sizing: border-box;
+    background: linear-gradient(180deg, #350b10, #741016);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.body_geral .logo-trem {
+    width: 110px;
+    height: 65px;
+    object-fit: contain;
+    margin-left: 2px;
+}
+
+.body_geral .marca {
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 0 0 20px 2px;
+}
+
+.body_geral .menu a {
+    display: flex;
+    align-items: center;
+    min-height: 43px;
+    padding: 0 13px;
+    border-radius: 25px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    gap: 10px;
+}
+
+.body_geral .menu a.ativo {
+    background: #fff;
+    color: #650003;
+}
+
+.body_geral .menu a.logout {
+    margin-top: auto;
+}
+
+
+.body_geral .conteudo {
+    flex: 1;
+    min-width: 0;
+    padding: 35px 30px;
+    box-sizing: border-box;
+}
+
+.body_geral .conteudo header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.body_geral .conteudo header small {
+    color: #7b1023;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.body_geral .conteudo header h1 {
+    margin: 8px 0 0;
+    font-size: 24px;
+    color: #850000;
+}
+
+.body_geral .conteudo header h2 {
+    margin-top: 8px;
+    font-size: 17px;
+    color: #7b1023;
+}
+
+.body_geral .admin {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    background: #fff;
+    box-shadow: 0 2px 10px #00000015;
+    font-size: 12px;
+}
+
+.body_geral .admin span {
+    color: #777;
+}
+
+.body_geral .foto {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #650003;
+}
+
+
+
+.body_geral .filtro-monitoramento {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 22px;
+}
+
+.body_geral .filtro-monitoramento label {
+    color: #850000;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.body_geral .filtro-monitoramento select {
+    min-width: 165px;
+    padding: 11px;
+    border: 1px solid #999;
+    background: #eee;
+}
+
+
+.body_geral .resumo-monitoramento {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px;
+    margin-bottom: 26px;
+}
+
+.body_geral .cartao-monitoramento {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 15px;
+    padding: 16px;
+    min-height: 75px;
+    box-sizing: border-box;
+    background: #d9d9d9;
+    border-left: 8px solid #850000;
+}
+
+.body_geral .cartao-monitoramento h2 {
+    margin: 0;
+    color: #850000;
+    font-size: 42px;
+}
+
+.body_geral .cartao-monitoramento p {
+    margin: 0;
+    color: #777;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+
+.body_geral .falhas_lista {
+    display: grid;
+    gap: 25px;
+}
+
+.body_geral .falha_item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 65px;
+    padding: 10px 15px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid #888;
+    border-left: 8px solid #850000;
+}
+
+.body_geral .falha_dados h3 {
+    margin: 0 0 6px;
+    color: #850000;
+    font-size: 16px;
+}
+
+.body_geral .falha_dados p {
+    margin: 4px 0;
+    color: #999;
+    font-size: 12px;
+}
+
+.body_geral .acoes-monitoramento a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 18px;
+    box-sizing: border-box;
+    border-radius: 25px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.body_geral .acoes-monitoramento .botao_resolver {
+    background: #3b0b10;
+    color: #fff;
+}
+
+.body_geral .acoes-monitoramento .botao_reabrir {
+    min-width: 120px;
+    background: #ddd;
+    border: 1px solid #999;
+    color: #650003;
+}
+
+.body_geral .falhas_vazias {
+    padding: 20px;
+    background: #fff;
+    text-align: center;
+}
+
+@media (max-width: 850px) {
+    .body_geral .pagina {
+        flex-direction: column;
     }
 
-    .falha_item {
+    .body_geral .menu {
+        width: 100%;
+        min-width: 0;
+        min-height: auto;
+    }
+
+    .body_geral .menu a.logout {
+        margin-top: 10px;
+    }
+
+    .body_geral .conteudo {
+        padding: 22px 16px;
+    }
+
+    .body_geral .resumo-monitoramento {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .body_geral .falha_item {
         align-items: flex-start;
         flex-direction: column;
     }
 
-    .acoes-monitoramento a {
-        width: 100%;
+    .body_geral .acoes-monitoramento a {
+        white-space: normal;
     }
 }
