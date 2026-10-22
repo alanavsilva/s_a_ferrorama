@@ -1935,6 +1935,13 @@ body {
             font-size: 15px;
         }
 
+        .pagina-login .icone-trem {
+          display: block;
+          width: 70px;
+          height: 70px;
+          margin-bottom: 12px;
+        }
+
         .home_tabela td {
             padding: 16px 12px;
             border-bottom: 1px solid #dddddd;
