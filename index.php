@@ -73,7 +73,7 @@ $sql = "SELECT id_usuario, nome, email, tipo, senha
 
 <body class="body_login">
     <main class="pagina-login">
-        <section class="login-vizualização" id="login">
+        <section class="login-vizualizacao" id="login">
             <div class="painel-introducao">
 
             <img
