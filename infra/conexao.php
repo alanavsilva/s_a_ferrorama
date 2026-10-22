@@ -2,14 +2,13 @@
 
 $host = 'localhost';
 $username = 'root';
-$pass = 'root';
-$dbname = "SA_FERRORAMA";
+$pass = '';
+$dbname = 'SA_FERRORAMA';
 
-$conn = new mysqli($host, $username, $pass, $dbname);
+$conn = new mysqli($host, $username, $pass, $dbname, 3306);
 
 if ($conn->connect_error) {
     die("Falha na conexão: " . $conn->connect_error);
 }
-
 
 ?>
