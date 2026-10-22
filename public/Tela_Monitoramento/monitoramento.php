@@ -59,6 +59,32 @@ foreach ($falhas as $falha) {
 
     <h2><?= $naoResolvidas ?></h2>
     <p>Falhas não resolvidas</p>
+    
+<section>
+    <?php foreach ($falhas as $id => $falha): ?>
+
+        <?php
+        if (
+            $filtro != "Todas" &&
+            $falha["status"] != $filtro
+        ) {
+            continue;
+        }
+        ?>
+
+        <article>
+            <h3><?= htmlspecialchars($falha["titulo"]) ?></h3>
+
+            <p><?= htmlspecialchars($falha["sensor"]) ?></p>
+
+            <p>Data: <?= htmlspecialchars($falha["data"]) ?></p>
+
+            <p>Status: <?= htmlspecialchars($falha["status"]) ?></p>
+        </article>
+
+    <?php endforeach; ?>
+</section>
+
 </section>
 
     </select>
