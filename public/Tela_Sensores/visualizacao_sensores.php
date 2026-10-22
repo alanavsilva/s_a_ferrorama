@@ -87,7 +87,7 @@ function mostrar_sensores($resultado, bool $mostrarAcoes = true): void
                 formularioPendente = formulario;
                 modal.querySelector('h2').textContent = formulario.dataset.titulo || 'Confirmar exclusão';
                 modal.querySelector('.modal-confirmacao-mensagem').textContent = formulario.dataset.mensagem || 'Essa ação não pode ser desfeita.';
-                modal.querySelector('.modal-btn-excluir').textContent = 'Excluir sensor';
+                modal.querySelector('.modal-btn-excluir').textContent = 'Excluir trem';
                 modal.showModal();
             });
         });
