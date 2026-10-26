@@ -15,7 +15,6 @@ function mostrar_trens($resultado): void
         return;
     }
 
-}
 
 ?>
 
@@ -42,7 +41,7 @@ function mostrar_trens($resultado): void
           <td><?= escapar($trem['tipo'] ?? '') ?></td>
           <td><?= escapar($trem['rota'] ?? '') ?></td>
 
-            <?php if ($ehAdministrador) { ?>
+            <?php if ($ehAdministrador): ?>
             <td class="acao_sensor">
 
             <a href="editar_t.php?id=<?= (int) $trem['id_trem'] ?>" class="acao-icone" aria-label="Editar trem">

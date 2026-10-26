@@ -2,7 +2,7 @@
 
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
-require_once "visualizacao_usuario.php";
+require_once "visualizacao_trens.php";
 
 exigir_login();
 
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     } catch (mysqli_sql_exception $e) {
-        error_log('Erro ao cadastrar usuário: ' . $e->getMessage());
+       error_log('Erro ao cadastrar trem: ' . $e->getMessage());
         $mensagem = 'Não foi possível concluir o cadastro.';
 }
             $stmt->close();
