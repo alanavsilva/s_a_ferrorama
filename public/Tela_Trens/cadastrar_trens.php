@@ -130,10 +130,10 @@ if ($stmtBusca) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>SISTEMA TREMTECH</title>
+  <title>Cadastro Trens</title>
 
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link rel="stylesheet" href="../../assets/style/style.css">
-  <link rel="stylesheet" href="visualizacao.css">
 </head>
 
 <body class="body_geral">
@@ -187,78 +187,104 @@ if ($stmtBusca) {
       </a>
     </aside>
 
-    <main class="conteudo">
-      <header>
-        <div>
-          <small>PAINEL ADMINISTRATIVO</small>
-          <h1>Controle de trens cadastrados</h1>
-          <h2>Trens</h2>
+    <main class="content-user">
+      <p class="painel-user">PAINEL ADMINISTRATIVO</p>
+        <h1>Controle de trens cadastrados</h1>
+        <h2>Trens</h2>
+
+        <?php if ($mensagemSucesso !== ''): ?>
+            <p class="mensagem-sucesso" role="status"><?= escapar($mensagemSucesso) ?></p>
+        <?php endif; ?>
+
+          <?php if ($mensagemAcesso !== ''): ?>
+            <p role="alert"><?= escapar($mensagemAcesso) ?></p>
+        <?php endif; ?>
+
+        <div class="admin-badge-user">
+            <div class="avatar-user"></div>
+            <div>
+                <strong>
+                    <?= $ehAdministrador ? 'Administrador' : 'Funcionário' ?>
+                </strong>
+                <span><?= escapar($_SESSION['nome'] ?? '') ?></span>
+            </div>
         </div>
 
-        <div class="admin">
-          <div class="foto"></div>
+        <?php if ($ehAdministrador): ?>
 
-          <b>
-            Admin<br>
-            <span>Usuário</span>
-          </b>
-        </div>
-      </header>
+            <button class="btn-cadastrar-user" type="button" onclick="alternarCadastroTrem()">CADASTRAR NOVO TREM</button>
 
-      <form class="formulario" method="POST">
-        <div>
+      <section class="cadastro-usuario <?= $manterFormularioAberto ? 'ativo' : '' ?>" id="cadastro">
+      <form class="form-cadastro-user" method="POST">
+
+      <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
+
+        <div class="campo-user">
           <label for="nome">Nome do trem</label>
           <input type="text" id="nome" name="nome" placeholder="Nome do trem"
-                 value="<?= htmlspecialchars($nome) ?>">
-          <span class="erro-campo"><?= $erros['nome'] ?? '' ?></span>
+                 value="<?= escapar($nome) ?>" required>
         </div>
 
-        <div>
+        <div class="campo-user">
           <label for="velocidade">Velocidade média</label>
           <input type="number" id="velocidade" name="velocidade" placeholder="Velocidade média"
-                 value="<?= htmlspecialchars($velocidade) ?>">
-          <span class="erro-campo"><?= $erros['velocidade'] ?? '' ?></span>
+            min="1" max="600" step="any" value="<?= escapar($velocidade) ?>" required>
         </div>
 
-        <div>
+        <div class="campo-user">
           <label for="tipo">Tipo/categoria</label>
-          <select id="tipo" name="tipo">
+          <select id="tipo" name="tipo" required>
             <option value="">Selecione o tipo</option>
             <?php foreach ($tipos as $t): ?>
-              <option value="<?= $t ?>" <?= $tipo === $t ? 'selected' : '' ?>><?= $t ?></option>
+              <option value="<?= escapar($t) ?>" <?= $tipo === $t ? 'selected' : '' ?>><?= escapar($t) ?></option>
             <?php endforeach; ?>
           </select>
-          <span class="erro-campo"><?= $erros['tipo'] ?? '' ?></span>
         </div>
 
-        <div>
+        <div class="campo-user">
           <label for="id_rotas">Rota</label>
-          <select id="id_rotas" name="id_rotas">
+          <select id="id_rotas" name="id_rotas" required>
             <option value="">Selecione a rota</option>
             <?php foreach ($rotas as $r): ?>
-              <option value="<?= $r['id_rotas'] ?>" <?= $id_rotas == $r['id_rotas'] ? 'selected' : '' ?>>
-                <?= htmlspecialchars($r['nome']) ?>
+              <option value="<?= (int)$r['id_rotas'] ?>" <?= (string)$id_rotas === (string)$r['id_rotas'] ? 'selected' : '' ?>>
+                <?= escapar($r['nome']) ?>
               </option>
             <?php endforeach; ?>
           </select>
-          <span class="erro-campo"><?= $erros['rota'] ?? '' ?></span>
         </div>
 
-        <button class="botao" type="submit">Cadastrar Novo Trem</button>
-      </form>
+          <?php if ($mensagem !== ''): ?>
+          <p class="mensagem-cadastro" role="alert"><?= escapar($mensagem) ?></p>
+          <?php endif; ?>
 
-      <?php if (isset($_GET['ok'])): ?>
-        <p class="sucesso">Trem cadastrado com sucesso.</p>
+        <button class="btn-cadastrar-form" type="submit">CADASTRAR NOVO TREM</button>
+      </form>
+      </section>
+
       <?php endif; ?>
 
-      <?php require_once __DIR__ . '/visualizacao_trens.php'; ?>
+           <section class="buscar-box-user">
+            <form method="GET">
+                <label for="buscar">Buscar</label>
+                <input type="text" id="buscar" name="buscar" placeholder="Nome, tipo ou rota" value="<?= escapar($busca) ?>">
+                <button type="submit">Buscar</button>
+            </form>
+        </section>
+
+        <?php mostrar_trens($resultado); ?>
+
     </main>
+</div>
 
-  </div>
+<script>
+function alternarCadastroTrem() {
+    const cadastro = document.getElementById('cadastro');
 
-  <script src="validacao.js"></script>
+    if (cadastro) {
+        cadastro.classList.toggle('ativo');
+    }
+}
+</script>
+
 </body>
 </html>
-
-  </tbody>
-</table>
