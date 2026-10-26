@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   verificar_csrf();
 
     $nome = trim ($_POST['nome'] ?? '');
-    $email = trim ($_POST['email'] ?? '');
+    $email = trim ($_POST['email'] ?? '');   
     $senha = $_POST['senha'] ?? '';
     $tipoRecebido = $_POST['tipo'] ?? '';
 

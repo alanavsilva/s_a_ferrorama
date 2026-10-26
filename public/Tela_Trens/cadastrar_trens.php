@@ -1,71 +1,128 @@
 <?php
 
-$pdo = new PDO("mysql:host=localhost;dbname=SA_FERRORAMA;charset=utf8", "root", "");
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+require_once "../../infra/conexao.php";
+require_once "../../infra/auth.php";
+require_once "visualizacao_usuario.php";
 
-$tipos = ['Velocidade', 'Temperatura', 'Status'];
-$rotas = $pdo->query("SELECT id_rotas, nome FROM rotas ORDER BY nome")->fetchAll(PDO::FETCH_ASSOC);
+exigir_login();
 
-$erros = [];
-$nome = '';
-$velocidade = '';
-$tipo = '';
-$id_rotas = '';
+$ehAdministrador =
+    strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
+
+    $mensagemSucesso = $_SESSION['mensagem_cadastro'] ?? '';
+    unset($_SESSION['mensagem_cadastro']);
+    $mensagem = '';
+    $mensagemAcesso = '';
+    
+    $nome = '';
+    $velocidade = '';
+    $tipo = '';
+    $id_rotas = '';
+    $erros = [];
+
+    $tipos = ['Velocidade', 'Temperatura', 'Status'];
+    $rotas = [];
+
+    $sqlRotas = "SELECT id_rotas, nome FROM rotas ORDER BY nome";
+    $resultadoRotas = $conn->query($sqlRotas);
+
+  if ($resultadoRotas) {
+    while ($rota = $resultadoRotas->fetch_assoc()) {
+        $rotas[] = $rota;
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome       = trim($_POST['nome'] ?? '');
-    $velocidade = trim($_POST['velocidade'] ?? '');
-    $tipo       = $_POST['tipo'] ?? '';
-    $id_rotas   = $_POST['id_rotas'] ?? '';
+  if (!$ehAdministrador) {
+        http_response_code(403);
+        $mensagemAcesso = 'Você não tem permissão para cadastrar trens.';
+  }else{
+  verificar_csrf();
 
+    $nome = trim($_POST['nome'] ?? '');
+    $velocidade = trim($_POST['velocidade'] ?? '');
+    $tipo = $_POST['tipo'] ?? '';
+    $id_rotas = $_POST['id_rotas'] ?? '';
     
-    if ($nome === '') {
-        $erros['nome'] = 'Informe o nome do trem.';
+    if ($nome === '' || $velocidade === '' || $tipo === '' || $id_rotas === '') {
+        $mensagem = "Preencha todos os campos.";
     } elseif (strlen($nome) < 3) {
         $erros['nome'] = 'O nome precisa ter ao menos 3 caracteres.';
-    } else {
-        $busca = $pdo->prepare("SELECT COUNT(*) FROM trens WHERE nome = ?");
-        $busca->execute([$nome]);
-        if ($busca->fetchColumn() > 0) {
-            $erros['nome'] = 'Já existe um trem com esse nome.';
-        }
-    }
-
-    
-    if ($velocidade === '') {
-        $erros['velocidade'] = 'Informe a velocidade.';
     } elseif (!is_numeric($velocidade) || $velocidade < 1 || $velocidade > 600) {
         $erros['velocidade'] = 'Use um valor entre 1 e 600 km/h.';
-    }
-
-    
-    if (!in_array($tipo, $tipos)) {
-        $erros['tipo'] = 'Selecione o tipo/categoria.';
-    }
-
-    
+      } elseif (!in_array($tipo, $tipos, true)) {
+            $mensagem = "Tipo de trem inválido.";
+        } else {
     $rotaValida = false;
     foreach ($rotas as $r) {
-        if ($r['id_rotas'] == $id_rotas) {
+        if ((string)$r['id_rotas'] === (string)$id_rotas) {
             $rotaValida = true;
+            break;
         }
     }
     if (!$rotaValida) {
-        $erros['rota'] = 'Selecione a rota.';
-    }
+      $mensagem = "Selecione uma rota válida.";
+    } else {
+                $velocidadeBanco = (float)$velocidade;
+                $idRotaBanco = (int)$id_rotas;
 
-    
-    if (count($erros) === 0) {
-        $insert = $pdo->prepare(
-            "INSERT INTO trens (nome, velocidade_media, tipo, id_rotas) VALUES (?, ?, ?, ?)"
-        );
-        $insert->execute([$nome, $velocidade, $tipo, $id_rotas]);
+                $sql = "INSERT INTO trens (nome, velocidade_media, tipo, id_rotas)
+                        VALUES (?, ?, ?, ?)";
+                        
+                $stmt = $conn->prepare($sql);
 
-        
-        header("Location: cadastrar_trens.php?ok=1");
+        if (!$stmt) {
+            $mensagem = "Não foi possível concluir o cadastro.";
+        } else {
+            $stmt->bind_param("sdsi", $nome, $velocidadeBanco, $tipo, $idRotaBanco);
+
+           try {
+    if ($stmt->execute()) {
+        $_SESSION['mensagem_cadastro'] = 'Trem cadastrado com sucesso!';
+        header('Location: cadastrar_trens.php');
         exit;
     }
+    } catch (mysqli_sql_exception $e) {
+        error_log('Erro ao cadastrar usuário: ' . $e->getMessage());
+        $mensagem = 'Não foi possível concluir o cadastro.';
 }
+            $stmt->close();
+        }
+    }
+  }
+    }
+}
+
+$manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST';
+
+    $busca = trim($_GET['buscar'] ?? '');
+$textoBusca = "%" . $busca . "%";
+
+$sql = "SELECT t.id_trem, t.nome, t.velocidade_media, t.tipo, t.id_rotas, r.nome AS nome_rota
+        FROM trens t LEFT JOIN rotas r ON r.id_rotas = t.id_rotas
+        WHERE t.nome LIKE ? OR  t.tipo LIKE ? OR r.nome LIKE ?
+        ORDER BY t.nome";
+
+$stmtBusca = $conn->prepare($sql);
+
+if ($stmtBusca) {
+    $stmtBusca->bind_param("sss", $textoBusca, $textoBusca, $textoBusca);
+
+    if ($stmtBusca->execute()) {
+        $resultado = $stmtBusca->get_result();
+    } else {
+        error_log("Erro ao consultar trens: " . $stmtBusca->error);
+        $resultado = false;
+        $mensagemAcesso = 'Não foi possível carregar os trens.';
+    }
+
+    $stmtBusca->close();
+} else {
+    error_log("Erro ao preparar consulta: " . $conn->error);
+    $resultado = false;
+    $mensagemAcesso = 'Não foi possível carregar os trens.';
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
