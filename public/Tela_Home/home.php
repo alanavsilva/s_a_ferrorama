@@ -2,6 +2,9 @@
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
 require_once "../Tela_Sensores/visualizacao_sensores.php";
+require_once "../../infra/apis/clima.php";
+
+$dadosClima = consultarClima();
 
 exigir_login();
 
