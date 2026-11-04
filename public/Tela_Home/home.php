@@ -161,6 +161,54 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 
     </section>
 
+    
+<section class="home_caixa_clima">
+    <h2>Clima em Joinville - SC</h2>
+
+    <?php if (isset($dadosClima['erro'])): ?>
+        <p><?= htmlspecialchars($dadosClima['erro'], ENT_QUOTES, 'UTF-8') ?></p>
+    <?php else: ?>
+        <p>
+            <strong>Temperatura:</strong>
+            <?= htmlspecialchars((string) $dadosClima['temperatura']) ?> °C
+        </p>
+
+        <p>
+            <strong>Condição:</strong>
+            <?= htmlspecialchars($dadosClima['condicao']) ?>
+        </p>
+
+        <p>
+            <strong>Sensação térmica:</strong>
+            <?= htmlspecialchars((string) $dadosClima['sensacao']) ?> °C
+        </p>
+
+        <p>
+            <strong>Umidade:</strong>
+            <?= htmlspecialchars((string) $dadosClima['umidade']) ?>%
+        </p>
+
+        <p>
+            <strong>Vento:</strong>
+            <?= htmlspecialchars((string) $dadosClima['vento']) ?> km/h
+        </p>
+
+        <p>
+            <strong>Precipitação:</strong>
+            <?= htmlspecialchars((string) $dadosClima['precipitacao']) ?> mm
+        </p>
+
+        <p>
+            <strong>Última atualização informada pela API:</strong>
+            <?= htmlspecialchars((string) $dadosClima['atualizado']) ?>
+        </p>
+    <?php endif; ?>
+
+    <small>Fonte: Open-Meteo | Localização: Joinville, SC</small>
+</section>
+
+
+
     <?php if ($ehAdministrador): ?>
     <section class="home_botoes">
         <a class="home_botao" href="../../public/Tela_Usuario/cadastrar_usuario.php"> Tela de Usuarios </a>
