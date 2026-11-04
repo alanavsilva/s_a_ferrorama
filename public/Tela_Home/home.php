@@ -77,7 +77,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/style/style.css">
-    <script src="../script/validacao.js"></script>
+    <script src="../../script/validacao.js"></script>
   </head>
 
 <body>
