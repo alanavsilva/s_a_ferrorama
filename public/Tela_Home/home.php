@@ -173,6 +173,29 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 
     </section>
 
+
+    <section class="home_atalhos">
+    <h2>Acesso rápido</h2>
+
+    <div class="home_atalhos_lista">
+        <a href="../Tela_Sensores/cadastrar_sensores.php">
+            Cadastrar sensor
+        </a>
+
+        <a href="../Tela_Trens/cadastrar_trens.php">
+            Cadastrar trem
+        </a>
+
+        <a href="../Tela_Rotas/cadastrar_rotas.php">
+            Cadastrar rota
+        </a>
+
+        <a href="../Tela_Monitoramento/monitoramento.php">
+            Monitorar falhas
+        </a>
+    </div>
+</section>
+
     
 <section class="home_caixa_clima">
     <h2>Clima em Joinville - SC</h2>
