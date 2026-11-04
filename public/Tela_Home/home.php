@@ -138,6 +138,17 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 </div>
     </section>
 
+    
+<section class="home_sobre">
+    <h2>Sobre o Ferrorama</h2>
+
+    <p>
+        O Ferrorama é um sistema de monitoramento ferroviário
+        desenvolvido para facilitar o gerenciamento de trens,
+        rotas, sensores e falhas operacionais.
+    </p>
+</section>
+
     <section class="home_indicadores">
 
         <div class="home_indicador">
