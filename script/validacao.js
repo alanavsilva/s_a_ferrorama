@@ -65,70 +65,63 @@ document.addEventListener("DOMContentLoaded", () => {
         botao.setAttribute("aria-expanded", String(!formulario.hidden));
     });
 });
+document.addEventListener("DOMContentLoaded", function () {
+    const formularioCep = document.getElementById("form_cep");
 
+    if (!formularioCep) return;
 
-
-const formularioCep = document.getElementById('form_cep');
-
-if (formularioCep) {
-    formularioCep.addEventListener('submit', async function (evento) {
+    formularioCep.addEventListener("submit", async function (evento) {
         evento.preventDefault();
 
-        const campoCep = document.getElementById('cep');
-        const mensagem = document.getElementById('mensagem_cep');
-        const cep = campoCep.value.replace(/\D/g, '');
+        const campoCep = document.getElementById("cep");
+        const mensagem = document.getElementById("mensagem_cep");
+        const cep = campoCep.value.replace(/\D/g, "");
 
-        const campos = ['logradouro', 'bairro', 'cidade', 'uf'];
+        const campos = ["logradouro", "bairro", "cidade", "uf"];
 
-        function limparCampos() {
-            campos.forEach(function (id) {
-                document.getElementById(id).value = '';
-            });
-        }
-
-        limparCampos();
+        campos.forEach(function (id) {
+            document.getElementById(id).value = "";
+        });
 
         if (!/^\d{8}$/.test(cep)) {
-            mensagem.textContent = 'Informe um CEP com 8 números.';
+            mensagem.textContent = "Digite um CEP válido com 8 números.";
             return;
         }
 
-        mensagem.textContent = 'Consultando CEP...';
+        mensagem.textContent = "Consultando CEP...";
 
         try {
             const resposta = await fetch(
-                'https://viacep.com.br/ws/' + cep + '/json/'
+                "https://viacep.com.br/ws/" + cep + "/json/"
             );
 
             if (!resposta.ok) {
-                throw new Error('Falha na comunicação com a API.');
+                throw new Error("Falha na consulta");
             }
 
             const dados = await resposta.json();
 
             if (dados.erro) {
-                mensagem.textContent = 'CEP não encontrado.';
+                mensagem.textContent = "CEP não encontrado.";
                 return;
             }
 
-            document.getElementById('logradouro').value =
-                dados.logradouro || '';
+            document.getElementById("logradouro").value =
+                dados.logradouro || "";
 
-            document.getElementById('bairro').value =
-                dados.bairro || '';
+            document.getElementById("bairro").value =
+                dados.bairro || "";
 
-            document.getElementById('cidade').value =
-                dados.localidade || '';
+            document.getElementById("cidade").value =
+                dados.localidade || "";
 
-            document.getElementById('uf').value =
-                dados.uf || '';
+            document.getElementById("uf").value =
+                dados.uf || "";
 
-            mensagem.textContent =
-                'Endereço encontrado e preenchido com sucesso.';
-
+            mensagem.textContent = "Endereço encontrado com sucesso!";
         } catch (erro) {
             mensagem.textContent =
-                'Não foi possível consultar o CEP. Tente novamente.';
+                "Erro ao consultar o CEP. Verifique sua internet e tente novamente.";
         }
     });
-}
+});
