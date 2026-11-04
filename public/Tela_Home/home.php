@@ -207,6 +207,51 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <small>Fonte: Open-Meteo | Localização: Joinville, SC</small>
 </section>
 
+<br>
+
+<section class="home_caixa_cep">
+    <h2>Consultar endereço por CEP</h2>
+
+    <form id="form_cep">
+        <label for="cep">CEP brasileiro</label>
+
+        <input
+            type="text"
+            id="cep"
+            name="cep"
+            placeholder="Ex.: 89201-000"
+            maxlength="9"
+            inputmode="numeric"
+            required
+        >
+
+        <button type="submit">Consultar CEP</button>
+    </form>
+
+    <p id="mensagem_cep" role="status" aria-live="polite"></p>
+
+    <div>
+        <label for="logradouro">Logradouro</label>
+        <input type="text" id="logradouro" readonly>
+    </div>
+
+    <div>
+        <label for="bairro">Bairro</label>
+        <input type="text" id="bairro" readonly>
+    </div>
+
+    <div>
+        <label for="cidade">Cidade</label>
+        <input type="text" id="cidade" readonly>
+    </div>
+
+    <div>
+        <label for="uf">Estado (UF)</label>
+        <input type="text" id="uf" readonly>
+    </div>
+
+    <small>Fonte: ViaCEP</small>
+</section>
 
 
     <?php if ($ehAdministrador): ?>
