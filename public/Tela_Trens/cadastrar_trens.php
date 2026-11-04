@@ -24,7 +24,7 @@ $ehAdministrador =
     $nome = '';
     $velocidade = '';
     $tipo = '';
-    $id_rotas = '';
+    $id_usuario = '';
     $erros = [];
 
     $tipos = ['Velocidade', 'Temperatura', 'Status'];
@@ -107,7 +107,7 @@ $manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST';
     $busca = trim($_GET['buscar'] ?? '');
 $textoBusca = "%" . $busca . "%";
 
-$sql = "SELECT t.id_trem, t.nome, t.velocidade_media, t.tipo, t.id_usuario,, u.nome AS nome_responsavel
+$sql = "SELECT t.id_trem, t.nome, t.velocidade_media, t.tipo, t.id_usuario, u.nome AS nome_responsavel
         FROM trens t LEFT JOIN usuarios u ON u.id_usuario = t.id_usuario
         WHERE t.nome LIKE ? OR  t.tipo LIKE ? OR u.nome LIKE ?
         ORDER BY t.nome";

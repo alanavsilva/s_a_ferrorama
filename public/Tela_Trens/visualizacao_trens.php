@@ -17,8 +17,7 @@ function mostrar_trens($resultado): void
 
 
 ?>
-
-<table class="tabela-trens">
+<table class="tabela-usuarios tabela-trens">
   <thead>
     <tr>
       <th>Nome</th>
@@ -35,14 +34,14 @@ function mostrar_trens($resultado): void
   <tbody>
     <?php while ($trem = $resultado->fetch_assoc()): ?>
       <tr>
-          <td><?= (int) $trem['id_trem'] ?></td>
+          <td><?= escapar($trem['nome'] ?? '') ?></td>
           <td><?= escapar($trem['nome_trem'] ?? '') ?></td>
           <td><?= escapar($trem['velocidade_media'] ?? '') ?></td>
           <td><?= escapar($trem['tipo'] ?? '') ?></td>
           <td><?= escapar($trem['nome_responsavel'] ?? '—') ?></td>
 
             <?php if ($ehAdministrador): ?>
-            <td class="acao_sensor">
+            <td class="acao_user">
 
             <a href="editar_t.php?id=<?= (int) $trem['id_trem'] ?>" class="acao-icone" aria-label="Editar trem">
             <img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt="" >
