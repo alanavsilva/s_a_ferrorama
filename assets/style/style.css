@@ -2706,3 +2706,152 @@ body.body_geral {
     margin: 0;
 }
 
+
+/* CLIMA */
+.home_caixa_clima {
+    background: #f5f5f5;
+    padding: 25px;
+    margin: 20px 0;
+    border-radius: 12px;
+    border: 1px solid #e2e2e2;
+    color: #222;
+    transition: 0.3s;
+}
+
+.home_caixa_clima:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.home_caixa_clima h2 {
+    color: #222;
+    font-size: 20px;
+    margin-bottom: 18px;
+}
+
+/* Temperatura */
+.home_caixa_clima p:first-of-type {
+    font-size: 38px;
+    font-weight: bold;
+    color: #222;
+    margin: 15px 0;
+}
+
+/* Condição do tempo */
+.home_caixa_clima p:nth-of-type(2) {
+    font-size: 18px;
+    color: #b85c65;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Informações adicionais */
+.home_caixa_clima p:nth-of-type(n+3) {
+    background: #fff;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 7px;
+    border-left: 4px solid #d98b92;
+    font-size: 14px;
+    color: #444;
+    transition: 0.2s;
+}
+
+.home_caixa_clima p:nth-of-type(n+3):hover {
+    background: #fff0f1;
+    transform: translateX(3px);
+}
+
+.home_caixa_clima strong {
+    color: #222;
+}
+
+.home_caixa_clima small {
+    display: block;
+    margin-top: 16px;
+    color: #777;
+    font-size: 12px;
+}
+
+/* CONSULTA DE CEP */
+.home_caixa_cep {
+    background: #f5f5f5;
+    padding: 22px;
+    margin: 20px 0;
+    border: 1px solid #e2e2e2;
+    border-radius: 12px;
+    color: #222;
+}
+
+.home_caixa_cep h2 {
+    font-size: 20px;
+    color: #222;
+    margin-bottom: 18px;
+}
+
+.home_caixa_cep label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #444;
+}
+
+.home_caixa_cep form {
+    display: flex;
+    align-items: end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.home_caixa_cep form input {
+    flex: 1;
+    min-width: 180px;
+}
+
+.home_caixa_cep input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    background: #fff;
+    color: #222;
+}
+
+.home_caixa_cep input:focus {
+    outline: none;
+    border-color: #d98b92;
+    box-shadow: 0 0 0 2px rgba(217, 139, 146, 0.2);
+}
+
+.home_caixa_cep button {
+    padding: 10px 16px;
+    margin-bottom: 12px;
+    background: #d98b92;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.home_caixa_cep button:hover {
+    background: #bd6e77;
+}
+
+.home_caixa_cep div {
+    margin-top: 8px;
+}
+
+.home_caixa_cep small {
+    display: block;
+    margin-top: 12px;
+    color: #777;
+    font-size: 12px;
+}
+
+#mensagem_cep {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #555;
+}
