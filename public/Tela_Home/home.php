@@ -149,6 +149,10 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     </p>
 </section>
 
+<div class="home_atualizacao">
+    <p>Última consulta: <?= date('d/m/Y H:i') ?></p>
+</div>
+
     <section class="home_indicadores">
 
         <div class="home_indicador">
