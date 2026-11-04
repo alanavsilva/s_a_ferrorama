@@ -11,6 +11,13 @@ $ehAdministrador =
 
     $mensagemSucesso = $_SESSION['mensagem_cadastro'] ?? '';
     unset($_SESSION['mensagem_cadastro']);
+
+    if (isset($_GET['editado'])) {
+    $mensagemSucesso = 'Trem atualizado com sucesso!';
+} elseif (isset($_GET['excluido'])) {
+    $mensagemSucesso = 'Trem excluído com sucesso!';
+}
+
     $mensagem = '';
     $mensagemAcesso = '';
     
@@ -21,14 +28,15 @@ $ehAdministrador =
     $erros = [];
 
     $tipos = ['Velocidade', 'Temperatura', 'Status'];
-    $rotas = [];
+    $usuarios = [];
 
-    $sqlRotas = "SELECT id_rotas, nome FROM rotas ORDER BY nome";
-    $resultadoRotas = $conn->query($sqlRotas);
+   $resultadoUsuarios = $conn->query(
+    "SELECT id_usuario, nome FROM usuarios ORDER BY nome"
+);
 
-  if ($resultadoRotas) {
-    while ($rota = $resultadoRotas->fetch_assoc()) {
-        $rotas[] = $rota;
+if ($resultadoUsuarios) {
+    while ($usuario = $resultadoUsuarios->fetch_assoc()) {
+        $usuarios[] = $usuario;
     }
 }
 
@@ -42,9 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = trim($_POST['nome'] ?? '');
     $velocidade = trim($_POST['velocidade'] ?? '');
     $tipo = $_POST['tipo'] ?? '';
-    $id_rotas = $_POST['id_rotas'] ?? '';
+    $id_usuario = filter_input(INPUT_POST, 'id_usuario', FILTER_VALIDATE_INT) ?: '';    
     
-    if ($nome === '' || $velocidade === '' || $tipo === '' || $id_rotas === '') {
+    if ($nome === '' || $velocidade === '' || $tipo === '' || $id_usuario === '') {
         $mensagem = "Preencha todos os campos.";
     } elseif (strlen($nome) < 3) {
         $erros['nome'] = 'O nome precisa ter ao menos 3 caracteres.';
@@ -53,20 +61,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       } elseif (!in_array($tipo, $tipos, true)) {
             $mensagem = "Tipo de trem inválido.";
         } else {
-    $rotaValida = false;
-    foreach ($rotas as $r) {
-        if ((string)$r['id_rotas'] === (string)$id_rotas) {
-            $rotaValida = true;
-            break;
-        }
-    }
-    if (!$rotaValida) {
-      $mensagem = "Selecione uma rota válida.";
-    } else {
-                $velocidadeBanco = (float)$velocidade;
-                $idRotaBanco = (int)$id_rotas;
+            $usuarioValido = false;
+            foreach ($usuarios as $usuario) {
+        if ( (int)$usuario['id_usuario'] === (int)$id_usuario) {
+           $usuarioValido = true;
+                    break;
+                }
+            }
 
-                $sql = "INSERT INTO trens (nome, velocidade_media, tipo, id_rotas)
+            if (!$usuarioValido) {
+                $mensagem = 'Selecione um responsável válido.';
+            } else {
+                $velocidadeBanco = (float)$velocidade;
+                $idUsuarioBanco = (int)$id_usuario;
+
+                $sql = "INSERT INTO trens (nome, velocidade_media, tipo, id_usuario)
                         VALUES (?, ?, ?, ?)";
                         
                 $stmt = $conn->prepare($sql);
@@ -74,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$stmt) {
             $mensagem = "Não foi possível concluir o cadastro.";
         } else {
-            $stmt->bind_param("sdsi", $nome, $velocidadeBanco, $tipo, $idRotaBanco);
+            $stmt->bind_param("sdsi", $nome, $velocidadeBanco, $tipo, $idUsuarioBanco );
 
            try {
     if ($stmt->execute()) {
@@ -98,9 +107,9 @@ $manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST';
     $busca = trim($_GET['buscar'] ?? '');
 $textoBusca = "%" . $busca . "%";
 
-$sql = "SELECT t.id_trem, t.nome, t.velocidade_media, t.tipo, t.id_rotas, r.nome AS nome_rota
-        FROM trens t LEFT JOIN rotas r ON r.id_rotas = t.id_rotas
-        WHERE t.nome LIKE ? OR  t.tipo LIKE ? OR r.nome LIKE ?
+$sql = "SELECT t.id_trem, t.nome, t.velocidade_media, t.tipo, t.id_usuario,, u.nome AS nome_responsavel
+        FROM trens t LEFT JOIN usuarios u ON u.id_usuario = t.id_usuario
+        WHERE t.nome LIKE ? OR  t.tipo LIKE ? OR u.nome LIKE ?
         ORDER BY t.nome";
 
 $stmtBusca = $conn->prepare($sql);
@@ -235,23 +244,23 @@ if ($stmtBusca) {
           <label for="tipo">Tipo/categoria</label>
           <select id="tipo" name="tipo" required>
             <option value="">Selecione o tipo</option>
-            <?php foreach ($tipos as $t): ?>
-              <option value="<?= escapar($t) ?>" <?= $tipo === $t ? 'selected' : '' ?>><?= escapar($t) ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-
-        <div class="campo-user">
-          <label for="id_rotas">Rota</label>
-          <select id="id_rotas" name="id_rotas" required>
-            <option value="">Selecione a rota</option>
-            <?php foreach ($rotas as $r): ?>
-              <option value="<?= (int)$r['id_rotas'] ?>" <?= (string)$id_rotas === (string)$r['id_rotas'] ? 'selected' : '' ?>>
-                <?= escapar($r['nome']) ?>
+           <?php foreach ($tipos as $tipoOpcao): ?>
+          <option value="<?= escapar($tipoOpcao) ?>" <?= $tipo === $tipoOpcao ? 'selected': '' ?> >
+            <?= escapar($tipoOpcao) ?>
               </option>
             <?php endforeach; ?>
-          </select>
-        </div>
+            </select>
+          </div>
+
+          <div class="campo-user">
+          <label for="id_usuario"> Usuário responsável</label>
+          <select id="id_usuario" name="id_usuario" required >          
+          <option value=""> Selecione o responsável </option>
+              <?php foreach ($usuarios as $usuario): ?>
+              <option value="<?= (int)$usuario['id_usuario'] ?>" <?= (string)$id_usuario === (string)$usuario['id_usuario'] ? 'selected': '' ?> > <?= escapar($usuario['nome']) ?> </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
 
           <?php if ($mensagem !== ''): ?>
           <p class="mensagem-cadastro" role="alert"><?= escapar($mensagem) ?></p>
@@ -266,7 +275,7 @@ if ($stmtBusca) {
            <section class="buscar-box-user">
             <form method="GET">
                 <label for="buscar">Buscar</label>
-                <input type="text" id="buscar" name="buscar" placeholder="Nome, tipo ou rota" value="<?= escapar($busca) ?>">
+                <input type="text" id="buscar" name="buscar" placeholder="Nome, tipo ou responsável" value="<?= escapar($busca) ?>">
                 <button type="submit">Buscar</button>
             </form>
         </section>

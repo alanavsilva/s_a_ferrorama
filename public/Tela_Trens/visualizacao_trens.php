@@ -24,7 +24,7 @@ function mostrar_trens($resultado): void
       <th>Nome</th>
       <th>Velocidade média</th>
       <th>Tipo/Categoria</th>
-      <th>Rota</th>
+      <th>Usuário responsável</th>
 
           <?php if ($ehAdministrador) { ?>
                 <th>Ação</th>
@@ -39,7 +39,7 @@ function mostrar_trens($resultado): void
           <td><?= escapar($trem['nome_trem'] ?? '') ?></td>
           <td><?= escapar($trem['velocidade_media'] ?? '') ?></td>
           <td><?= escapar($trem['tipo'] ?? '') ?></td>
-          <td><?= escapar($trem['rota'] ?? '') ?></td>
+          <td><?= escapar($trem['nome_responsavel'] ?? '—') ?></td>
 
             <?php if ($ehAdministrador): ?>
             <td class="acao_sensor">
