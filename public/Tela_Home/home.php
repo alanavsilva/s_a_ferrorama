@@ -257,10 +257,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 
     <?php if ($ehAdministrador): ?>
     <section class="home_botoes">
-        <a class="home_botao" href="../../public/Tela_Usuario/cadastrar_usuario.php"> Tela de Usuarios </a>
-        <a class="home_botao" href="../../public/Tela_Sensores/cadastrar_sensores.php"> Tela de Sensores </a>
-        <a class="home_botao" href="../../public/Tela_Trens/cadastrar_trens.php"> Tela de Trens </a>
-        <a class="home_botao" href="../../public/Tela_Rotas/cadastrar_rotas.php"> Tela de Rotas </a>
+        
     </section>
     <?php endif; ?>
 
