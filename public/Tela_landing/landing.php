@@ -37,5 +37,22 @@
             <p>Monitoramento ferroviário em um só lugar.</p>
         </div>
     </section>
+    <section class="landing_final">
+    <h2>Conheça o Ferrorama</h2>
+    <p>Acesse o sistema e acompanhe suas funcionalidades.</p>
+    <a href="index.php" class="landing_botao">Entrar no sistema</a>
+</section>
+<section class="landing_sobre" id="sobre">
+    <p class="landing_destaque">CONHEÇA O PROJETO</p>
+
+    <h2>O que é o Ferrorama?</h2>
+
+    <p>
+        O Ferrorama é um sistema de gerenciamento e monitoramento
+        ferroviário que reúne informações sobre trens, rotas,
+        sensores e falhas operacionais em uma única plataforma.
+    </p>
+</section>
+    </main>
 </body>
 </html>
