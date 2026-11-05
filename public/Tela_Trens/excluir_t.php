@@ -37,6 +37,6 @@ try {
     error_log('Erro ao excluir trem: ' . $e->getMessage());
     $stmt->close();
     http_response_code(409);
-    exit('Não foi possível excluir: existem registros relacionados a este trem.');
+    exit('Não é possível excluir este trem porque há rotas ou sensores vinculados a ele.');
 }
 ?>
