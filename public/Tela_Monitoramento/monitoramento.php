@@ -17,27 +17,31 @@ $sensorSelecionado = $_GET["sensor"] ?? "Sensor Norte";
     "mensagem" => "Velocidade acima da média"
 ];
     
+$falhas = [];
 
-$falhas = [
-    [
-        "titulo" => "Velocidade acima do limite",
-        "sensor" => "Sensor 001 - Linha Norte",
-        "data" => "07/05/2026",
-        "status" => "Não resolvida"
-    ],
-    [
-        "titulo" => "Temperatura alta",
-        "sensor" => "Sensor 256 - Linha Sul",
-        "data" => "05/05/2026",
-        "status" => "Resolvida"
-    ],
-    [
-        "titulo" => "Leitura estável",
-        "sensor" => "Sensor 111 - Linha Oeste",
-        "data" => "22/05/2026",
-        "status" => "Não resolvida"
-    ]
-];
+$sql = "SELECT 
+            f.id_falha,
+            f.descricao,
+            f.data_registro,
+            f.resolvida,
+            s.nome_sensor
+        FROM falhas_operacionais f
+        INNER JOIN sensores s ON f.id_sensor = s.id_sensor
+        ORDER BY f.data_registro DESC";
+
+$resultadoFalhas = $conn->query($sql);
+
+while ($falha = $resultadoFalhas->fetch_assoc()) {
+
+    $falhas[] = [
+        "id" => $falha["id_falha"],
+        "titulo" => $falha["descricao"],
+        "sensor" => $falha["nome_sensor"],
+        "data" => date("d/m/Y", strtotime($falha["data_registro"])),
+        "status" => $falha["resolvida"] ? "Resolvida" : "Não resolvida"
+    ];
+}
+
 
 if (isset($_GET["acao"]) && isset($_GET["id"])) {
     $id = (int) $_GET["id"];
@@ -105,12 +109,12 @@ foreach ($falhas as $falha) {
             <h3>Velocidade atual</h3>
 
             <p><?= htmlspecialchars($sensorSelecionado) ?></p>
+<p><?= $dadosSensor["velocidade"] ?></p>
 
-<p><?= $sensores[$sensorSelecionado]["velocidade"] ?></p>
+<p>Status operacional: <?= $dadosSensor["status"] ?></p>
 
-<p>Status operacional: <?= $sensores[$sensorSelecionado]["status"] ?></p>
+<p><?= $dadosSensor["mensagem"] ?></p>
 
-<p><?= $sensores[$sensorSelecionado]["mensagem"] ?></p>
         </article>
 
         <article>
@@ -118,9 +122,9 @@ foreach ($falhas as $falha) {
 
           <p><?= htmlspecialchars($sensorSelecionado) ?></p>
 
-<p><?= $sensores[$sensorSelecionado]["temperatura"] ?></p>
+<p><?= $dadosSensor["temperatura"] ?></p>
 
-<p>Status operacional: <?= $sensores[$sensorSelecionado]["status"] ?></p>
+<p>Status operacional: <?= $dadosSensor["status"] ?></p>
 
 <p>Temperatura estável</p>
         </article>
@@ -152,6 +156,7 @@ foreach ($falhas as $falha) {
             </option>
         </select>
     </form>
+    </section>
 
     <section>
         <h2><?= $resolvidas ?></h2>
