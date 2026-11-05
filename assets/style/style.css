@@ -2635,4 +2635,48 @@ article a:hover {
 
 .home_rodape p {
     margin: 5px 0;
+}~
+/* RESPONSIVIDADE DA LANDING */
+
+@media (max-width: 768px) {
+
+    .landing_menu {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .landing_menu nav {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .landing_inicio {
+        flex-direction: column;
+        padding: 50px 20px;
+        text-align: center;
+    }
+
+    .landing_texto h1 {
+        font-size: 32px;
+    }
+
+    .landing_card {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .landing_sobre,
+    .landing_funcionalidades,
+    .landing_beneficios {
+        padding: 50px 20px;
+    }
+
+    .landing_lista {
+        grid-template-columns: 1fr;
+    }
+
+    .landing_final {
+        padding: 50px 20px;
+    }
 }
