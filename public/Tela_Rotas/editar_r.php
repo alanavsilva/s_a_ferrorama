@@ -132,6 +132,10 @@ if (!$resultadoTrens) {
         <a href="../../public/Tela_Trens/cadastrar_trens.php">Trem</a>
         <a class="ativo" href="cadastrar_rotas.php">Rota</a>
         <a href="../../public/Tela_Monitoramento/monitoramento.php">Monitoramento</a>
+<a href="../../public/Tela_Monitoramento/cadastrar_falha.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
+  Falhas
+</a>
         <a href="../../public/Tela_Relatorios/relatorios.php">Relatórios</a>
         <a class="logout" href="../../logout.php">Logout</a>
     </aside>

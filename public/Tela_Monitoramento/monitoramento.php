@@ -4,9 +4,13 @@ require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
 
 exigir_login();
+$ehAdministrador = strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
 $resultadoSensores = $conn->query("SELECT id_sensor, nome_sensor FROM sensores ORDER BY nome_sensor");
 
 $filtro = $_GET["status"] ?? "Todas";
+if (!in_array($filtro, ['Todas', 'Resolvida', 'Não resolvida'], true)) {
+    $filtro = 'Todas';
+}
 $sensorSelecionado = $_GET["sensor"] ?? "Sensor Norte";
 
 
@@ -42,31 +46,23 @@ while ($falha = $resultadoFalhas->fetch_assoc()) {
     ];
 }
 
-if (isset($_GET["acao"]) && isset($_GET["id"])) {
-    $id = (int) $_GET["id"];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao'], $_POST['id'])) {
+    exigir_administrador();
+    verificar_csrf();
+    $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+    $acao = $_POST['acao'];
 
-    if ($_GET["acao"] == "resolver") {
-        $sql = "UPDATE falhas_operacionais
-                SET resolvida = 1
-                WHERE id_falha = ?";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $stmt->close();
-
-    } elseif ($_GET["acao"] == "reabrir") {
-        $sql = "UPDATE falhas_operacionais
-                SET resolvida = 0
-                WHERE id_falha = ?";
-
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $stmt->close();
+    if ($id && $id > 0 && in_array($acao, ['resolver', 'reabrir'], true)) {
+        $resolvida = $acao === 'resolver' ? 1 : 0;
+        $stmt = $conn->prepare('UPDATE falhas_operacionais SET resolvida = ? WHERE id_falha = ?');
+        if ($stmt) {
+            $stmt->bind_param('ii', $resolvida, $id);
+            $stmt->execute();
+            $stmt->close();
+        }
     }
 
-    header("Location: monitoramento.php?status=" . urlencode($filtro));
+    header('Location: monitoramento.php?status=' . urlencode($filtro) . '&sensor=' . urlencode($sensorSelecionado));
     exit;
 }
 
@@ -89,11 +85,25 @@ foreach ($falhas as $falha) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoramento</title>
-    <link rel="stylesheet" href="monitoramento.css">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261105-2">
 </head>
-<body>
+<body class="body_geral">
+<div class="pagina">
+    <aside class="menu">
+        <img class="logo-trem" src="https://img.icons8.com/ios/100/ffffff/train.png" alt="Logo TremTech">
+        <p class="marca">SISTEMA TREMTECH</p>
+        <a href="../Tela_Home/home.php"><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');"></span>Home</a>
+        <a href="../Tela_Usuario/cadastrar_usuario.php"><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');"></span>Usuários</a>
+        <a href="../Tela_Sensores/cadastrar_sensores.php"><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');"></span>Sensores</a>
+        <a href="../Tela_Trens/cadastrar_trens.php"><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png');"></span>Trens</a>
+        <a href="../Tela_Rotas/cadastrar_rotas.php"><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png');"></span>Rotas</a>
+        <a href="cadastrar_falha.php"><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>Falhas</a>
+        <a class="ativo" href="monitoramento.php"><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');"></span>Monitoramento</a>
+        <a href="../Tela_Relatorios/relatorios.php"><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png');"></span>Relatórios</a>
+        <a class="logout" href="../../logout.php"><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png');"></span>Logout</a>
+    </aside>
 
-<main>
+<main class="content-user">
 
     <h1>Painel de Monitoramento</h1>
 
@@ -206,15 +216,17 @@ foreach ($falhas as $falha) {
 
                 <p>Status: <?= htmlspecialchars($falha["status"]) ?></p>
 
-                <?php if ($falha["status"] == "Não resolvida"): ?>
-    <a href="?acao=resolver&id=<?= $falha["id"] ?>&status=<?= urlencode($filtro) ?>">
-        Marcar como resolvida
-    </a>
-<?php else: ?>
-    <a href="?acao=reabrir&id=<?= $falha["id"] ?>&status=<?= urlencode($filtro) ?>">
-        Reabrir falha
-    </a>
-<?php endif; ?>
+                <?php if ($ehAdministrador): ?>
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
+                        <input type="hidden" name="id" value="<?= (int) $falha['id'] ?>">
+                        <?php if ($falha['status'] === 'Não resolvida'): ?>
+                            <button type="submit" name="acao" value="resolver">Marcar como resolvida</button>
+                        <?php else: ?>
+                            <button type="submit" name="acao" value="reabrir">Reabrir falha</button>
+                        <?php endif; ?>
+                    </form>
+                <?php endif; ?>
             </article>
 
         <?php endforeach; ?>
@@ -225,6 +237,7 @@ foreach ($falhas as $falha) {
     </section>
 
 </main>
+</div>
 
 </body>
 </html>

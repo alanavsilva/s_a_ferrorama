@@ -75,7 +75,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - TremTech</title>
 
-    <link rel="stylesheet" href="../../assets/style/style.css">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261105-2">
     <script src="../../script/validacao.js"></script>
   
 
@@ -92,6 +92,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <a class="home_link" href="../../public/Tela_Sensores/cadastrar_sensores.php">Sensores</a>
     <a class="home_link" href="../../public/Tela_Rotas/cadastrar_rotas.php">Rotas</a>
     <a class="home_link" href="../../public/Tela_Trens/cadastrar_trens.php">Trens</a>
+    <a class="home_link" href="../../public/Tela_Monitoramento/cadastrar_falha.php">Falhas</a>
     <a class="home_link" href="../../public/Tela_Monitoramento/monitoramento.php">Monitoramento</a>
     <a class="home_link" href="../../public/Tela_Relatorios/relatorios.php">Relatórios</a>
 
@@ -183,6 +184,9 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
         <a href="../Tela_Rotas/cadastrar_rotas.php">
             Cadastrar rota
         </a>
+        <a href="../Tela_Monitoramento/cadastrar_falha.php">
+            Cadastrar falha
+        </a>
         <?php else: ?>
         <a href="../Tela_Usuario/cadastrar_usuario.php">
             Tela de usuários
@@ -196,9 +200,12 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
         <a href="../Tela_Rotas/cadastrar_rotas.php">
             Tela de rotas
         </a>
+        <a href="../Tela_Monitoramento/cadastrar_falha.php#falhas">
+            Ver falhas registradas
+        </a>
         <?php endif; ?>
         <a href="../Tela_Monitoramento/monitoramento.php">
-            <?= $ehAdministrador ? 'Monitorar falhas' : 'Visualizar falhas' ?>
+            Ver monitoramento
         </a>
         <a href="../Tela_Relatorios/relatorios.php">
             Relatórios

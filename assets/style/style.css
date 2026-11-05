@@ -464,6 +464,10 @@ a {
   color: #fff;
 }
 
+.home_atalhos_lista a:last-child {
+  grid-column: 1 / -1;
+}
+
 .home_logout {
   margin-top: 30px;
 }

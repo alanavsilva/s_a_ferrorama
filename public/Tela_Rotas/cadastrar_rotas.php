@@ -180,6 +180,10 @@ if ($stmt) {
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/visible.png');"></span>
   Monitoramento
 </a>
+<a href="../../public/Tela_Monitoramento/cadastrar_falha.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
+  Falhas
+</a>
 
 <a href="../../public/Tela_Relatorios/relatorios.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/report-card.png');"></span>

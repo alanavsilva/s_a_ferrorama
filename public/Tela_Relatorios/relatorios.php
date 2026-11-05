@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   Home
 </a>
 
-<a class="ativo" href="../../public/Tela_Usuario/cadastrar_usuario.php">
+<a href="../../public/Tela_Usuario/cadastrar_usuario.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');"></span>
   Usuários
 </a>
@@ -95,8 +95,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');"></span>
   Monitoramento
 </a>
+<a href="../../public/Tela_Monitoramento/cadastrar_falha.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
+  Falhas
+</a>
 
-<a href="../../public/Tela_Relatorios/relatorios.php">
+<a class="ativo" href="../../public/Tela_Relatorios/relatorios.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png');"></span>
   Relatórios
 </a>
@@ -108,8 +112,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   </a>
         </aside>
-
-    </aside>
 
     <main class="conteudo-relatorios">
 
