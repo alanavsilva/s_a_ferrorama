@@ -3,6 +3,8 @@
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
 
+exigir_login();
+
 $mensagem_relatorios = "";
 $sensor_relatorios = "";
 $periodo_relatorios = "";
@@ -32,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         in_array($periodo_relatorios, $periodos_permitidos_relatorios, true)
     ) {
         $relatorio_gerado = true;
-        $mensagem_relatorios = "Filtros selecionados com sucesso.";
+        $mensagem_relatorios = "Relatório gerado com sucesso.";
     } else {
         $mensagem_relatorios = "Selecione um sensor e um período válidos.";
     }
@@ -60,78 +62,84 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         <aside class="menu">
 
+            <img class="logo-trem"
+                src="https://img.icons8.com/ios/100/ffffff/train.png"
+                alt="Logo TremTech">
 
+            <p class="marca">SISTEMA TREMTECH</p>
 
-       <img class="logo-trem"
-    src="https://img.icons8.com/ios/100/ffffff/train.png"
-    alt="Logo TremTech">
+            <a href="../../public/Tela_Home/home.php">
+                <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');"></span>
+                Home
+            </a>
 
-  <p class="marca">SISTEMA TREMTECH</p>
-     <a href="../../public/Tela_Home/home.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');"></span>
-  Home
-</a>
+            <a href="../../public/Tela_Usuario/cadastrar_usuario.php">
+                <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');"></span>
+                Usuários
+            </a>
 
-<a href="../../public/Tela_Usuario/cadastrar_usuario.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');"></span>
-  Usuários
-</a>
+            <a href="../../public/Tela_Sensores/cadastrar_sensores.php">
+                <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');"></span>
+                Sensores
+            </a>
 
-<a href="../../public/Tela_Sensores/cadastrar_sensores.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');"></span>
-  Sensores
-</a>
+            <a href="../../public/Tela_Trens/cadastrar_trens.php">
+                <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png');"></span>
+                Trem
+            </a>
 
-<a href="../../public/Tela_Trens/cadastrar_trens.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png');"></span>
-  Trem
-</a>
+            <a href="../../public/Tela_Rotas/cadastrar_rotas.php">
+                <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png');"></span>
+                Rota
+            </a>
 
-<a href="../../public/Tela_Rotas/cadastrar_rotas.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png');"></span>
-  Rota
-</a>
-<a href="../../public/Tela_Monitoramento/monitoramento.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');"></span>
-  Monitoramento
-</a>
-<a href="../../public/Tela_Falhas/cadastrar_falha.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
-  Falhas
-</a>
+            <a href="../../public/Tela_Monitoramento/monitoramento.php">
+                <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');"></span>
+                Monitoramento
+            </a>
 
-<a class="ativo" href="../../public/Tela_Relatorios/relatorios.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png');"></span>
-  Relatórios
-</a>
+            <a href="../../public/Tela_Falhas/cadastrar_falha.php">
+                <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
+                Falhas
+            </a>
 
+            <a class="ativo" href="../../public/Tela_Relatorios/relatorios.php">
+                <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png');"></span>
+                Relatórios
+            </a>
 
-<a class="logout" href="../../logout.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png');"></span>
-  Logout
+            <a class="logout" href="../../logout.php">
+                <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png');"></span>
+                Logout
+            </a>
 
-  </a>
         </aside>
 
     <main class="conteudo-relatorios">
 
         <header class="cabecalho-relatorios">
+
             <div class="titulo-area-relatorios">
+
                 <p class="sobretitulo-relatorios">
                     PAINEL DE RELATÓRIOS
                 </p>
 
                 <h1>Relatórios do sistema</h1>
+
             </div>
 
             <div class="perfil-relatorios">
+
                 <div class="avatar-relatorios"></div>
 
                 <div class="dados-perfil-relatorios">
                     <strong>Admin</strong>
                     <span>alana.veiga</span>
                 </div>
+
             </div>
+
         </header>
 
         <section class="area-relatorios">
@@ -145,6 +153,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <h2>Gerar relatório</h2>
 
                 <div class="campo-relatorios">
+
                     <label for="sensor-relatorios">Sensor</label>
 
                     <select
@@ -152,6 +161,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         id="sensor-relatorios"
                         required
                     >
+
                         <option value="">Selecione um sensor</option>
 
                         <option value="leste"
@@ -168,10 +178,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             <?= $sensor_relatorios === "oeste" ? "selected" : "" ?>>
                             Sensor oeste
                         </option>
+
                     </select>
+
                 </div>
 
                 <div class="campo-relatorios">
+
                     <label for="periodo-relatorios">Período</label>
 
                     <select
@@ -179,6 +192,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         id="periodo-relatorios"
                         required
                     >
+
                         <option value="">Selecione um período</option>
 
                         <option value="maio-2026"
@@ -210,7 +224,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             <?= $periodo_relatorios === "outubro-2026" ? "selected" : "" ?>>
                             Outubro de 2026
                         </option>
+
                     </select>
+
                 </div>
 
                 <button type="submit" class="botao-relatorios">
@@ -218,9 +234,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </button>
 
                 <?php if ($mensagem_relatorios !== ""): ?>
+
                     <p class="mensagem-relatorios">
                         <?= htmlspecialchars($mensagem_relatorios, ENT_QUOTES, "UTF-8") ?>
                     </p>
+
                 <?php endif; ?>
 
             </form>
@@ -230,6 +248,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <?php if ($relatorio_gerado): ?>
 
                     <div class="estado-relatorios">
+
                         <h2>Relatório solicitado</h2>
 
                         <p>
@@ -250,17 +269,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             Os filtros foram recebidos.
                             Os dados reais precisam ser consultados no banco de dados.
                         </p>
+
                     </div>
 
                 <?php else: ?>
 
                     <div class="estado-vazio-relatorios">
+
                         <h2>Relatório</h2>
 
                         <p>
                             Selecione um sensor e um período
                             para solicitar um relatório.
                         </p>
+
                     </div>
 
                 <?php endif; ?>
