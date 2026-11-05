@@ -1,3 +1,4 @@
+
 <?php
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
@@ -15,7 +16,6 @@ if (!in_array($filtro, ['Todas', 'Resolvida', 'Não resolvida'], true)) {
 
 $sensorSelecionado = filter_input(INPUT_GET, 'sensor', FILTER_VALIDATE_INT) ?: 0;
 
-/* Resolver ou reabrir falha: somente Administradores podem alterar. */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_falha'])) {
     exigir_administrador();
     verificar_csrf();
@@ -53,8 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_falha'])) {
     exit;
 }
 
-/* Carrega sensores, trem e rota relacionados. */
 $sensores = [];
+
 $resultadoSensores = $conn->query(
     'SELECT
         s.id_sensor,
@@ -73,11 +73,7 @@ if ($resultadoSensores) {
     $posicao = 0;
 
     while ($sensor = $resultadoSensores->fetch_assoc()) {
-        /*
-         * A tabela atual não guarda temperatura.
-         * Este valor é apenas uma leitura demonstrativa.
-         */
-        sensor['temperaturademo']=35+(posicao % 4);
+        $sensor['temperatura_demo'] = 35 + ($posicao % 4);
         $sensores[] = $sensor;
         $posicao++;
     }
@@ -88,17 +84,16 @@ if ($resultadoSensores) {
 $indiceInicial = 0;
 
 foreach ($sensores as $indice => $sensor) {
-    if ((int)sensor['idsensor']===(int)sensorSelecionado) {
+    if ((int)$sensor['id_sensor'] === (int)$sensorSelecionado) {
         $indiceInicial = $indice;
         break;
     }
 }
 
 if (!empty($sensores)) {
-    sensorSelecionado=(int)sensores[$indiceInicial]['id_sensor'];
+    $sensorSelecionado = (int)$sensores[$indiceInicial]['id_sensor'];
 }
 
-/* Contadores e lista de falhas. */
 $totalResolvidas = (int)(
     $conn->query(
         'SELECT COUNT(*) AS total
@@ -135,7 +130,7 @@ if ($filtro === 'Resolvida') {
 }
 
 $sqlFalhas .= ' ORDER BY f.data_registro DESC';
-$resultadoFalhas = conn->query(sqlFalhas);
+$resultadoFalhas = $conn->query($sqlFalhas);
 
 $falhas = [];
 
@@ -191,7 +186,7 @@ if ($resultadoFalhas) {
             <select id="sensor" name="sensor" onchange="this.form.submit()">
                 <?php foreach ($sensores as $sensor): ?>
                     <option value="<?= (int)$sensor['id_sensor'] ?>"
-                        <?= (int)sensorSelecionado===(int)sensor['id_sensor'] ? 'selected' : '' ?>>
+                        <?= (int)$sensorSelecionado === (int)$sensor['id_sensor'] ? 'selected' : '' ?>>
                         <?= escapar($sensor['nome_sensor']) ?>
                     </option>
                 <?php endforeach; ?>
@@ -233,11 +228,9 @@ if ($resultadoFalhas) {
 
                 <rect width="760" height="330" fill="url(#gradeMapa)"/>
 
-                <!-- Circuito principal -->
                 <polyline class="trilho"
                     points="70,175 80,115 150,75 250,60 360,65 470,90 580,120 670,165 690,220 640,265 540,290 420,300 300,290 190,260 100,225 70,175"/>
 
-                <!-- Linha central e desvios -->
                 <polyline class="trilho"
                     points="70,175 140,185 250,165 360,160 470,175 545,200 640,230"/>
                 <polyline class="trilho"
@@ -247,12 +240,10 @@ if ($resultadoFalhas) {
                 <polyline class="trilho"
                     points="545,200 580,235 640,265"/>
 
-                <!-- Ponte vermelha do percurso -->
                 <polyline class="trilho-ponte"
                     points="250,60 360,65"/>
                 <text x="275" y="45" class="rotulo-ponte">Ponte</text>
 
-                <!-- Marcador que percorre o circuito e os desvios -->
                 <g id="marcadorTrem" transform="translate(70 175)">
                     <circle r="12" class="marcador-trem"/>
                     <circle r="4" class="marcador-centro"/>
@@ -388,7 +379,6 @@ document.getElementById('sensor').addEventListener('change', function () {
     }
 });
 
-/* Alterna o sensor mostrado, como na Home. */
 if (sensoresMonitorados.length > 1) {
     setInterval(() => {
         indiceSensor = (indiceSensor + 1) % sensoresMonitorados.length;
@@ -396,7 +386,6 @@ if (sensoresMonitorados.length > 1) {
     }, 3000);
 }
 
-/* Percorre o circuito principal e os desvios. */
 const caminhoDoTrem = [
     [70,175],[80,115],[150,75],[250,60],[360,65],[470,90],
     [580,120],[670,165],[690,220],[640,265],[540,290],[420,300],
