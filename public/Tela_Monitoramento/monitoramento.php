@@ -1,7 +1,34 @@
 
 <?php
 $filtro = $_GET["status"] ?? "Todas";
+$sensorSelecionado = $_GET["sensor"] ?? "Sensor Norte";
 
+$sensores = [
+    "Sensor Norte" => [
+        "velocidade" => "98 km/h",
+        "temperatura" => "35º C",
+        "status" => "Alerta",
+        "mensagem" => "Velocidade acima da média"
+    ],
+    "Sensor Sul" => [
+        "velocidade" => "75 km/h",
+        "temperatura" => "29º C",
+        "status" => "Normal",
+        "mensagem" => "Funcionamento normal"
+    ],
+    "Sensor Leste" => [
+        "velocidade" => "82 km/h",
+        "temperatura" => "31º C",
+        "status" => "Normal",
+        "mensagem" => "Velocidade estável"
+    ],
+    "Sensor Oeste" => [
+        "velocidade" => "105 km/h",
+        "temperatura" => "37º C",
+        "status" => "Alerta",
+        "mensagem" => "Temperatura acima da média"
+    ]
+];
 $falhas = [
     [
         "titulo" => "Velocidade acima do limite",
