@@ -100,12 +100,20 @@ foreach ($falhas as $falha) {
         <form method="GET">
             <label for="sensor">Sensor:</label>
 
-            <select name="sensor" id="sensor">
-                <option value="Sensor Norte">Sensor Norte</option>
-                <option value="Sensor Sul">Sensor Sul</option>
-                <option value="Sensor Leste">Sensor Leste</option>
-                <option value="Sensor Oeste">Sensor Oeste</option>
-            </select>
+         <select name="sensor" id="sensor" onchange="this.form.submit()">
+
+    <?php while ($sensor = $resultadoSensores->fetch_assoc()): ?>
+
+        <option
+            value="<?= htmlspecialchars($sensor["nome_sensor"]) ?>"
+            <?= $sensorSelecionado == $sensor["nome_sensor"] ? "selected" : "" ?>
+        >
+            <?= htmlspecialchars($sensor["nome_sensor"]) ?>
+        </option>
+
+    <?php endwhile; ?>
+
+</select>  
         </form>
     </section>
 
