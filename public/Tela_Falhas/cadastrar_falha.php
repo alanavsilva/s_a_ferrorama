@@ -150,7 +150,7 @@ if (!$faltas) {
             <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png');"></span>
             Rotas
         </a>
-        <a href="monitoramento.php">
+        <a href="../Tela_Monitoramento/monitoramento.php">
             <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');"></span>
             Monitoramento
         </a>
@@ -281,3 +281,4 @@ if (!$faltas) {
 <?php endif; ?>
 </body>
 </html>
+

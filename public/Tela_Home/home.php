@@ -92,7 +92,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <a class="home_link" href="../../public/Tela_Sensores/cadastrar_sensores.php">Sensores</a>
     <a class="home_link" href="../../public/Tela_Rotas/cadastrar_rotas.php">Rotas</a>
     <a class="home_link" href="../../public/Tela_Trens/cadastrar_trens.php">Trens</a>
-    <a class="home_link" href="../../public/Tela_Monitoramento/cadastrar_falha.php">Falhas</a>
+    <a class="home_link" href="../../public/Tela_Falhas/cadastrar_falha.php">Falhas</a>
     <a class="home_link" href="../../public/Tela_Monitoramento/monitoramento.php">Monitoramento</a>
     <a class="home_link" href="../../public/Tela_Relatorios/relatorios.php">Relatórios</a>
 
@@ -184,7 +184,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
         <a href="../Tela_Rotas/cadastrar_rotas.php">
             Cadastrar rota
         </a>
-        <a href="../Tela_Monitoramento/cadastrar_falha.php">
+        <a href="../Tela_Falhas/cadastrar_falha.php">
             Cadastrar falha
         </a>
         <?php else: ?>
@@ -200,7 +200,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
         <a href="../Tela_Rotas/cadastrar_rotas.php">
             Tela de rotas
         </a>
-        <a href="../Tela_Monitoramento/cadastrar_falha.php#falhas">
+        <a href="../Tela_Falhas/cadastrar_falha.php#falhas">
             Ver falhas registradas
         </a>
         <?php endif; ?>
@@ -452,4 +452,3 @@ setInterval(mostrarTrem, 3000);
 </script>
 
 </body>
-

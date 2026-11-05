@@ -69,7 +69,7 @@ $nomeUsuario = escapar((string)($_SESSION['nome'] ?? 'Administrador'));
         <a href="../../public/Tela_Trens/cadastrar_trens.php">▰ &nbsp; Trem</a>
         <a href="../../public/Tela_Rotas/cadastrar_rotas.php">▥ &nbsp; Rota</a>
         <a href="../../public/Tela_Monitoramento/monitoramento.php">◉ &nbsp; Monitoramento</a>
-<a href="../../public/Tela_Monitoramento/cadastrar_falha.php">
+<a href="../../public/Tela_Falhas/cadastrar_falha.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
   Falhas
 </a>

@@ -163,7 +163,7 @@ if ($stmtBusca) {
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');"></span>
   Monitoramento
 </a>
-<a href="../../public/Tela_Monitoramento/cadastrar_falha.php">
+<a href="../../public/Tela_Falhas/cadastrar_falha.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
   Falhas
 </a>
