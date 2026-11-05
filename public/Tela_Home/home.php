@@ -87,9 +87,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 
     <a class="home_link" href="home.php">Home</a>
 
-    <?php if ($ehAdministrador): ?>
     <a class="home_link" href="../../public/Tela_Usuario/cadastrar_usuario.php">Usuários</a>
-    <?php endif; ?>
 
     <a class="home_link" href="../../public/Tela_Sensores/cadastrar_sensores.php">Sensores</a>
     <a class="home_link" href="../../public/Tela_Rotas/cadastrar_rotas.php">Rotas</a>
@@ -170,6 +168,10 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <h2>Acesso rápido</h2>
 
     <div class="home_atalhos_lista">
+        <?php if ($ehAdministrador): ?>
+        <a href="../Tela_Usuario/cadastrar_usuario.php">
+            Cadastrar usuário
+        </a>
         <a href="../Tela_Sensores/cadastrar_sensores.php">
             Cadastrar sensor
         </a>
@@ -181,9 +183,25 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
         <a href="../Tela_Rotas/cadastrar_rotas.php">
             Cadastrar rota
         </a>
-
+        <?php else: ?>
+        <a href="../Tela_Usuario/cadastrar_usuario.php">
+            Tela de usuários
+        </a>
+        <a href="../Tela_Sensores/cadastrar_sensores.php">
+            Tela de sensores
+        </a>
+        <a href="../Tela_Trens/cadastrar_trens.php">
+            Tela de trens
+        </a>
+        <a href="../Tela_Rotas/cadastrar_rotas.php">
+            Tela de rotas
+        </a>
+        <?php endif; ?>
         <a href="../Tela_Monitoramento/monitoramento.php">
-            Monitorar falhas
+            <?= $ehAdministrador ? 'Monitorar falhas' : 'Visualizar falhas' ?>
+        </a>
+        <a href="../Tela_Relatorios/relatorios.php">
+            Relatórios
         </a>
     </div>
 </section>
