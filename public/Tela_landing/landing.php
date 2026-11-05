@@ -420,21 +420,5 @@
 </main>
 
 
-<footer class="landing-footer">
-
-    <strong>
-        SISTEMA TREMTECH
-    </strong>
-
-    <span>
-        Ferrorama - Sistema de Monitoramento Ferroviário
-    </span>
-
-    <span>
-        © 2026
-    </span>
-
-</footer>
-
 </body>
 </html>
