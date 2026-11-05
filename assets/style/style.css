@@ -734,3 +734,445 @@ body {
 .home_barra {
   width: 100%;
 }
+
+/* ===== TELA DE USUÁRIOS ===== */
+
+.body_geral {
+  margin: 0;
+  background: #eeeeee;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1a1a1a;
+}
+
+/* Ajustes do menu lateral (valem para todas as telas que usam .menu) */
+.menu {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.logo-trem {
+  margin: 0 0 8px;
+}
+
+.marca {
+  margin: 0 0 22px;
+  padding-bottom: 22px;
+  text-align: left;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.55);
+}
+
+.menu a:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.menu .ativo:hover {
+  background: #fff;
+}
+
+.logout {
+  left: 18px;
+  right: 18px;
+}
+
+/* Conteúdo */
+.content-user {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  padding: 32px 48px 48px;
+}
+
+.painel-user {
+  margin: 0 0 4px;
+  color: #5c0b0b;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.content-user > h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  color: #111;
+}
+
+.content-user > h2 {
+  margin: 0 0 24px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #6e1423;
+}
+
+.content-user > .painel-user,
+.content-user > h1,
+.content-user > h2 {
+  padding-right: 240px;
+}
+
+/* Selo do usuário logado */
+.admin-badge-user {
+  position: absolute;
+  top: 32px;
+  right: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 170px;
+  padding: 12px 18px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.avatar-user {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #430b0b;
+}
+
+.admin-badge-user strong {
+  display: block;
+  color: #111;
+  font-size: 16px;
+}
+
+.admin-badge-user span {
+  color: #777;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Mensagens */
+.mensagem-sucesso {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-left: 5px solid #2e7d32;
+  border-radius: 6px;
+  background: #e8f5e9;
+  color: #1b5e20;
+  font-weight: 700;
+}
+
+.content-user [role="alert"] {
+  margin: 12px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fdecea;
+  color: #8a1010;
+  font-size: 14px;
+}
+
+/* Botão grande "Cadastrar novo usuário" */
+.btn-cadastrar-user {
+  display: block;
+  width: 100%;
+  margin: 0 0 24px;
+  padding: 22px;
+  border: 0;
+  border-radius: 40px;
+  background: #430b0b;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cadastrar-user:hover {
+  background: #6b1515;
+}
+
+/* Formulário de cadastro (abre e fecha pela classe .ativo) */
+.cadastro-usuario {
+  display: none;
+}
+
+.cadastro-usuario.ativo {
+  display: block;
+  margin: 0 0 28px;
+  padding: 30px 36px 36px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.form-cadastro-user {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 30px;
+}
+
+.campo-user label {
+  display: block;
+  margin-bottom: 6px;
+  color: #6e1423;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.campo-user input,
+.campo-user select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.campo-user input:focus,
+.campo-user select:focus {
+  border-color: #6e1423;
+}
+
+.form-cadastro-user .mensagem-cadastro,
+.btn-cadastrar-form {
+  grid-column: 1 / -1;
+}
+
+.btn-cadastrar-form {
+  padding: 16px;
+  border: 0;
+  border-radius: 30px;
+  background: #430b0b;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.btn-cadastrar-form:hover {
+  background: #6b1515;
+}
+
+/* Busca */
+.buscar-box-user {
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.buscar-box-user form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.buscar-box-user label {
+  flex-basis: 100%;
+  color: #5c0b0b;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.buscar-box-user input {
+  width: 100%;
+  max-width: 460px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  outline: none;
+}
+
+.buscar-box-user input:focus {
+  border-color: #6e1423;
+}
+
+.buscar-box-user button {
+  height: 42px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 30px;
+  background: #430b0b;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.buscar-box-user button:hover {
+  background: #6b1515;
+}
+
+/* Tabela */
+.content-user table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.content-user th {
+  padding: 20px 16px;
+  background: #d9d9d9;
+  color: #111;
+  font-size: 16px;
+  text-align: center;
+}
+
+.content-user td {
+  padding: 16px;
+  border-bottom: 1px solid #e8e8e8;
+  color: #5c0b0b;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.content-user tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.content-user tbody tr:hover {
+  background: #faf5f5;
+}
+
+/* Botões de ação (lixeira / editar) */
+.acao_user {
+  white-space: nowrap;
+}
+
+.acao_user form {
+  display: inline;
+  margin: 0;
+}
+
+.acao-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 3px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #5c0b0b;
+  vertical-align: middle;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.acao-icone img {
+  width: 22px;
+  height: 22px;
+  filter: brightness(0) invert(1);
+}
+
+.acao-icone:hover {
+  background: #8a1010;
+}
+
+/* Janela de confirmação de exclusão */
+.modal-confirmacao {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: min(430px, calc(100% - 32px));
+  margin: 0;
+  padding: 30px;
+  border: 0;
+  border-radius: 18px;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 24px 80px rgba(22, 2, 5, 0.35);
+}
+
+.modal-confirmacao::backdrop {
+  background: rgba(22, 2, 5, 0.6);
+}
+
+.modal-confirmacao h2 {
+  margin-bottom: 9px;
+  color: #3b1015;
+  font-size: 21px;
+}
+
+.modal-confirmacao-mensagem {
+  color: #666;
+  line-height: 1.55;
+}
+
+.modal-confirmacao-acoes {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.modal-confirmacao-acoes button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 9px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-btn-cancelar {
+  background: #f0eeee;
+  color: #3f3f3f;
+}
+
+.modal-btn-excluir {
+  background: #7a151b;
+  color: #fff;
+}
+
+.modal-btn-excluir:hover {
+  background: #5d0d12;
+}
+
+/* Telas pequenas */
+@media (max-width: 900px) {
+  .pagina {
+    flex-direction: column;
+  }
+
+  .menu {
+    position: relative;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+  }
+
+  .logout {
+    position: static;
+    margin-top: 10px;
+  }
+
+  .content-user {
+    padding: 24px 16px;
+  }
+
+  .content-user > .painel-user,
+  .content-user > h1,
+  .content-user > h2 {
+    padding-right: 0;
+  }
+
+  .admin-badge-user {
+    position: static;
+    margin-bottom: 18px;
+  }
+
+  .form-cadastro-user {
+    grid-template-columns: 1fr;
+  }
+
+  .content-user table {
+    display: block;
+    overflow-x: auto;
+  }
+}
