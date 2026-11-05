@@ -105,12 +105,12 @@ foreach ($falhas as $falha) {
             <h3>Velocidade atual</h3>
 
             <p><?= htmlspecialchars($sensorSelecionado) ?></p>
+<p><?= $dadosSensor["velocidade"] ?></p>
 
-<p><?= $sensores[$sensorSelecionado]["velocidade"] ?></p>
+<p>Status operacional: <?= $dadosSensor["status"] ?></p>
 
-<p>Status operacional: <?= $sensores[$sensorSelecionado]["status"] ?></p>
+<p><?= $dadosSensor["mensagem"] ?></p>
 
-<p><?= $sensores[$sensorSelecionado]["mensagem"] ?></p>
         </article>
 
         <article>
@@ -118,9 +118,9 @@ foreach ($falhas as $falha) {
 
           <p><?= htmlspecialchars($sensorSelecionado) ?></p>
 
-<p><?= $sensores[$sensorSelecionado]["temperatura"] ?></p>
+<p><?= $dadosSensor["temperatura"] ?></p>
 
-<p>Status operacional: <?= $sensores[$sensorSelecionado]["status"] ?></p>
+<p>Status operacional: <?= $dadosSensor["status"] ?></p>
 
 <p>Temperatura estável</p>
         </article>
