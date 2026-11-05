@@ -111,7 +111,7 @@ $sql = "SELECT id_usuario, nome, email, tipo, senha
 
                     <button id="botao-envio" type="submit">Entrar</button>
 </form>    
- <a href="landing.php">Voltar para a página inicial</a>              
+ <a href="public/Tela_landing/landing.php">Ir para Tela Landing</a>              
 </div>
     </section>
 </main>

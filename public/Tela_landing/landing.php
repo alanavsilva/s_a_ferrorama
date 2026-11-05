@@ -1,133 +1,439 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ferrorama</title>
+
+    <title>Ferrorama - Sistema TremTech</title>
+
+    <link rel="stylesheet" href="../../assets/style/style.css">
 </head>
-<body>
 
-<header class="landing_menu">
-    <a href="landing.php" class="landing_logo">SISTEMA TREMTECH</a>
+<body class="landing-body">
 
-    <nav>
+<header class="landing-header">
+
+    <div class="landing-logo">
+        SISTEMA TREMTECH
+    </div>
+
+    <nav class="landing-menu">
+        <a href="#inicio">Início</a>
         <a href="#sobre">Sobre</a>
         <a href="#funcionalidades">Funcionalidades</a>
-        <a href="#beneficios">Benefícios</a>
-        <a href="index.php" class="landing_botao">Acessar sistema</a>
+        <a href="#monitoramento">Monitoramento</a>
+
+        <a href="../../index.php" class="landing-acesso">
+            Acessar sistema
+        </a>
     </nav>
+
 </header>
+
 
 <main>
 
-    <section class="landing_inicio">
-        <div class="landing_texto">
-            <p class="landing_destaque">TECNOLOGIA E MONITORAMENTO FERROVIÁRIO</p>
+<!-- INÍCIO -->
 
-            <h1>Mais controle e organização para as operações ferroviárias.</h1>
+<section class="landing-inicio" id="inicio">
 
-            <p>
-                Conheça o Ferrorama, um sistema desenvolvido para
-                facilitar o gerenciamento de trens, rotas, sensores
-                e falhas operacionais.
-            </p>
+    <div class="landing-inicio-texto">
 
-            <a href="index.php" class="landing_botao">Acessar o sistema</a>
-        </div>
+        <span>Bem-vindo ao Ferrorama!</span>
 
-        <div class="landing_card">
-            <h2>FERRORAMA</h2>
-            <p>Monitoramento ferroviário em um só lugar.</p>
-        </div>
-    </section>
-
-    <section class="landing_sobre" id="sobre">
-        <p class="landing_destaque">CONHEÇA O PROJETO</p>
-
-        <h2>O que é o Ferrorama?</h2>
+        <h1>
+            Monitore trens, rotas e
+            operações em um só lugar.
+        </h1>
 
         <p>
-            O Ferrorama é um sistema de gerenciamento e monitoramento
-            ferroviário que reúne informações sobre trens, rotas,
-            sensores e falhas operacionais em uma única plataforma.
+            Um sistema desenvolvido para organizar e acompanhar
+            informações das operações ferroviárias.
         </p>
-    </section>
 
-    <section class="landing_funcionalidades" id="funcionalidades">
-        <h2>Principais funcionalidades</h2>
+        <div class="landing-botoes">
 
-        <div class="landing_lista">
+            <a href="../../index.php" class="landing-btn">
+                Acessar sistema
+            </a>
 
-            <article class="landing_item">
-                <h3>Gerenciamento de usuários</h3>
-                <p>Cadastro e administração dos usuários.</p>
-            </article>
-
-            <article class="landing_item">
-                <h3>Cadastro de trens</h3>
-                <p>Organização das informações dos trens.</p>
-            </article>
-
-            <article class="landing_item">
-                <h3>Gerenciamento de rotas</h3>
-                <p>Cadastro e consulta das rotas ferroviárias.</p>
-            </article>
-
-            <article class="landing_item">
-                <h3>Monitoramento de sensores</h3>
-                <p>Acompanhamento dos sensores cadastrados.</p>
-            </article>
-
-            <article class="landing_item">
-                <h3>Controle de falhas</h3>
-                <p>Identificação e acompanhamento de falhas.</p>
-            </article>
-
-            <article class="landing_item">
-                <h3>Relatórios</h3>
-                <p>Consulta das informações do sistema.</p>
-            </article>
+            <a href="#funcionalidades" class="landing-btn-secundario">
+                Conhecer funcionalidades
+            </a>
 
         </div>
-    </section>
 
-    <section class="landing_beneficios" id="beneficios">
-        <h2>Quais problemas o sistema ajuda a resolver?</h2>
+    </div>
 
-        <div class="landing_lista">
 
-            <article class="landing_item">
-                <h3>Informações centralizadas</h3>
-                <p>Dados organizados em uma única plataforma.</p>
-            </article>
+    <div class="landing-status">
 
-            <article class="landing_item">
-                <h3>Acompanhamento facilitado</h3>
-                <p>Consulta de trens, rotas, sensores e falhas.</p>
-            </article>
+        <div class="landing-status-topo">
+            <span>Monitoramento ferroviário</span>
+        </div>
 
-            <article class="landing_item">
-                <h3>Mais organização</h3>
-                <p>Facilidade para administrar os registros.</p>
-            </article>
+        <h3>
+            Operação
+        </h3>
+
+        <strong>
+            Acompanhamento
+        </strong>
+
+        <div class="landing-status-linhas">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- SOBRE -->
+
+<section class="landing-sobre" id="sobre">
+
+    <div class="landing-sobre-titulo">
+
+        <h2>
+            Sobre o Ferrorama
+        </h2>
+
+        <p>
+            O Ferrorama é um sistema de monitoramento ferroviário
+            desenvolvido para facilitar o gerenciamento de trens,
+            rotas, sensores e falhas operacionais.
+        </p>
+
+    </div>
+
+
+    <div class="landing-sobre-info">
+
+        <div>
+            <strong>Organização</strong>
+
+            <p>
+                Reúne informações da operação em um único ambiente.
+            </p>
+        </div>
+
+        <div>
+            <strong>Monitoramento</strong>
+
+            <p>
+                Permite acompanhar dados dos sensores e dos trens.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- FUNCIONALIDADES -->
+
+<section class="landing-secao" id="funcionalidades">
+
+    <div class="landing-titulo">
+
+        <h2>
+            Funcionalidades
+        </h2>
+
+        <p>
+            Recursos disponíveis para o gerenciamento da operação.
+        </p>
+
+    </div>
+
+
+    <div class="landing-cards">
+
+        <div class="landing-card">
+
+            <span>01</span>
+
+            <h3>
+                Usuários
+            </h3>
+
+            <p>
+                Cadastro e gerenciamento dos usuários do sistema.
+            </p>
 
         </div>
-    </section>
 
-    <section class="landing_final">
-        <h2>Conheça o Ferrorama</h2>
 
-        <p>Acesse o sistema e acompanhe suas funcionalidades.</p>
+        <div class="landing-card">
 
-        <a href="index.php" class="landing_botao">Entrar no sistema</a>
-    </section>
+            <span>02</span>
+
+            <h3>
+                Trens
+            </h3>
+
+            <p>
+                Cadastro e gerenciamento das informações dos trens.
+            </p>
+
+        </div>
+
+
+        <div class="landing-card">
+
+            <span>03</span>
+
+            <h3>
+                Rotas
+            </h3>
+
+            <p>
+                Cadastro e organização das rotas ferroviárias.
+            </p>
+
+        </div>
+
+
+        <div class="landing-card">
+
+            <span>04</span>
+
+            <h3>
+                Sensores
+            </h3>
+
+            <p>
+                Acompanhamento de velocidade, temperatura e status.
+            </p>
+
+        </div>
+
+
+        <div class="landing-card">
+
+            <span>05</span>
+
+            <h3>
+                Falhas
+            </h3>
+
+            <p>
+                Registro e acompanhamento das falhas operacionais.
+            </p>
+
+        </div>
+
+
+        <div class="landing-card">
+
+            <span>06</span>
+
+            <h3>
+                Relatórios
+            </h3>
+
+            <p>
+                Visualização das informações registradas no sistema.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- MONITORAMENTO -->
+
+<section class="landing-monitoramento" id="monitoramento">
+
+    <div class="landing-monitoramento-texto">
+
+        <h2>
+            Monitoramento ferroviário
+        </h2>
+
+        <p>
+            O Ferrorama permite acompanhar informações importantes
+            da operação por meio dos sensores cadastrados.
+        </p>
+
+        <p>
+            Os dados podem estar relacionados à velocidade,
+            temperatura e status dos trens.
+        </p>
+
+    </div>
+
+
+    <div class="landing-monitoramento-box">
+
+        <div class="landing-monitoramento-topo">
+
+            <span>
+                Dados monitorados
+            </span>
+
+            <strong>
+                TremTech
+            </strong>
+
+        </div>
+
+
+        <div class="landing-dado">
+
+            <span>
+                Velocidade
+            </span>
+
+            <strong>
+                Sensor
+            </strong>
+
+        </div>
+
+
+        <div class="landing-dado">
+
+            <span>
+                Temperatura
+            </span>
+
+            <strong>
+                Sensor
+            </strong>
+
+        </div>
+
+
+        <div class="landing-dado">
+
+            <span>
+                Status
+            </span>
+
+            <strong>
+                Acompanhamento
+            </strong>
+
+        </div>
+
+
+        <div class="landing-dado">
+
+            <span>
+                Falhas
+            </span>
+
+            <strong>
+                Registro
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- BENEFÍCIOS -->
+
+<section class="landing-secao landing-beneficios-secao">
+
+    <div class="landing-titulo">
+
+        <h2>
+            Benefícios
+        </h2>
+
+        <p>
+            O sistema ajuda a manter as informações da operação
+            mais organizadas e fáceis de acompanhar.
+        </p>
+
+    </div>
+
+
+    <div class="landing-beneficios">
+
+        <div>
+            <strong>
+                Segurança
+            </strong>
+
+            <p>
+                Facilita o acompanhamento das informações
+                e das falhas registradas.
+            </p>
+        </div>
+
+
+        <div>
+            <strong>
+                Organização
+            </strong>
+
+            <p>
+                Centraliza dados sobre trens, rotas e sensores.
+            </p>
+        </div>
+
+
+        <div>
+            <strong>
+                Eficiência
+            </strong>
+
+            <p>
+                Torna o acesso às informações mais simples.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ACESSO -->
+
+<section class="landing-final">
+
+    <h2>
+        Acesse o Sistema TremTech
+    </h2>
+
+    <p>
+        Conheça as funcionalidades do Ferrorama.
+    </p>
+
+    <a href="../../index.php" class="landing-btn-final">
+        Acessar sistema
+    </a>
+
+</section>
 
 </main>
 
-<footer class="landing_rodape">
-    <p>Ferrorama - Sistema de Monitoramento Ferroviário</p>
-    <a href="landing.php">Voltar para o início</a>
+
+<footer class="landing-footer">
+
+    <strong>
+        SISTEMA TREMTECH
+    </strong>
+
+    <span>
+        Ferrorama - Sistema de Monitoramento Ferroviário
+    </span>
+
+    <span>
+        © 2026
+    </span>
+
 </footer>
 
 </body>
