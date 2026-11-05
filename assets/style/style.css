@@ -2536,3 +2536,91 @@ article a:hover {
     color: #6d6d73;
     line-height: 1.5;
 }
+
+.landing_beneficios {
+    padding: 70px 60px;
+    background: #fff;
+    text-align: center;
+}
+
+.landing_beneficios h2 {
+    color: #1d1d1f;
+    font-size: 32px;
+    margin-bottom: 35px;
+}
+
+.landing_final {
+    padding: 60px 20px;
+    background: #7b1023;
+    color: #fff;
+    text-align: center;
+}
+
+.landing_final h2 {
+    font-size: 30px;
+    margin-bottom: 15px;
+}
+
+.landing_final p {
+    margin-bottom: 25px;
+}
+
+.landing_final .landing_botao {
+    background: #fff;
+    color: #7b1023;
+}
+
+.landing_rodape {
+    padding: 20px;
+    background: #460812;
+    color: #fff;
+    text-align: center;
+}
+
+.landing_rodape p {
+    margin: 0;
+}
+
+.landing_beneficios {
+    padding: 70px 60px;
+    background: #fff;
+    text-align: center;
+}
+
+.landing_beneficios h2 {
+    color: #1d1d1f;
+    font-size: 32px;
+    margin-bottom: 35px;
+}
+
+.landing_final {
+    padding: 60px 20px;
+    background: #7b1023;
+    color: #fff;
+    text-align: center;
+}
+
+.landing_final h2 {
+    font-size: 30px;
+    margin-bottom: 15px;
+}
+
+.landing_final p {
+    margin-bottom: 25px;
+}
+
+.landing_final .landing_botao {
+    background: #fff;
+    color: #7b1023;
+}
+
+.landing_rodape {
+    padding: 20px;
+    background: #460812;
+    color: #fff;
+    text-align: center;
+}
+
+.landing_rodape p {
+    margin: 0;
+}
