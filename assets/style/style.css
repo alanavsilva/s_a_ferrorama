@@ -1180,3 +1180,104 @@ body {
     overflow-x: auto;
   }
 }
+
+
+/* monitoramento */
+
+.monitoramento-filtro {
+  margin: 12px 0 20px;
+}
+
+.monitoramento-filtro label {
+  display: block;
+  margin-bottom: 6px;
+  color: #790b0b;
+  font-weight: bold;
+}
+
+.monitoramento-filtro select {
+  width: 100%;
+  max-width: 340px;
+  padding: 10px 12px;
+  border: 1px solid #aaa;
+  background: #fff;
+}
+
+.monitoramento-cartoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-bottom: 24px;
+}
+
+.monitoramento-cartao,
+.monitoramento-localizacao {
+  padding: 24px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+}
+
+.monitoramento-cartao h2,
+.monitoramento-localizacao h2 {
+  margin-bottom: 8px;
+  color: #790b0b;
+  font-size: 22px;
+}
+
+.monitoramento-cartao > strong {
+  display: block;
+  margin: 12px 0;
+  color: #790b0b;
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1;
+}
+
+.monitoramento-localizacao {
+  margin-bottom: 24px;
+}
+
+.mapa-trilhos {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  background: #fff;
+}
+
+.trilho {
+  fill: none;
+  stroke: #454545;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trilho-ponte {
+  fill: none;
+  stroke: #d71920;
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+.rotulo-ponte {
+  fill: #790b0b;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.marcador-trem {
+  fill: #790b0b;
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.marcador-centro {
+  fill: #fff;
+}
+
+@media (max-width: 900px) {
+  .monitoramento-cartoes {
+    grid-template-columns: 1fr;
+  }
+}
+
+
