@@ -4,6 +4,7 @@ require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
 
 exigir_login();
+$resultadoSensores = $conn->query("SELECT id_sensor, nome_sensor FROM sensores ORDER BY nome_sensor");
 
 $filtro = $_GET["status"] ?? "Todas";
 $sensorSelecionado = $_GET["sensor"] ?? "Sensor Norte";
