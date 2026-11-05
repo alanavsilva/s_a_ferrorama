@@ -119,20 +119,20 @@ foreach ($falhas as $falha) {
         <article>
             <h3>Temperatura atual</h3>
 
-            <p>Sensor Norte</p>
+          <p><?= htmlspecialchars($sensorSelecionado) ?></p>
 
-            <p>35º C</p>
+<p><?= $sensores[$sensorSelecionado]["temperatura"] ?></p>
 
-            <p>Status operacional: Normal</p>
+<p>Status operacional: <?= $sensores[$sensorSelecionado]["status"] ?></p>
 
-            <p>Temperatura estável</p>
+<p>Temperatura estável</p>
         </article>
     </section>
 
     <section>
         <h2>Localização</h2>
 
-        <p>Sensor Norte</p>
+        <p><?= htmlspecialchars($sensorSelecionado) ?></p>
     </section>
 
     <section>
