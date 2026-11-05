@@ -107,13 +107,13 @@ foreach ($falhas as $falha) {
         <article>
             <h3>Velocidade atual</h3>
 
-            <p>Sensor Norte</p>
+            <p><?= htmlspecialchars($sensorSelecionado) ?></p>
 
-            <p>98 km/h</p>
+<p><?= $sensores[$sensorSelecionado]["velocidade"] ?></p>
 
-            <p>Status operacional: Alerta</p>
+<p>Status operacional: <?= $sensores[$sensorSelecionado]["status"] ?></p>
 
-            <p>Velocidade acima da média</p>
+<p><?= $sensores[$sensorSelecionado]["mensagem"] ?></p>
         </article>
 
         <article>
