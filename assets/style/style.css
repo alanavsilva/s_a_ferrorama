@@ -2138,3 +2138,29 @@ body {
     font-weight: bold;
 }
 
+/* Botão para a Landing */
+
+.botao-landing {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  margin-top: 16px;
+  padding: 14px 20px;
+
+  border: 1px solid #7b1023;
+  border-radius: 30px;
+
+  background: #ead7d7;
+  color: #5c0b0b;
+
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+
+  transition: 0.2s;
+}
+
+.botao-landing:hover {
+  background: #7b1023;
+  color: #fff;
+}
