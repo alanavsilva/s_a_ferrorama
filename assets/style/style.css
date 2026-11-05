@@ -2624,3 +2624,15 @@ article a:hover {
 .landing_rodape p {
     margin: 0;
 }
+
+.home_rodape {
+    margin-top: 30px;
+    padding: 25px;
+    background: #460812;
+    color: #fff;
+    text-align: center;
+}
+
+.home_rodape p {
+    margin: 5px 0;
+}
