@@ -19,6 +19,12 @@ if (!$id || $id < 1) {
 }
 
 $stmt = $conn->prepare('DELETE FROM rotas WHERE id_rotas = ?');
+if (!$stmt) {
+    error_log('Erro ao preparar exclusão de rota: ' . $conn->error);
+    $_SESSION['mensagem_cadastro'] = 'Não foi possível excluir a rota.';
+    header('Location: cadastrar_rotas.php');
+    exit;
+}
 $stmt->bind_param('i', $id);
 
 try {
@@ -30,12 +36,14 @@ try {
 } catch (mysqli_sql_exception $e) {
     if ((int) $e->getCode() === 1451) {
         $_SESSION['mensagem_cadastro'] =
-            'Não é possível excluir esta rota porque há trens ou sensores vinculados a ela.';
+            'Não é possível excluir esta rota porque há sensores vinculados a ela.';
     } else {
         error_log('Erro ao excluir rota: ' . $e->getMessage());
         $_SESSION['mensagem_cadastro'] = 'Não foi possível excluir a rota.';
     }
 }
+
+$stmt->close();
 
 header('Location: cadastrar_rotas.php');
 exit;

@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($nome === '' || $velocidade === '' || $tipo === '' || $id_usuario === '') {
         $mensagem = "Preencha todos os campos.";
-    } elseif (strlen($nome) < 3) {
+    } elseif (mb_strlen($nome) < 3) {
         $erros['nome'] = 'O nome precisa ter ao menos 3 caracteres.';
     } elseif (!is_numeric($velocidade) || $velocidade < 1 || $velocidade > 600) {
         $erros['velocidade'] = 'Use um valor entre 1 e 600 km/h.';
@@ -90,6 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['mensagem_cadastro'] = 'Trem cadastrado com sucesso!';
         header('Location: cadastrar_trens.php');
         exit;
+    } else {
+        error_log('Erro ao cadastrar trem: ' . $stmt->error);
+        $mensagem = 'Não foi possível concluir o cadastro.';
     }
     } catch (mysqli_sql_exception $e) {
        error_log('Erro ao cadastrar trem: ' . $e->getMessage());
@@ -141,7 +144,6 @@ if ($stmtBusca) {
 
   <title>Cadastro Trens</title>
 
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   <link rel="stylesheet" href="../../assets/style/style.css">
 </head>
 
@@ -209,6 +211,10 @@ if ($stmtBusca) {
             <p role="alert"><?= escapar($mensagemAcesso) ?></p>
         <?php endif; ?>
 
+        <?php foreach ($erros as $erroCampo): ?>
+            <p role="alert"><?= escapar($erroCampo) ?></p>
+        <?php endforeach; ?>
+
         <div class="admin-badge-user">
             <div class="avatar-user"></div>
             <div>
@@ -221,9 +227,9 @@ if ($stmtBusca) {
 
         <?php if ($ehAdministrador): ?>
 
-            <button class="btn-cadastrar-user" type="button" onclick="alternarCadastroTrem()">CADASTRAR NOVO TREM</button>
+            <button class="btn-cadastrar-user" id="btnAbrirCadastro" type="button" aria-expanded="<?= $manterFormularioAberto ? 'true' : 'false' ?>" aria-controls="cadastro">CADASTRAR NOVO TREM</button>
 
-      <section class="cadastro-usuario <?= $manterFormularioAberto ? 'ativo' : '' ?>" id="cadastro">
+      <section class="cadastro-usuario" id="cadastro" <?= $manterFormularioAberto ? '' : 'hidden' ?>>
       <form class="form-cadastro-user" method="POST">
 
       <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
@@ -285,15 +291,8 @@ if ($stmtBusca) {
     </main>
 </div>
 
-<script>
-function alternarCadastroTrem() {
-    const cadastro = document.getElementById('cadastro');
-
-    if (cadastro) {
-        cadastro.classList.toggle('ativo');
-    }
-}
-</script>
+<script src="../../script/validacao.js"></script>
 
 </body>
 </html>
+
