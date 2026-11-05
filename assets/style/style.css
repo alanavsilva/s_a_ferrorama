@@ -2430,3 +2430,53 @@ article a:hover {
     background: #fff;
     color: #7b1023;
 }
+.landing_inicio {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 50px;
+    padding: 80px 60px;
+    background: #f8f5f6;
+}
+
+.landing_texto {
+    max-width: 600px;
+}
+
+.landing_destaque {
+    color: #7b1023;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.landing_texto h1 {
+    font-size: 42px;
+    color: #1d1d1f;
+    margin: 20px 0;
+}
+
+.landing_texto p {
+    color: #6d6d73;
+    line-height: 1.6;
+}
+
+.landing_texto .landing_botao {
+    margin-top: 15px;
+}
+
+.landing_card {
+    width: 300px;
+    padding: 50px 30px;
+    background: #7b1023;
+    color: #fff;
+    text-align: center;
+    border-radius: 10px;
+}
+
+.landing_card h2 {
+    font-size: 30px;
+}
+
+.landing_card p {
+    color: #fff;
+}
