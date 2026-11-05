@@ -1280,4 +1280,201 @@ body {
   }
 }
 
+/* ===== RELATÓRIOS ===== */
+
+.pagina-relatorios {
+  margin: 0;
+  background: #eeeeee;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #1a1a1a;
+}
+
+.layout-relatorios {
+  display: flex;
+  min-height: 100vh;
+}
+
+.menu-lateral-relatorios {
+  width: 280px;
+  min-height: 100vh;
+  flex-shrink: 0;
+}
+
+.menu-lateral-relatorios .menu {
+  width: 280px;
+}
+
+.conteudo-relatorios {
+  flex: 1;
+  min-width: 0;
+  padding: 32px 48px 48px;
+}
+
+.cabecalho-relatorios {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 28px;
+}
+
+.sobretitulo-relatorios {
+  margin-bottom: 8px;
+  color: #5c0b0b;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.titulo-area-relatorios h1 {
+  margin: 0;
+  color: #111;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.perfil-relatorios {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 170px;
+  padding: 12px 18px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.avatar-relatorios {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #430b0b;
+}
+
+.dados-perfil-relatorios strong {
+  display: block;
+  color: #111;
+  font-size: 16px;
+}
+
+.dados-perfil-relatorios span {
+  display: block;
+  margin-top: 3px;
+  color: #777;
+  font-size: 13px;
+}
+
+.area-relatorios {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.formulario-relatorios,
+.resultado-relatorios {
+  padding: 30px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.10);
+}
+
+.formulario-relatorios h2,
+.resultado-relatorios h2 {
+  margin-bottom: 24px;
+  color: #5c0b0b;
+  font-size: 22px;
+}
+
+.campo-relatorios {
+  margin-bottom: 20px;
+}
+
+.campo-relatorios label {
+  display: block;
+  margin-bottom: 7px;
+  color: #6e1423;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.campo-relatorios select {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #333;
+  font-size: 14px;
+  outline: none;
+}
+
+.campo-relatorios select:focus {
+  border-color: #6e1423;
+}
+
+.botao-relatorios {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 6px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 30px;
+  background: #430b0b;
+  color: #fff;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.botao-relatorios:hover {
+  background: #6b1515;
+}
+
+.mensagem-relatorios {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-left: 5px solid #5c0b0b;
+  background: #f5eeee;
+  color: #5c0b0b;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.estado-relatorios {
+  min-height: 220px;
+  padding: 24px;
+  border-left: 6px solid #5c0b0b;
+  background: #f8f8f8;
+}
+
+.estado-relatorios h2 {
+  margin-bottom: 18px;
+}
+
+.estado-relatorios p {
+  margin: 12px 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.estado-relatorios strong {
+  color: #5c0b0b;
+}
+
+.estado-vazio-relatorios {
+  min-height: 220px;
+  padding: 24px;
+  border: 2px dashed #ccc;
+  background: #fafafa;
+  text-align: center;
+}
+
+.estado-vazio-relatorios h2 {
+  margin-top: 45px;
+  margin-bottom: 12px;
+}
+
+.estado-vazio-relatorios p {
+  color: #777;
+  line-height: 1.5;
+}
 
