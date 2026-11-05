@@ -2227,3 +2227,65 @@ body {
 .conteudo-aviso button:hover {
     background: #865ff5;
 }
+
+.modal-aviso {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.conteudo-aviso {
+    background: #1b1b2b;
+    border: 1px solid #393950;
+    border-radius: 18px;
+    padding: 35px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.icone-aviso {
+    width: 65px;
+    height: 65px;
+    border: 5px solid #ff5364;
+    border-radius: 50%;
+    color: #ff5364;
+    font-size: 42px;
+    font-weight: bold;
+    line-height: 55px;
+    margin: 0 auto 20px;
+}
+
+.conteudo-aviso h2 {
+    font-size: 23px;
+    margin-bottom: 15px;
+}
+
+.conteudo-aviso p {
+    color: #c7c7d8;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.conteudo-aviso button {
+    background: #7045e8;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 55px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.conteudo-aviso button:hover {
+    background: #865ff5;
+}
