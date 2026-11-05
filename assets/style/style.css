@@ -2289,3 +2289,39 @@ body {
 .conteudo-aviso button:hover {
     background: #865ff5;
 }
+
+ .modal-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.65);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                }
+
+                .modal-conteudo {
+                    background: white;
+                    padding: 30px;
+                    border-radius: 12px;
+                    width: 90%;
+                    max-width: 400px;
+                    text-align: center;
+                }
+
+                .icone-alerta {
+                    width: 45px;
+                    height: 45px;
+                    border: 3px solid #b3261e;
+                    color: #b3261e;
+                    border-radius: 50%;
+                    font-size: 30px;
+                    font-weight: bold;
+                    margin: 0 auto 15px;
+                }
+
+                .modal-conteudo button {
+                    margin-top: 15px;
+                    padding: 10px 25px;
+                    cursor: pointer;
+                }
