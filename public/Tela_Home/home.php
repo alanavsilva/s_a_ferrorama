@@ -75,55 +75,43 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - TremTech</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/style/style.css">
     <script src="../../script/validacao.js"></script>
-  </head>
-
-<body>
+  
 
 <nav class="home_barra">
-<a class="home_logo" href="home.php"> 
+    <a class="home_logo" href="home.php">
+        <img class="home-imagem-trem" src="https://img.icons8.com/ios/50/ffffff/train.png" alt="Ícone de trem">
+        SISTEMA TREMTECH
+    </a>
 
-<link rel="stylesheet" href="assets/style/style.css">
-<nav class="home_barra">
-<a class="home_logo" href="home.php"> <img class="home-imagem-trem" src="https://img.icons8.com/ios/50/ffffff/train.png" alt="Ícone de trem"> SISTEMA TREMTECH </a>
     <a class="home_link" href="home.php">Home</a>
 
     <?php if ($ehAdministrador): ?>
-    <a class="home_link" href="../../public/Tela_Usuario/cadastrar_usuario.php">
-        Tela de Usuarios
-    </a>
+    <a class="home_link" href="../../public/Tela_Usuario/cadastrar_usuario.php">Usuários</a>
     <?php endif; ?>
 
-    <a class="home_link" href="../../public/Tela_Sensores/cadastrar_sensores.php">
-        Sensores
-    </a>
-
-    <a class="home_link" href="../../public/Tela_Rotas/cadastrar_rotas.php">
-        Rotas
-    </a>
-
-    <a class="home_link" href="../../public/Tela_Trens/cadastrar_trens.php">
-        Trens
-    </a>
-
-    <a class="home_link" href="../../public/Tela_Monitoramento/monitoramento.php" >
-        Monitoramento
-    </a>
-
-    <a class="home_link" href="../../public/Tela_Relatorios/relatorios.php">
-        Relatórios
-    </a>
+    <a class="home_link" href="../../public/Tela_Sensores/cadastrar_sensores.php">Sensores</a>
+    <a class="home_link" href="../../public/Tela_Rotas/cadastrar_rotas.php">Rotas</a>
+    <a class="home_link" href="../../public/Tela_Trens/cadastrar_trens.php">Trens</a>
+    <a class="home_link" href="../../public/Tela_Monitoramento/monitoramento.php">Monitoramento</a>
+    <a class="home_link" href="../../public/Tela_Relatorios/relatorios.php">Relatórios</a>
 
     <div class="home_usuario">
         <div class="home_bolinha"></div>
-
-        <div class="home_nome_usuario"> <strong><?= escapar($_SESSION['tipo'] ?? 'Usuário') ?></strong><br> <?= escapar($nome) ?> </div>
+        <div class="home_nome_usuario">
+            <strong><?= escapar($_SESSION['tipo'] ?? 'Usuário') ?></strong><br>
+            <?= escapar($nome) ?>
+        </div>
     </div>
 </nav>
 
 <main class="home_conteudo">
+
+
+
+
+
 
     <section class="home_boas_vindas">
         <div>
@@ -405,7 +393,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 </div>
 </section>
 
-    <section class="home_botoes home_logout" style="grid-column: 1 / -1; display: flex; justify-content: center; width: 100%;">
+   <section class="home_logout">
         <a class="home_botao" href="../../logout.php">Logout</a>
     </section>
 
