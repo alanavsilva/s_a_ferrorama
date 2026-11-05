@@ -25,8 +25,12 @@ CREATE TABLE rotas (
     extensao FLOAT NOT NULL,
     tempo INT NOT NULL,
     data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    descricao VARCHAR(255) NOT NULL DEFAULT '' AFTER nome,
+    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
     id_trem INT NOT NULL,
-    FOREIGN KEY (id_trem) REFERENCES trens(id_trem)
+    CONSTRAINT fk_rotas_trens
+    FOREIGN KEY (id_trem) REFERENCES trens(id_trem);
 );
 
 CREATE TABLE sensores (
