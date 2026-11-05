@@ -1,6 +1,22 @@
 
 <?php
+require_once "../../infra/conexao.php";
+require_once "../../infra/auth.php";
+
+exigir_login();
+$resultadoSensores = $conn->query("SELECT id_sensor, nome_sensor FROM sensores ORDER BY nome_sensor");
+
 $filtro = $_GET["status"] ?? "Todas";
+$sensorSelecionado = $_GET["sensor"] ?? "Sensor Norte";
+
+
+    $dadosSensor = [
+    "velocidade" => "98 km/h",
+    "temperatura" => "35º C",
+    "status" => "Alerta",
+    "mensagem" => "Velocidade acima da média"
+];
+    
 
 $falhas = [
     [
@@ -58,7 +74,66 @@ foreach ($falhas as $falha) {
 <body>
 
 <main>
-    <h1>Falhas operacionais</h1>
+
+    <h1>Painel de Monitoramento</h1>
+
+    <section>
+        <h2>Monitoramento em tempo real</h2>
+
+        <form method="GET">
+            <label for="sensor">Sensor:</label>
+
+         <select name="sensor" id="sensor" onchange="this.form.submit()">
+
+    <?php while ($sensor = $resultadoSensores->fetch_assoc()): ?>
+
+        <option
+            value="<?= htmlspecialchars($sensor["nome_sensor"]) ?>"
+            <?= $sensorSelecionado == $sensor["nome_sensor"] ? "selected" : "" ?>
+        >
+            <?= htmlspecialchars($sensor["nome_sensor"]) ?>
+        </option>
+
+    <?php endwhile; ?>
+
+</select>  
+        </form>
+    </section>
+
+    <section>
+        <article>
+            <h3>Velocidade atual</h3>
+
+            <p><?= htmlspecialchars($sensorSelecionado) ?></p>
+<p><?= $dadosSensor["velocidade"] ?></p>
+
+<p>Status operacional: <?= $dadosSensor["status"] ?></p>
+
+<p><?= $dadosSensor["mensagem"] ?></p>
+
+        </article>
+
+        <article>
+            <h3>Temperatura atual</h3>
+
+          <p><?= htmlspecialchars($sensorSelecionado) ?></p>
+
+<p><?= $dadosSensor["temperatura"] ?></p>
+
+<p>Status operacional: <?= $dadosSensor["status"] ?></p>
+
+<p>Temperatura estável</p>
+        </article>
+    </section>
+
+    <section>
+        <h2>Localização</h2>
+
+        <p><?= htmlspecialchars($sensorSelecionado) ?></p>
+    </section>
+
+    <section>
+        <h2>Falhas operacionais</h2>
 
     <form method="GET">
         <label for="status">Status:</label>
