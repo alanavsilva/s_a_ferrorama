@@ -101,3 +101,139 @@ header {
   display: flex;
   justify-content: space-between;
 }
+
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.body_login {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #fff;
+  color: #111;
+}
+
+.pagina-login {
+  min-height: 100vh;
+}
+
+.login-vizualizacao {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Lado esquerdo (vinho) */
+.painel-introducao {
+  width: 50%;
+  padding: 60px 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(135deg, #2e0a0c 0%, #5c1214 55%, #7a3d38 100%);
+}
+
+.icone-trem {
+  width: 100px;
+  height: auto;
+  margin-bottom: 6px;
+}
+
+.inicio_login {
+  margin-bottom: 28px;
+  color: #e9d6d6;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.painel-introducao h1 {
+  max-width: 520px;
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.introducao_login {
+  display: none;
+}
+
+/* Lado direito (formulário) */
+#login-cadastro {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #fff;
+}
+
+.login-painel {
+  width: 100%;
+  max-width: 380px;
+  padding: 36px 34px 34px;
+  background: #faf9fc;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.introducao_formulario {
+  margin-bottom: 4px;
+  color: #7a0a0a;
+  font-size: 13px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.login-painel h2 {
+  margin-bottom: 22px;
+  font-size: 28px;
+  font-weight: 400;
+  color: #111;
+}
+
+.login-painel label {
+  display: block;
+  margin: 16px 0 6px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.login-painel input {
+  display: block;
+  width: 100%;
+  height: 46px;
+  padding: 0 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.login-painel input::placeholder {
+  color: #999;
+}
+
+.login-painel input:focus {
+  border-color: #6e1423;
+}
+
+.login-painel [role="alert"] {
+  min-height: 18px;
+  margin: 12px 0;
+  color: #8a1010;
+  font-size: 13px;
+}
+
+#botao-envio {
+  width: 100%;
+  height: 46px;
+  border: none;
+  border-radius: 30px;
+  background: #430b0b;
+  color: #fff;
+  font-size: 16px;
+}
