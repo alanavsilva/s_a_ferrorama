@@ -42,18 +42,34 @@ while ($falha = $resultadoFalhas->fetch_assoc()) {
     ];
 }
 
-
 if (isset($_GET["acao"]) && isset($_GET["id"])) {
     $id = (int) $_GET["id"];
 
-    if (isset($falhas[$id])) {
-        if ($_GET["acao"] == "resolver") {
-            $falhas[$id]["status"] = "Resolvida";
-        } elseif ($_GET["acao"] == "reabrir") {
-            $falhas[$id]["status"] = "Não resolvida";
-        }
+    if ($_GET["acao"] == "resolver") {
+        $sql = "UPDATE falhas_operacionais
+                SET resolvida = 1
+                WHERE id_falha = ?";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $stmt->close();
+
+    } elseif ($_GET["acao"] == "reabrir") {
+        $sql = "UPDATE falhas_operacionais
+                SET resolvida = 0
+                WHERE id_falha = ?";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $stmt->close();
     }
+
+    header("Location: monitoramento.php?status=" . urlencode($filtro));
+    exit;
 }
+
 
 $resolvidas = 0;
 $naoResolvidas = 0;
@@ -170,7 +186,7 @@ foreach ($falhas as $falha) {
         <?php
         $encontrou = false;
 
-        foreach ($falhas as $id => $falha):
+        foreach ($falhas as $falha):
             if (
                 $filtro != "Todas" &&
                 $falha["status"] != $filtro
@@ -191,14 +207,14 @@ foreach ($falhas as $falha) {
                 <p>Status: <?= htmlspecialchars($falha["status"]) ?></p>
 
                 <?php if ($falha["status"] == "Não resolvida"): ?>
-                    <a href="?acao=resolver&id=<?= $id ?>&status=<?= urlencode($filtro) ?>">
-                        Marcar como resolvida
-                    </a>
-                <?php else: ?>
-                    <a href="?acao=reabrir&id=<?= $id ?>&status=<?= urlencode($filtro) ?>">
-                        Reabrir falha
-                    </a>
-                <?php endif; ?>
+    <a href="?acao=resolver&id=<?= $falha["id"] ?>&status=<?= urlencode($filtro) ?>">
+        Marcar como resolvida
+    </a>
+<?php else: ?>
+    <a href="?acao=reabrir&id=<?= $falha["id"] ?>&status=<?= urlencode($filtro) ?>">
+        Reabrir falha
+    </a>
+<?php endif; ?>
             </article>
 
         <?php endforeach; ?>
