@@ -202,7 +202,7 @@ if ($stmt) {
         <h1>Controle de rotas cadastradas</h1>
         <h2>Rotas do sistema</h2>
 
-        <?php if ($mensagemSucesso !== ''): ?>
+           <?php if ($mensagemSucesso !== ''): ?>
             <p class="mensagem-sucesso" role="status">
                 <?= escapar($mensagemSucesso) ?>
             </p>
@@ -211,6 +211,20 @@ if ($stmt) {
         <?php if ($mensagemAcesso !== ''): ?>
             <p role="alert"><?= escapar($mensagemAcesso) ?></p>
         <?php endif; ?>
+
+        <div class="admin-badge-user">
+
+            <div class="avatar-user"></div>
+
+            <div>
+                <strong>
+                    <?= $ehAdministrador ? 'Administrador' : 'Funcionário' ?>
+                </strong>
+
+                <span><?= escapar($_SESSION['nome'] ?? '') ?></span>
+            </div>
+
+        </div>
 
         <?php if ($ehAdministrador): ?>
             <button

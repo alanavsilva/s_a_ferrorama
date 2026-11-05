@@ -5,6 +5,8 @@ require_once "../../infra/auth.php";
 
 exigir_login();
 
+$ehAdministrador = strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
+
 $mensagem_relatorios = "";
 $sensor_relatorios = "";
 $periodo_relatorios = "";
@@ -39,6 +41,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $mensagem_relatorios = "Selecione um sensor e um período válidos.";
     }
 }
+
+
 ?>
 
 <!DOCTYPE html>
@@ -159,16 +163,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             </div>
 
-            <div class="perfil-relatorios">
+                <div class="admin-badge-user">
 
-                <div class="avatar-relatorios"></div>
+            <div class="avatar-user"></div>
 
-                <div class="dados-perfil-relatorios">
-                    <strong>Admin</strong>
-                    <span>alana.veiga</span>
-                </div>
+            <div>
+                <strong>
+                    <?= $ehAdministrador ? 'Administrador' : 'Funcionário' ?>
+                </strong>
 
+                <span>
+                    <?= escapar($_SESSION['nome'] ?? '') ?>
+                </span>
             </div>
+
+        </div>
+
 
         </header>
 

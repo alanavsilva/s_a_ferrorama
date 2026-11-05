@@ -204,7 +204,7 @@ if ($stmtBusca) {
         <h1>Controle de usuários cadastrados</h1>
         <h2>Administradores e Funcionários</h2>
 
-        <?php if ($mensagemSucesso !== ''): ?>
+          <?php if ($mensagemSucesso !== ''): ?>
             <p class="mensagem-sucesso" role="status">
                 <?= escapar($mensagemSucesso) ?>
             </p>
@@ -229,17 +229,6 @@ if ($stmtBusca) {
         </div>
 
         <?php if ($ehAdministrador): ?>
-
-            <div class="admin-badge-user">
-
-                <div class="avatar-user"></div>
-
-                <div>
-                    <strong>Admin</strong>
-                    <span><?= escapar($_SESSION['nome'] ?? 'Administrador') ?></span>
-                </div>
-
-            </div>
 
             <button
                 class="btn-cadastrar-user"

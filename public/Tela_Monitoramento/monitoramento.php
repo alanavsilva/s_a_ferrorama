@@ -184,7 +184,7 @@ if ($resultadoFalhas) {
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/map.png');"></span>
   Rota
 </a>
-<a class="ativo" href="../../public/Tela_Monitoramento/monitoramento.php">
+<a class="ativo"href="../../public/Tela_Monitoramento/monitoramento.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/visible.png');"></span>
   Monitoramento
 </a>
@@ -209,12 +209,20 @@ if ($resultadoFalhas) {
         <p class="painel-user">PAINEL DE MONITORAMENTO</p>
         <h1>Monitoramento em tempo real</h1>
 
-        <div class="admin-badge-user">
+       <div class="admin-badge-user">
+
             <div class="avatar-user"></div>
+
             <div>
-                <strong><?= $ehAdministrador ? 'Admin' : 'Funcionário' ?></strong>
-                <span><?= escapar($_SESSION['nome'] ?? '') ?></span>
+                <strong>
+                    <?= $ehAdministrador ? 'Administrador' : 'Funcionário' ?>
+                </strong>
+
+                <span>
+                    <?= escapar($_SESSION['nome'] ?? '') ?>
+                </span>
             </div>
+
         </div>
 
         <form method="GET" class="monitoramento-filtro">

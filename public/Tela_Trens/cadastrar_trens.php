@@ -9,7 +9,6 @@ exigir_login();
 
 $ehAdministrador = strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
 
-// Mensagens
 $mensagemSucesso = $_SESSION['mensagem_cadastro'] ?? '';
 unset($_SESSION['mensagem_cadastro']);
 
@@ -34,7 +33,6 @@ $erros = [];
 $tipos = ['Velocidade', 'Temperatura', 'Status'];
 $usuarios = [];
 
-// Busca os usuários responsáveis
 $resultadoUsuarios = $conn->query(
     "SELECT id_usuario, nome FROM usuarios ORDER BY nome"
 );
@@ -45,7 +43,6 @@ if ($resultadoUsuarios) {
     }
 }
 
-// Cadastro de trens
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$ehAdministrador) {
@@ -138,7 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST';
 
-// Busca dos trens
 $busca = trim($_GET['buscar'] ?? '');
 $textoBusca = "%" . $busca . "%";
 
