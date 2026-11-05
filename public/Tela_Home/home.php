@@ -410,6 +410,10 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     </section>
 
 </main>
+<footer class="home_rodape">
+    <p>Ferrorama - Sistema de Monitoramento Ferroviário</p>
+    <p>© 2026 TremTech</p>
+</footer>
 
 <script>
 const trens = <?= json_encode($trensVelocidade) ?>;

@@ -110,7 +110,8 @@ $sql = "SELECT id_usuario, nome, email, tipo, senha
                         </p>
 
                     <button id="botao-envio" type="submit">Entrar</button>
-</form>                   
+</form>    
+ <a href="landing.php">Voltar para a página inicial</a>              
 </div>
     </section>
 </main>

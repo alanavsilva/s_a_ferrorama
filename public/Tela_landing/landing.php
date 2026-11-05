@@ -127,6 +127,7 @@
 
 <footer class="landing_rodape">
     <p>Ferrorama - Sistema de Monitoramento Ferroviário</p>
+    <a href="landing.php">Voltar para o início</a>
 </footer>
 
 </body>
