@@ -2480,3 +2480,59 @@ article a:hover {
 .landing_card p {
     color: #fff;
 }
+
+.landing_sobre {
+    padding: 70px 60px;
+    text-align: center;
+    background: #fff;
+}
+
+.landing_sobre h2 {
+    color: #1d1d1f;
+    font-size: 32px;
+    margin: 15px 0;
+}
+
+.landing_sobre p {
+    max-width: 700px;
+    margin: 0 auto;
+    color: #6d6d73;
+    line-height: 1.6;
+}
+
+.landing_funcionalidades {
+    padding: 70px 60px;
+    background: #f8f5f6;
+    text-align: center;
+}
+
+.landing_funcionalidades h2 {
+    color: #1d1d1f;
+    font-size: 32px;
+    margin-bottom: 35px;
+}
+
+.landing_lista {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.landing_item {
+    padding: 30px 25px;
+    background: #fff;
+    border: 1px solid #e7d9dc;
+    border-radius: 10px;
+}
+
+.landing_item h3 {
+    color: #7b1023;
+    margin-bottom: 10px;
+}
+
+.landing_item p {
+    color: #6d6d73;
+    line-height: 1.5;
+}
