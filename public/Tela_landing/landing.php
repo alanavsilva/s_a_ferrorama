@@ -34,7 +34,6 @@
 
 <main>
 
-<!-- INÍCIO -->
 
 <section class="landing-inicio" id="inicio">
 

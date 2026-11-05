@@ -150,23 +150,59 @@ if ($resultadoFalhas) {
     <title>Monitoramento | TremTech</title>
     <link rel="stylesheet" href="../../assets/style/style.css">
 </head>
-<body class="body_geral">
-<div class="pagina">
-    <aside class="menu">
-        <img class="logo-trem"
-             src="https://img.icons8.com/ios/100/ffffff/train.png"
-             alt="Logo TremTech">
-        <p class="marca">SISTEMA TREMTECH</p>
 
-        <a href="../Tela_Home/home.php">Home</a>
-        <a href="../Tela_Usuario/cadastrar_usuario.php">Usuários</a>
-        <a href="../Tela_Sensores/cadastrar_sensores.php">Sensores</a>
-        <a href="../Tela_Trens/cadastrar_trens.php">Trens</a>
-        <a href="../Tela_Rotas/cadastrar_rotas.php">Rotas</a>
-        <a href="cadastrar_falha.php">Falhas</a>
-        <a class="ativo" href="monitoramento.php">Monitoramento</a>
-        <a href="../Tela_Relatorios/relatorios.php">Relatórios</a>
-        <a class="logout" href="../../logout.php">Logout</a>
+<body class="body_geral">
+   <div class="pagina">
+
+    <aside class="menu">
+       <img class="logo-trem"
+    src="https://img.icons8.com/ios/100/ffffff/train.png"
+    alt="Logo TremTech">
+
+  <p class="marca">SISTEMA TREMTECH</p>
+     <a href="../../public/Tela_Home/home.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');"></span>
+  Home
+</a>
+
+<a href="../../public/Tela_Usuario/cadastrar_usuario.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');"></span>
+  Usuários
+</a>
+
+<a href="../../public/Tela_Sensores/cadastrar_sensores.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');"></span>
+  Sensores
+</a>
+
+<a href="../../public/Tela_Trens/cadastrar_trens.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/train.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/train.png');"></span>
+  Trem
+</a>
+
+<a href="../../public/Tela_Rotas/cadastrar_rotas.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/map.png');"></span>
+  Rota
+</a>
+<a class="ativo" href="../../public/Tela_Monitoramento/monitoramento.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/visible.png');"></span>
+  Monitoramento
+</a>
+<a href="../../public/Tela_Falhas/cadastrar_falha.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
+  Falhas
+</a>
+
+<a href="../../public/Tela_Relatorios/relatorios.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/report-card.png');"></span>
+  Relatórios
+</a>
+
+
+<a class="logout" href="../../logout.php">
+  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>
+  Logout
+</a>
     </aside>
 
     <main class="content-user">
