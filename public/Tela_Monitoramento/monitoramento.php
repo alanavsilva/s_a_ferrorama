@@ -58,7 +58,58 @@ foreach ($falhas as $falha) {
 <body>
 
 <main>
-    <h1>Falhas operacionais</h1>
+
+    <h1>Painel de Monitoramento</h1>
+
+    <section>
+        <h2>Monitoramento em tempo real</h2>
+
+        <form method="GET">
+            <label for="sensor">Sensor:</label>
+
+            <select name="sensor" id="sensor">
+                <option value="Sensor Norte">Sensor Norte</option>
+                <option value="Sensor Sul">Sensor Sul</option>
+                <option value="Sensor Leste">Sensor Leste</option>
+                <option value="Sensor Oeste">Sensor Oeste</option>
+            </select>
+        </form>
+    </section>
+
+    <section>
+        <article>
+            <h3>Velocidade atual</h3>
+
+            <p>Sensor Norte</p>
+
+            <p>98 km/h</p>
+
+            <p>Status operacional: Alerta</p>
+
+            <p>Velocidade acima da média</p>
+        </article>
+
+        <article>
+            <h3>Temperatura atual</h3>
+
+            <p>Sensor Norte</p>
+
+            <p>35º C</p>
+
+            <p>Status operacional: Normal</p>
+
+            <p>Temperatura estável</p>
+        </article>
+    </section>
+
+    <section>
+        <h2>Localização</h2>
+
+        <p>Sensor Norte</p>
+    </section>
+
+    <section>
+        <h2>Falhas operacionais</h2>
 
     <form method="GET">
         <label for="status">Status:</label>
