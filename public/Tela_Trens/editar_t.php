@@ -77,10 +77,26 @@ if (!$usuarios) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar trem</title>
-    <link rel="stylesheet" href="../../assets/style/style.css">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
 </head>
 <body class="body_geral">
-<main class="conteudo">
+<div class="pagina">
+    <aside class="menu">
+        <img class="logo-trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
+        <p class="marca">SISTEMA TREMTECH</p>
+        <a href="../Tela_Home/home.php">⌂ &nbsp; Home</a>
+        <a href="../Tela_Usuario/cadastrar_usuario.php">♟ &nbsp; Usuários</a>
+        <a href="../Tela_Sensores/cadastrar_sensores.php">◉ &nbsp; Sensores</a>
+        <a class="ativo" href="cadastrar_trens.php">▰ &nbsp; Trens</a>
+        <a href="../Tela_Rotas/cadastrar_rotas.php">▥ &nbsp; Rotas</a>
+        <a href="../Tela_Falhas/cadastrar_falha.php">! &nbsp; Falhas</a>
+        <a href="../Tela_Monitoramento/monitoramento.php">◉ &nbsp; Monitoramento</a>
+        <a href="../Tela_Relatorios/relatorios.php">▣ &nbsp; Relatórios</a>
+        <a class="logout" href="../../logout.php" data-confirmar-logout><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>Logout</a>
+    </aside>
+    <main class="content-user">
+        <p class="painel-user">PAINEL ADMINISTRATIVO</p>
+        <div class="admin-badge-user card-recuado"><div class="avatar-user"></div><div><strong>Administrador</strong><span><?= escapar($_SESSION['nome'] ?? 'Administrador') ?></span></div></div>
     <h1>Editar trem</h1>
     <?php if ($erro !== ''): ?><p role="alert"><?= escapar($erro) ?></p><?php endif; ?>
     <form method="POST">
@@ -114,5 +130,7 @@ if (!$usuarios) {
         <a href="cadastrar_trens.php">Cancelar</a>
     </form>
 </main>
+</div>
+<script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>
 </html>

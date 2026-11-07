@@ -148,7 +148,7 @@ if ($resultadoFalhas) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoramento | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
 </head>
 
 <body class="body_geral">
@@ -156,7 +156,7 @@ if ($resultadoFalhas) {
 
     <aside class="menu">
        <img class="logo-trem"
-    src="https://img.icons8.com/ios/100/ffffff/train.png"
+    src="https://img.icons8.com/ios/100/701015/train.png"
     alt="Logo TremTech">
 
   <p class="marca">SISTEMA TREMTECH</p>
@@ -177,12 +177,12 @@ if ($resultadoFalhas) {
 
 <a href="../../public/Tela_Trens/cadastrar_trens.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/train.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/train.png');"></span>
-  Trem
+  Trens
 </a>
 
 <a href="../../public/Tela_Rotas/cadastrar_rotas.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/map.png');"></span>
-  Rota
+  Rotas
 </a>
 <a class="ativo"href="../../public/Tela_Monitoramento/monitoramento.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/visible.png');"></span>
@@ -199,16 +199,12 @@ if ($resultadoFalhas) {
 </a>
 
 
-<a class="logout" href="../../logout.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>
-  Logout
-</a>
+        <a class="logout" href="../../logout.php" data-confirmar-logout><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>Logout</a>
     </aside>
 
     <main class="content-user">
         <p class="painel-user">PAINEL DE MONITORAMENTO</p>
         <h1>Monitoramento em tempo real</h1>
-
        <div class="admin-badge-user">
 
             <div class="avatar-user"></div>
@@ -462,5 +458,6 @@ setInterval(() => {
         .setAttribute('transform', `translate(${x} ${y})`);
 }, 50);
 </script>
+<script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>
 </html>

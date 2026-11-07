@@ -123,12 +123,12 @@ if (!$faltas) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Falhas operacionais | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261105-2">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
 </head>
 <body class="body_geral">
 <div class="pagina">
     <aside class="menu">
-        <img class="logo-trem" src="https://img.icons8.com/ios/100/ffffff/train.png" alt="Logo TremTech">
+        <img class="logo-trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
         <p class="marca">SISTEMA TREMTECH</p>
         <a href="../Tela_Home/home.php">
             <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');"></span>
@@ -162,10 +162,7 @@ if (!$faltas) {
             <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png');"></span>
             Relatórios
         </a>
-        <a class="logout" href="../../logout.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png');"></span>
-            Logout
-        </a>
+        <a class="logout" href="../../logout.php" data-confirmar-logout><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>Logout</a>
     </aside>
 
     <main class="content-user">
@@ -179,8 +176,7 @@ if (!$faltas) {
         <?php if ($mensagem !== ''): ?>
             <p role="alert"><?= escapar($mensagem) ?></p>
         <?php endif; ?>
-
-        <div class="admin-badge-user">
+        <div class="admin-badge-user card-recuado">
             <div class="avatar-user"></div>
             <div>
                 <strong><?= $ehAdministrador ? 'Administrador' : 'Funcionário' ?></strong>
@@ -189,10 +185,6 @@ if (!$faltas) {
         </div>
 
         <?php if ($ehAdministrador): ?>
-            <button class="btn-cadastrar-user" id="btnAbrirCadastro" type="button"
-                    aria-expanded="<?= $manterFormularioAberto ? 'true' : 'false' ?>" aria-controls="cadastro">
-                CADASTRAR NOVA FALHA
-            </button>
             <section class="cadastro-usuario <?= $manterFormularioAberto ? 'ativo' : '' ?>" id="cadastro" <?= $manterFormularioAberto ? '' : 'hidden' ?>>
                 <form class="form-cadastro-user" method="POST">
                     <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
@@ -219,7 +211,16 @@ if (!$faltas) {
 
         <section class="home_caixa_falhas" id="falhas">
             <div class="falhas_cabecalho">
-                <h2 class="home_titulo_tabela">Falhas operacionais</h2>
+                <div class="falhas-cabecalho-acoes">
+                    <h2 class="home_titulo_tabela">Falhas operacionais</h2>
+                    <?php if ($ehAdministrador): ?>
+                        <button class="btn-cadastrar-user btn-cadastrar-user-compacto" id="btnAbrirCadastro"
+                                type="button" aria-expanded="<?= $manterFormularioAberto ? 'true' : 'false' ?>"
+                                aria-controls="cadastro">
+                            Cadastrar falha
+                        </button>
+                    <?php endif; ?>
+                </div>
                 <form method="GET" class="falhas_filtro">
                     <label for="status">Status</label>
                     <select id="status" name="status" onchange="this.form.submit()">
@@ -279,6 +280,7 @@ if (!$faltas) {
 })();
 </script>
 <?php endif; ?>
+<script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>
 </html>
 

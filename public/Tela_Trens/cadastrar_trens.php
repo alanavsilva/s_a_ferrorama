@@ -192,7 +192,7 @@ if ($stmtBusca) {
 
     <title>Cadastro Trens</title>
 
-    <link rel="stylesheet" href="../../assets/style/style.css">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
 </head>
 
 <body class="body_geral">
@@ -203,7 +203,7 @@ if ($stmtBusca) {
 
         <img
             class="logo-trem"
-            src="https://img.icons8.com/ios/100/ffffff/train.png"
+            src="https://img.icons8.com/ios/100/701015/train.png"
             alt="Logo TremTech"
         >
 
@@ -226,12 +226,12 @@ if ($stmtBusca) {
 
         <a class="ativo" href="../../public/Tela_Trens/cadastrar_trens.php">
             <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png');"></span>
-            Trem
+            Trens
         </a>
 
         <a href="../../public/Tela_Rotas/cadastrar_rotas.php">
             <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png');"></span>
-            Rota
+            Rotas
         </a>
 
         <a href="../../public/Tela_Monitoramento/monitoramento.php">
@@ -249,11 +249,8 @@ if ($stmtBusca) {
             Relatórios
         </a>
 
-        <a class="logout" href="../../logout.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png');"></span>
-            Logout
-        </a>
 
+        <a class="logout" href="../../logout.php" data-confirmar-logout><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>Logout</a>
     </aside>
 
     <main class="content-user">
@@ -280,8 +277,7 @@ if ($stmtBusca) {
                 <?= escapar($erroCampo) ?>
             </p>
         <?php endforeach; ?>
-
-        <div class="admin-badge-user">
+        <div class="admin-badge-user card-recuado">
 
             <div class="avatar-user"></div>
 
@@ -298,16 +294,6 @@ if ($stmtBusca) {
         </div>
 
         <?php if ($ehAdministrador): ?>
-
-            <button
-                class="btn-cadastrar-user"
-                id="btnAbrirCadastro"
-                type="button"
-                aria-expanded="<?= $manterFormularioAberto ? 'true' : 'false' ?>"
-                aria-controls="cadastro"
-            >
-                CADASTRAR NOVO TREM
-            </button>
 
             <section
                 class="cadastro-usuario"
@@ -418,7 +404,7 @@ if ($stmtBusca) {
 
         <?php endif; ?>
 
-        <section class="buscar-box-user">
+        <section class="buscar-box-user buscar-usuarios-linha">
 
             <form method="GET">
 
@@ -435,6 +421,14 @@ if ($stmtBusca) {
                 <button type="submit">Buscar</button>
 
             </form>
+
+            <?php if ($ehAdministrador): ?>
+                <button class="btn-cadastrar-user btn-cadastrar-user-compacto" id="btnAbrirCadastro"
+                        type="button" aria-expanded="<?= $manterFormularioAberto ? 'true' : 'false' ?>"
+                        aria-controls="cadastro">
+                    Cadastrar trem
+                </button>
+            <?php endif; ?>
 
         </section>
 
@@ -471,5 +465,6 @@ if ($stmtBusca) {
 
 <script src="../../script/validacao.js"></script>
 
+<script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>
 </html>

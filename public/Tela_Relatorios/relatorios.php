@@ -56,100 +56,68 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="../../assets/style/style.css">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
 </head>
 
 <body class="pagina-relatorios">
 
-<div class="layout-relatorios">
+<div class="pagina">
 
-    <aside class="menu-lateral-relatorios">
+    <aside class="menu">
 
-        <div class="menu">
+        <img
+            class="logo-trem"
+            src="https://img.icons8.com/ios/100/701015/train.png"
+            alt="Logo TremTech"
+        >
 
-            <img class="logo-trem"
-                src="https://img.icons8.com/ios/100/ffffff/train.png"
-                alt="Logo TremTech">
+        <p class="marca">SISTEMA TREMTECH</p>
 
-            <p class="marca">SISTEMA TREMTECH</p>
+        <a href="../Tela_Home/home.php">
+            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');"></span>
+            Home
+        </a>
 
-            <a href="../../public/Tela_Home/home.php">
-                <span class="icone"
-                    style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');
-                    -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');">
-                </span>
-                Home
-            </a>
+        <a href="../Tela_Usuario/cadastrar_usuario.php">
+            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');"></span>
+            Usuários
+        </a>
 
-            <a href="../../public/Tela_Usuario/cadastrar_usuario.php">
-                <span class="icone"
-                    style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');
-                    -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');">
-                </span>
-                Usuários
-            </a>
+        <a href="../Tela_Sensores/cadastrar_sensores.php">
+            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');"></span>
+            Sensores
+        </a>
 
-            <a href="../../public/Tela_Sensores/cadastrar_sensores.php">
-                <span class="icone"
-                    style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');
-                    -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');">
-                </span>
-                Sensores
-            </a>
+        <a href="../Tela_Trens/cadastrar_trens.php">
+            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png');"></span>
+            Trens
+        </a>
 
-            <a href="../../public/Tela_Trens/cadastrar_trens.php">
-                <span class="icone"
-                    style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png');
-                    -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png');">
-                </span>
-                Trem
-            </a>
+        <a href="../Tela_Rotas/cadastrar_rotas.php">
+            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png');"></span>
+            Rotas
+        </a>
 
-            <a href="../../public/Tela_Rotas/cadastrar_rotas.php">
-                <span class="icone"
-                    style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png');
-                    -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png');">
-                </span>
-                Rota
-            </a>
+        <a href="../Tela_Monitoramento/monitoramento.php">
+            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');"></span>
+            Monitoramento
+        </a>
 
-            <a href="../../public/Tela_Monitoramento/monitoramento.php">
-                <span class="icone"
-                    style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');
-                    -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');">
-                </span>
-                Monitoramento
-            </a>
+        <a href="../Tela_Falhas/cadastrar_falha.php">
+            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
+            Falhas
+        </a>
 
-            <a href="../../public/Tela_Falhas/cadastrar_falha.php">
-                <span class="icone"
-                    style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');
-                    -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');">
-                </span>
-                Falhas
-            </a>
+        <a class="ativo" href="relatorios.php">
+            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png');"></span>
+            Relatórios
+        </a>
 
-            <a class="ativo" href="../../public/Tela_Relatorios/relatorios.php">
-                <span class="icone"
-                    style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png');
-                    -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png');">
-                </span>
-                Relatórios
-            </a>
 
-            <a class="logout" href="../../logout.php">
-                <span class="icone"
-                    style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png');
-                    -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/logout-rounded.png');">
-                </span>
-                Logout
-            </a>
-
-        </div>
-
+        <a class="logout" href="../../logout.php" data-confirmar-logout><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>Logout</a>
     </aside>
 
-    <main class="conteudo-relatorios">
+    <main class="content-user conteudo-relatorios">
 
         <header class="cabecalho-relatorios">
 
@@ -162,8 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <h1>Relatórios do sistema</h1>
 
             </div>
-
-                <div class="admin-badge-user">
+                <div class="admin-badge-user card-recuado">
 
             <div class="avatar-user"></div>
 
@@ -357,5 +324,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 </div>
 
+<script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>
 </html>

@@ -59,31 +59,31 @@ $nomeUsuario = escapar((string)($_SESSION['nome'] ?? 'Administrador'));
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar usuário | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261021-edicao">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
 </head>
 <body class="body_geral pagina-edicao">
 <div class="pagina">
     <aside class="menu">
-        <img class="logo-trem" src="https://img.icons8.com/ios/100/ffffff/train.png" alt="Logo TremTech">
+        <img class="logo-trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
         <p class="marca">SISTEMA TREMTECH</p>
         <a href="../../public/Tela_Home/home.php">⌂ &nbsp; Home</a>
         <a class="ativo" href="cadastrar_usuario.php">♟ &nbsp; Usuários</a>
         <a href="../../public/Tela_Sensores/cadastrar_sensores.php">◉ &nbsp; Sensores</a>
-        <a href="../../public/Tela_Trens/cadastrar_trens.php">▰ &nbsp; Trem</a>
-        <a href="../../public/Tela_Rotas/cadastrar_rotas.php">▥ &nbsp; Rota</a>
+        <a href="../../public/Tela_Trens/cadastrar_trens.php">▰ &nbsp; Trens</a>
+        <a href="../../public/Tela_Rotas/cadastrar_rotas.php">▥ &nbsp; Rotas</a>
         <a href="../../public/Tela_Monitoramento/monitoramento.php">◉ &nbsp; Monitoramento</a>
 <a href="../../public/Tela_Falhas/cadastrar_falha.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
   Falhas
 </a>
         <a href="../../public/Tela_Relatorios/relatorios.php">▣ &nbsp; Relatórios</a>
-        <a class="logout" href="../../logout.php">⇥ Logout</a>
+        <a class="logout" href="../../logout.php" data-confirmar-logout><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>Logout</a>
     </aside>
     <main class="content-user">
         <p class="painel-user">PAINEL ADMINISTRATIVO</p>
         <h1>Controle de usuários cadastrados</h1>
         <h2>Atualize os dados do usuário</h2>
-        <div class="admin-badge-user"><div class="avatar-user"></div><div><strong>Administrador</strong><span><?= $nomeUsuario ?></span></div></div>
+        <div class="admin-badge-user card-recuado"><div class="avatar-user"></div><div><strong>Administrador</strong><span><?= $nomeUsuario ?></span></div></div>
 
         <a class="link-voltar-edicao" href="cadastrar_usuario.php">← Voltar para usuários</a>
         <section class="cadastro-usuario ativo formulario-edicao">
@@ -104,5 +104,6 @@ $nomeUsuario = escapar((string)($_SESSION['nome'] ?? 'Administrador'));
         </section>
     </main>
 </div>
+<script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>
 </html>

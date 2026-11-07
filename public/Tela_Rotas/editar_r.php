@@ -114,7 +114,7 @@ if (!$resultadoTrens) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar rota | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
 </head>
 
 <body class="body_geral pagina-edicao">
@@ -122,25 +122,27 @@ if (!$resultadoTrens) {
     <aside class="menu">
         <img
             class="logo-trem"
-            src="https://img.icons8.com/ios/100/ffffff/train.png"
+            src="https://img.icons8.com/ios/100/701015/train.png"
             alt="Logo TremTech"
         >
         <p class="marca">SISTEMA TREMTECH</p>
         <a href="../../public/Tela_Home/home.php">Home</a>
         <a href="../../public/Tela_Usuario/cadastrar_usuario.php">Usuários</a>
         <a href="../../public/Tela_Sensores/cadastrar_sensores.php">Sensores</a>
-        <a href="../../public/Tela_Trens/cadastrar_trens.php">Trem</a>
-        <a class="ativo" href="cadastrar_rotas.php">Rota</a>
+        <a href="../../public/Tela_Trens/cadastrar_trens.php">Trens</a>
+        <a class="ativo" href="cadastrar_rotas.php">Rotas</a>
         <a href="../../public/Tela_Monitoramento/monitoramento.php">Monitoramento</a>
 <a href="../../public/Tela_Falhas/cadastrar_falha.php">
   <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
   Falhas
 </a>
         <a href="../../public/Tela_Relatorios/relatorios.php">Relatórios</a>
-        <a class="logout" href="../../logout.php">Logout</a>
+        <a class="logout" href="../../logout.php" data-confirmar-logout><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>Logout</a>
     </aside>
 
     <main class="content-user">
+        <div class="admin-badge-user card-recuado"><div class="avatar-user"></div><div><strong>Administrador</strong><span><?= escapar($_SESSION['nome'] ?? 'Administrador') ?></span></div></div>
+
         <p class="painel-user">PAINEL ADMINISTRATIVO</p>
         <h1>Controle de rotas cadastradas</h1>
         <h2>Atualize os dados da rota</h2>
@@ -236,5 +238,6 @@ if (!$resultadoTrens) {
         </section>
     </main>
 </div>
+<script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>
 </html>
