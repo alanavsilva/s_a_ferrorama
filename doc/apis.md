@@ -30,12 +30,5 @@ Endpoints são endereços específicos de uma API que permitem acessar determina
 
 ## Como funciona a troca de dados no formato JSON?
 
-## Diferenças entre uma API e um sistema web tradicional.
+JSON é um formato utilizado para organizar e transmitir informações entre sistemas. Os dados são organizados em pares de chave e valor.
 
-## Como uma aplicação PHP pode consumir uma API?
-
-## Como uma API pode disponibilizar informações para outros sistemas?
-
-## Importância da autenticação, autorização e segurança no consumo de APIs.
-
-## Exemplos de utilização de APIs em sistemas empresariais.
