@@ -1,6 +1,7 @@
+
 <?php
 
-include "../../infra/conexao.php";
+require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
 
 exigir_administrador();
@@ -9,34 +10,34 @@ verificar_csrf();
 $id = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
 
 if (!$id || $id < 1) {
-    exit("usuário inválido.");
+    $_SESSION["aviso_exclusao"] = "Sensor inválido.";
+    header("Location: cadastrar_sensores.php");
+    exit;
 }
 
-$stmt = $conn->prepare("SELECT tipo FROM usuarios WHERE id_usuario = ?");
+$stmt = $conn->prepare("SELECT id_sensor FROM sensores WHERE id_sensor = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 
 $resultado = $stmt->get_result();
-$usuario = $resultado->fetch_assoc();
 
-if (!$usuario) {
-    exit("usuário não encontrado.");
+if ($resultado->num_rows === 0) {
+    $_SESSION["aviso_exclusao"] = "Sensor não encontrado.";
+    header("Location: cadastrar_sensores.php");
+    exit;
 }
 
-if ($usuario["tipo"] === "administrador") {
-    exit("este usuário não pode ser excluído.");
-}
-
-$sql = "DELETE FROM usuarios WHERE id_usuario = ?";
-
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare("DELETE FROM sensores WHERE id_sensor = ?");
 $stmt->bind_param("i", $id);
 
 if ($stmt->execute()) {
-    header("Location: cadastrar_usuario.php");
-    exit;
+    $_SESSION["mensagem_cadastro"] = "Sensor excluído com sucesso!";
 } else {
-    echo "erro ao excluir usuário.";
+    error_log("Erro ao excluir sensor: " . $stmt->error);
+    $_SESSION["aviso_exclusao"] = "Não foi possível excluir este sensor.";
 }
+
+header("Location: cadastrar_sensores.php");
+exit;
 
 ?>

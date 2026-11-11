@@ -5,6 +5,26 @@ require_once "../Tela_Sensores/visualizacao_sensores.php";
 require_once "../../infra/apis/clima.php";
 
 $dadosClima = consultarClima();
+$iconesClima = [
+    'Céu limpo' => '☀️',
+    'Predominantemente limpo' => '🌤️',
+    'Parcialmente nublado' => '⛅',
+    'Nublado' => '☁️',
+    'Neblina' => '🌫️',
+    'Garoa leve' => '🌦️',
+    'Garoa moderada' => '🌧️',
+    'Garoa intensa' => '🌧️',
+    'Chuva leve' => '🌦️',
+    'Chuva moderada' => '🌧️',
+    'Chuva intensa' => '🌧️',
+    'Pancadas de chuva leves' => '🌦️',
+    'Pancadas de chuva moderadas' => '🌧️',
+    'Pancadas de chuva intensas' => '🌧️',
+    'Trovoadas' => '⛈️',
+    'Trovoadas com granizo' => '⛈️',
+    'Trovoadas com granizo intenso' => '⛈️'
+];
+$iconeClima = $iconesClima[$dadosClima['condicao'] ?? ''] ?? '☁️';
 
 exigir_login();
 
@@ -75,55 +95,43 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - TremTech</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/style/style.css">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
     <script src="../../script/validacao.js"></script>
-  </head>
-
-<body>
+  
 
 <nav class="home_barra">
-<a class="home_logo" href="home.php"> 
+    <a class="home_logo" href="home.php">
+        <img class="home-imagem-trem" src="https://img.icons8.com/ios/50/701015/train.png" alt="Ícone de trem">
+        SISTEMA TREMTECH
+    </a>
 
-<link rel="stylesheet" href="assets/style/style.css">
-<nav class="home_barra">
-<a class="home_logo" href="home.php"> <img class="home-imagem-trem" src="https://img.icons8.com/ios/50/ffffff/train.png" alt="Ícone de trem"> SISTEMA TREMTECH </a>
     <a class="home_link" href="home.php">Home</a>
 
-    <?php if ($ehAdministrador): ?>
-    <a class="home_link" href="../../public/Tela_Usuario/cadastrar_usuario.php">
-        Tela de Usuarios
-    </a>
-    <?php endif; ?>
+    <a class="home_link" href="../../public/Tela_Usuario/cadastrar_usuario.php">Usuários</a>
 
-    <a class="home_link" href="../../public/Tela_Sensores/cadastrar_sensores.php">
-        Sensores
-    </a>
+    <a class="home_link" href="../../public/Tela_Sensores/cadastrar_sensores.php">Sensores</a>
+    <a class="home_link" href="../../public/Tela_Rotas/cadastrar_rotas.php">Rotas</a>
+    <a class="home_link" href="../../public/Tela_Trens/cadastrar_trens.php">Trens</a>
+    <a class="home_link" href="../../public/Tela_Falhas/cadastrar_falha.php">Falhas</a>
+    <a class="home_link" href="../../public/Tela_Monitoramento/monitoramento.php">Monitoramento</a>
+    <a class="home_link" href="../../public/Tela_Relatorios/relatorios.php">Relatórios</a>
 
-    <a class="home_link" href="../../public/Tela_Rotas/cadastrar_rotas.php">
-        Rotas
-    </a>
-
-    <a class="home_link" href="../../public/Tela_Trens/cadastrar_trens.php">
-        Trens
-    </a>
-
-    <a class="home_link" href="../../public/Tela_Monitoramento/monitoramento.php" >
-        Monitoramento
-    </a>
-
-    <a class="home_link" href="../../public/Tela_Relatorios/relatorios.php">
-        Relatórios
-    </a>
-
+    <a class="home-logout-link" href="../../logout.php" data-confirmar-logout>Logout</a>
     <div class="home_usuario">
         <div class="home_bolinha"></div>
-
-        <div class="home_nome_usuario"> <strong><?= escapar($_SESSION['tipo'] ?? 'Usuário') ?></strong><br> <?= escapar($nome) ?> </div>
+        <div class="home_nome_usuario">
+            <strong><?= escapar($_SESSION['tipo'] ?? 'Usuário') ?></strong><br>
+            <?= escapar($nome) ?>
+        </div>
     </div>
 </nav>
 
 <main class="home_conteudo">
+
+
+
+
+
 
     <section class="home_boas_vindas">
         <div>
@@ -182,6 +190,10 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <h2>Acesso rápido</h2>
 
     <div class="home_atalhos_lista">
+        <?php if ($ehAdministrador): ?>
+        <a href="../Tela_Usuario/cadastrar_usuario.php">
+            Cadastrar usuário
+        </a>
         <a href="../Tela_Sensores/cadastrar_sensores.php">
             Cadastrar sensor
         </a>
@@ -193,9 +205,31 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
         <a href="../Tela_Rotas/cadastrar_rotas.php">
             Cadastrar rota
         </a>
-
+        <a href="../Tela_Falhas/cadastrar_falha.php">
+            Cadastrar falha
+        </a>
+        <?php else: ?>
+        <a href="../Tela_Usuario/cadastrar_usuario.php">
+            Tela de usuários
+        </a>
+        <a href="../Tela_Sensores/cadastrar_sensores.php">
+            Tela de sensores
+        </a>
+        <a href="../Tela_Trens/cadastrar_trens.php">
+            Tela de trens
+        </a>
+        <a href="../Tela_Rotas/cadastrar_rotas.php">
+            Tela de rotas
+        </a>
+        <a href="../Tela_Falhas/cadastrar_falha.php#falhas">
+            Ver falhas registradas
+        </a>
+        <?php endif; ?>
         <a href="../Tela_Monitoramento/monitoramento.php">
-            Monitorar falhas
+            Ver monitoramento
+        </a>
+        <a href="../Tela_Relatorios/relatorios.php">
+            Relatórios
         </a>
     </div>
 </section>
@@ -205,41 +239,38 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <h2>Clima em Joinville - SC</h2>
 
     <?php if (isset($dadosClima['erro'])): ?>
-        <p><?= htmlspecialchars($dadosClima['erro'], ENT_QUOTES, 'UTF-8') ?></p>
+        <p class="clima-erro" role="alert"><?= htmlspecialchars($dadosClima['erro'], ENT_QUOTES, 'UTF-8') ?></p>
     <?php else: ?>
-        <p>
-            <strong>Temperatura:</strong>
-            <?= htmlspecialchars((string) $dadosClima['temperatura']) ?> °C
-        </p>
+        <div class="clima-resumo">
+            <div class="clima-icone" aria-hidden="true"><?= $iconeClima ?></div>
+            <div class="clima-resumo-texto">
+                <span><?= htmlspecialchars($dadosClima['condicao'], ENT_QUOTES, 'UTF-8') ?></span>
+                <strong><?= htmlspecialchars((string) $dadosClima['temperatura'], ENT_QUOTES, 'UTF-8') ?>°C</strong>
+                <small>Temperatura atual</small>
+            </div>
+        </div>
 
-        <p>
-            <strong>Condição:</strong>
-            <?= htmlspecialchars($dadosClima['condicao']) ?>
-        </p>
+        <div class="clima-detalhes">
+            <div class="clima-dado">
+                <span>Sensação térmica</span>
+                <strong><?= htmlspecialchars((string) $dadosClima['sensacao'], ENT_QUOTES, 'UTF-8') ?>°C</strong>
+            </div>
+            <div class="clima-dado">
+                <span>Umidade</span>
+                <strong><?= htmlspecialchars((string) $dadosClima['umidade'], ENT_QUOTES, 'UTF-8') ?>%</strong>
+            </div>
+            <div class="clima-dado">
+                <span>Vento</span>
+                <strong><?= htmlspecialchars((string) $dadosClima['vento'], ENT_QUOTES, 'UTF-8') ?> km/h</strong>
+            </div>
+            <div class="clima-dado">
+                <span>Precipitação</span>
+                <strong><?= htmlspecialchars((string) $dadosClima['precipitacao'], ENT_QUOTES, 'UTF-8') ?> mm</strong>
+            </div>
+        </div>
 
-        <p>
-            <strong>Sensação térmica:</strong>
-            <?= htmlspecialchars((string) $dadosClima['sensacao']) ?> °C
-        </p>
-
-        <p>
-            <strong>Umidade:</strong>
-            <?= htmlspecialchars((string) $dadosClima['umidade']) ?>%
-        </p>
-
-        <p>
-            <strong>Vento:</strong>
-            <?= htmlspecialchars((string) $dadosClima['vento']) ?> km/h
-        </p>
-
-        <p>
-            <strong>Precipitação:</strong>
-            <?= htmlspecialchars((string) $dadosClima['precipitacao']) ?> mm
-        </p>
-
-        <p>
-            <strong>Última atualização informada pela API:</strong>
-            <?= htmlspecialchars((string) $dadosClima['atualizado']) ?>
+        <p class="clima-atualizado">
+            Atualizado: <?= htmlspecialchars((string) $dadosClima['atualizado'], ENT_QUOTES, 'UTF-8') ?>
         </p>
     <?php endif; ?>
 
@@ -405,11 +436,12 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 </div>
 </section>
 
-    <section class="home_botoes home_logout" style="grid-column: 1 / -1; display: flex; justify-content: center; width: 100%;">
-        <a class="home_botao" href="../../logout.php">Logout</a>
-    </section>
 
 </main>
+<footer class="home_rodape">
+    <p>Ferrorama - Sistema de Monitoramento Ferroviário</p>
+    <p>2026 TremTech</p>
+</footer>
 
 <script>
 const trens = <?= json_encode($trensVelocidade) ?>;
@@ -434,5 +466,5 @@ mostrarTrem();
 setInterval(mostrarTrem, 3000);
 </script>
 
+<script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>
-

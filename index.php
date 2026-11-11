@@ -110,7 +110,10 @@ $sql = "SELECT id_usuario, nome, email, tipo, senha
                         </p>
 
                     <button id="botao-envio" type="submit">Entrar</button>
-</form>                   
+</form>    
+ <a href="public/Tela_Landing/landing.php" class="botao-landing">
+    Conheça o Ferrorama
+</a>
 </div>
     </section>
 </main>
