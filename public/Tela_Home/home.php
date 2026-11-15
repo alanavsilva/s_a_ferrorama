@@ -95,7 +95,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - TremTech</title>
 
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
     <script src="../../script/validacao.js"></script>
   
 

@@ -13,7 +13,6 @@ CREATE TABLE trens (
     id_trem INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
     velocidade_media FLOAT NOT NULL,
-    tipo ENUM('Velocidade', 'Temperatura', 'Status') NOT NULL,
     id_usuario INT NULL,
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );

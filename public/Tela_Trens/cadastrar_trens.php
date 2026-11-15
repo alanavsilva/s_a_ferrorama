@@ -26,11 +26,9 @@ $mensagemAcesso = '';
 
 $nome = '';
 $velocidade = '';
-$tipo = '';
 $id_usuario = '';
 $erros = [];
 
-$tipos = ['Velocidade', 'Temperatura', 'Status'];
 $usuarios = [];
 
 $resultadoUsuarios = $conn->query(
@@ -55,10 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $nome = trim($_POST['nome'] ?? '');
         $velocidade = trim($_POST['velocidade'] ?? '');
-        $tipo = $_POST['tipo'] ?? '';
         $id_usuario = filter_input(INPUT_POST, 'id_usuario', FILTER_VALIDATE_INT) ?: '';
 
-        if ($nome === '' || $velocidade === '' || $tipo === '' || $id_usuario === '') {
+        if ($nome === '' || $velocidade === '' || $id_usuario === '') {
             $mensagem = "Preencha todos os campos.";
 
         } elseif (mb_strlen($nome) < 3) {
@@ -66,9 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         } elseif (!is_numeric($velocidade) || $velocidade < 1 || $velocidade > 600) {
             $erros['velocidade'] = 'Use um valor entre 1 e 600 km/h.';
-
-        } elseif (!in_array($tipo, $tipos, true)) {
-            $mensagem = "Tipo de trem inválido.";
 
         } else {
 
@@ -89,8 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $velocidadeBanco = (float)$velocidade;
                 $idUsuarioBanco = (int)$id_usuario;
 
-                $sql = "INSERT INTO trens (nome, velocidade_media, tipo, id_usuario)
-                        VALUES (?, ?, ?, ?)";
+                $sql = "INSERT INTO trens (nome, velocidade_media, id_usuario)
+                        VALUES (?, ?, ?)";
 
                 $stmt = $conn->prepare($sql);
 
@@ -99,13 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 } else {
 
-                    $stmt->bind_param(
-                        "sdsi",
-                        $nome,
-                        $velocidadeBanco,
-                        $tipo,
-                        $idUsuarioBanco
-                    );
+                    $stmt->bind_param("sdi", $nome, $velocidadeBanco, $idUsuarioBanco);
 
                     try {
 
@@ -142,13 +130,11 @@ $sql = "SELECT
             t.id_trem,
             t.nome,
             t.velocidade_media,
-            t.tipo,
             t.id_usuario,
             u.nome AS nome_responsavel
         FROM trens t
         LEFT JOIN usuarios u ON u.id_usuario = t.id_usuario
         WHERE t.nome LIKE ?
-           OR t.tipo LIKE ?
            OR u.nome LIKE ?
         ORDER BY t.nome";
 
@@ -156,12 +142,7 @@ $stmtBusca = $conn->prepare($sql);
 
 if ($stmtBusca) {
 
-    $stmtBusca->bind_param(
-        "sss",
-        $textoBusca,
-        $textoBusca,
-        $textoBusca
-    );
+    $stmtBusca->bind_param("ss", $textoBusca, $textoBusca);
 
     if ($stmtBusca->execute()) {
         $resultado = $stmtBusca->get_result();
@@ -192,7 +173,7 @@ if ($stmtBusca) {
 
     <title>Cadastro Trens</title>
 
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
 </head>
 
 <body class="body_geral">
@@ -342,30 +323,7 @@ if ($stmtBusca) {
 
                     </div>
 
-                    <div class="campo-user">
-
-                        <label for="tipo">Tipo/categoria</label>
-
-                        <select id="tipo" name="tipo" required>
-
-                            <option value="">Selecione o tipo</option>
-
-                            <?php foreach ($tipos as $tipoOpcao): ?>
-
-                                <option
-                                    value="<?= escapar($tipoOpcao) ?>"
-                                    <?= $tipo === $tipoOpcao ? 'selected' : '' ?>
-                                >
-                                    <?= escapar($tipoOpcao) ?>
-                                </option>
-
-                            <?php endforeach; ?>
-
-                        </select>
-
-                    </div>
-
-                    <div class="campo-user">
+                    <div class="campo-user campo-responsavel-trem">
 
                         <label for="id_usuario">Usuário responsável</label>
 
@@ -414,7 +372,7 @@ if ($stmtBusca) {
                     type="text"
                     id="buscar"
                     name="buscar"
-                    placeholder="Nome, tipo ou responsável"
+                    placeholder="Nome ou responsável"
                     value="<?= escapar($busca) ?>"
                 >
 

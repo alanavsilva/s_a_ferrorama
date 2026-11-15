@@ -14,7 +14,7 @@ function mostrar_trens($resultado): void
     ?>
     <table class="tabela-usuarios tabela-trens">
         <thead><tr>
-            <th>Nome</th><th>Velocidade média</th><th>Tipo/Categoria</th><th>Usuário responsável</th>
+            <th>Nome</th><th>Velocidade média</th><th>Usuário responsável</th>
             <?php if ($ehAdministrador): ?><th>Ação</th><?php endif; ?>
         </tr></thead>
         <tbody>
@@ -22,7 +22,6 @@ function mostrar_trens($resultado): void
             <tr>
                 <td><?= escapar($trem['nome'] ?? '') ?></td>
                 <td><?= escapar((string)($trem['velocidade_media'] ?? '')) ?> km/h</td>
-                <td><?= escapar($trem['tipo'] ?? '') ?></td>
                 <td><?= escapar($trem['nome_responsavel'] ?? '—') ?></td>
                 <?php if ($ehAdministrador): ?>
                     <td class="acao_user">

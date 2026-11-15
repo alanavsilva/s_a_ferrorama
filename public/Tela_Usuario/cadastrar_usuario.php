@@ -134,7 +134,7 @@ if ($stmtBusca) {
 
     <title>Cadastro Usuário</title>
 
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
 
 </head>
 

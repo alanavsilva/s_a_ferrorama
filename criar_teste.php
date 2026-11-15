@@ -4,7 +4,7 @@ require_once "infra/conexao.php";
 $nome = "Administrador Teste";
 $email = "teste@exemplo.com";
 $senha = "Teste123";
-$tipo = "administrador";
+$tipo = "Administrador";
 
 $sql = "SELECT id_usuario FROM usuarios WHERE email = ?";
 $stmt = $conn->prepare($sql);

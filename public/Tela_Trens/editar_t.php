@@ -3,7 +3,6 @@ require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 exigir_administrador();
 
-$tipos = ['Velocidade', 'Temperatura', 'Status'];
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id || $id < 1) {
     http_response_code(400);
@@ -11,7 +10,7 @@ if (!$id || $id < 1) {
 }
 
 $erro = '';
-$stmt = $conn->prepare('SELECT id_trem, nome, velocidade_media, tipo, id_usuario FROM trens WHERE id_trem = ?');
+$stmt = $conn->prepare('SELECT id_trem, nome, velocidade_media, id_usuario FROM trens WHERE id_trem = ?');
 $stmt->bind_param('i', $id);
 $stmt->execute();
 $trem = $stmt->get_result()->fetch_assoc();
@@ -23,18 +22,16 @@ if (!$trem) {
 
 $nome = $trem['nome'];
 $velocidade = (string)$trem['velocidade_media'];
-$tipo = $trem['tipo'];
 $usuarioSelecionado = (int)$trem['id_usuario'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verificar_csrf();
     $nome = trim($_POST['nome'] ?? '');
     $velocidade = trim($_POST['velocidade_media'] ?? '');
-    $tipo = $_POST['tipo'] ?? '';
     $usuario = filter_var($_POST['id_usuario'] ?? null, FILTER_VALIDATE_INT);
     $velocidadeNumero = filter_var($velocidade, FILTER_VALIDATE_FLOAT);
 
-    if (mb_strlen($nome) < 3 || mb_strlen($nome) > 100 || $velocidadeNumero === false || $velocidadeNumero < 1 || $velocidadeNumero > 600 || !in_array($tipo, $tipos, true) || !$usuario || $usuario < 1) {
+    if (mb_strlen($nome) < 3 || mb_strlen($nome) > 100 || $velocidadeNumero === false || $velocidadeNumero < 1 || $velocidadeNumero > 600 || !$usuario || $usuario < 1) {
         $erro = 'Confira os dados do trem e o usuário responsável.';
     } else {
         $check = $conn->prepare('SELECT id_usuario FROM usuarios WHERE id_usuario = ?');
@@ -45,8 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$usuarioExiste) {
             $erro = 'Selecione um usuário cadastrado.';
         } else {
-            $stmt = $conn->prepare('UPDATE trens SET nome = ?, velocidade_media = ?, tipo = ?, id_usuario = ? WHERE id_trem = ?');
-            $stmt->bind_param('sdsii', $nome, $velocidadeNumero, $tipo, $usuario, $id);
+            $stmt = $conn->prepare('UPDATE trens SET nome = ?, velocidade_media = ?, id_usuario = ? WHERE id_trem = ?');
+            $stmt->bind_param('sdii', $nome, $velocidadeNumero, $usuario, $id);
             try {
                 $stmt->execute();
                 $stmt->close();
@@ -77,7 +74,7 @@ if (!$usuarios) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar trem</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
 </head>
 <body class="body_geral">
 <div class="pagina">
@@ -108,14 +105,6 @@ if (!$usuarios) {
         <div>
             <label for="velocidade_media">Velocidade média (km/h)</label>
             <input type="number" id="velocidade_media" name="velocidade_media" min="1" max="600" step="any" required value="<?= escapar($velocidade) ?>">
-        </div>
-        <div>
-            <label for="tipo">Tipo/categoria</label>
-            <select id="tipo" name="tipo" required>
-                <?php foreach ($tipos as $opcao): ?>
-                    <option value="<?= escapar($opcao) ?>" <?= $tipo === $opcao ? 'selected' : '' ?>><?= escapar($opcao) ?></option>
-                <?php endforeach; ?>
-            </select>
         </div>
         <div>
             <label for="id_usuario">Usuário responsável</label>

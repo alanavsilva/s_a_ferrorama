@@ -114,7 +114,7 @@ if (!$resultadoTrens) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar rota | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261107-header20">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
 </head>
 
 <body class="body_geral pagina-edicao">
