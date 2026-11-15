@@ -32,7 +32,6 @@ Em uma demonstração ferroviária, informações sobre trens, percursos, respon
 | Administrador | Cadastrar, consultar, editar e excluir usuários, trens, rotas e sensores; registrar falhas e resolver ou reabrir ocorrências; consultar Home, monitoramento e relatórios. |
 | Funcionário | Consultar as informações liberadas, acompanhar falhas e acessar Home, monitoramento e relatórios. Não pode executar ações administrativas. |
 
-
 ## Estrutura
 
 assets/      CSS e imagens
@@ -52,3 +51,20 @@ manual.md    Guia para quem vai usar o sistema
 - **Alana:** organizou a equipe e a estrutura do projeto, pesquisou sobre CRUD e contribuiu com a documentação, a licença, a estilização e o desenvolvimento de diferentes telas.
 - **Piettra:** trabalhou no README, login e nas telas de cadastro e em outras partes da aplicação, além de colaborar com a estilização e os ajustes visuais.
 - **Nicole:** desenvolveu a tela de home, pesquisou a identidade visual e também colaborou na criação e nos ajustes de outras telas do sistema.
+
+## Requisitos funcionais
+
+- **RF-01 —** O sistema deve apresentar uma página pública com informações do TremTech e acesso ao login.
+- **RF-02 —** O sistema deve autenticar usuários, manter a sessão e permitir logout.
+- **RF-03 —** O sistema deve aplicar permissões diferentes para Administradores e Funcionários.
+- **RF-04 —** O sistema deve apresentar na Home os totais de usuários, trens, rotas e sensores.
+- **RF-05 —** O sistema deve permitir ao Administrador cadastrar, consultar, pesquisar, editar e excluir usuários.
+- **RF-06 —** O sistema deve permitir ao Administrador cadastrar, consultar, pesquisar, editar e excluir trens com um usuário responsável.
+- **RF-07 —** O sistema deve permitir ao Administrador cadastrar, consultar, pesquisar, editar e excluir rotas vinculadas a trens.
+- **RF-08 —** O sistema deve permitir ao Administrador cadastrar, consultar, pesquisar, editar e excluir sensores vinculados a trens e rotas.
+- **RF-09 —** O sistema deve permitir ao Administrador registrar, resolver e reabrir falhas; Funcionários devem poder consultá-las.
+- **RF-10 —** O sistema deve permitir selecionar um sensor e visualizar informações demonstrativas no monitoramento.
+- **RF-11 —** O sistema deve apresentar relatórios de falhas por sensor e mês.
+- **RF-12 —** O sistema deve consultar o clima e permitir consulta de endereço por CEP na Home.
+- **RF-13 —** O sistema deve salvar os dados cadastrados no banco de dados.
+- **RF-14 —** O sistema deve adaptar as páginas a diferentes tamanhos de tela.

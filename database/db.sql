@@ -47,3 +47,28 @@ CREATE TABLE falhas_operacionais (
     resolvida TINYINT(1) NOT NULL DEFAULT 0,
     FOREIGN KEY (id_sensor) REFERENCES sensores(id_sensor)
 );
+
+INSERT INTO usuarios (id_usuario, nome, email, tipo, senha) VALUES
+(1, 'Alana Veiga', 'alana@exemplo.com', 'Administrador', '$2y$10$bXVcpJfCXaNrKVunKTAEsOaFtuKi2Yfv5SmWhNZ9mjOqLl15fcs2S'),
+(2, 'Nicole Beloni', 'nicole@exemplo.com', 'Funcionário', '$2y$10$xhmKTckVojt1IQEzHqBfmOHqPa/g5cYZV7vgb/vHhtdVKStR8d85C'),
+(3, 'Piettra Cidral', 'piettra@exemplo.com', 'Funcionário', '$2y$10$CwPl0pjF6fLWaGpw25O3zuwpMxWripMrVQkpRbjP1aPRWh40BCSG6');
+
+INSERT INTO trens (id_trem, nome, velocidade_media, id_usuario) VALUES
+(1, 'Trem Norte', 72, 2),
+(2, 'Trem Central', 95, 3),
+(3, 'Trem Sul', 64, 2);
+
+INSERT INTO rotas (id_rotas, nome, descricao, extensao, tempo, id_trem) VALUES
+(1, 'Rota Norte', 'Percurso de demonstração da região norte.', 12.5, 25, 1),
+(2, 'Rota Central', 'Percurso de demonstração da região central.', 18.0, 35, 2),
+(3, 'Rota Sul', 'Percurso de demonstração da região sul.', 9.5, 20, 3);
+
+INSERT INTO sensores (id_sensor, nome_sensor, tipo_dado, id_trem, id_rotas) VALUES
+(1, 'Sensor Norte', 'Velocidade', 1, 1),
+(2, 'Sensor Central', 'Temperatura', 2, 2),
+(3, 'Sensor Sul', 'Status', 3, 3);
+
+INSERT INTO falhas_operacionais (id_falha, id_sensor, descricao, resolvida) VALUES
+(1, 1, 'Velocidade acima do limite.', 0),
+(2, 2, 'Temperatura elevada no percurso.', 1),
+(3, 3, 'Leitura de status instável.', 0);
