@@ -35,40 +35,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tiposPermitidos = ['Velocidade', 'Temperatura', 'Status'];
 
         if (
-            $nomeSensor === '' ||
+            mb_strlen($nomeSensor) < 3 ||
+            mb_strlen($nomeSensor) > 100 ||
             !in_array($tipoDado, $tiposPermitidos, true) ||
             !$idTrem ||
             !$idRotas
         ) {
             $mensagem = 'Preencha todos os campos corretamente.';
         } else {
-            $sql = "INSERT INTO sensores
-                    (nome_sensor, tipo_dado, id_trem, id_rotas)
-                    VALUES (?, ?, ?, ?)";
+            $stmtRota = $conn->prepare(
+                'SELECT id_rotas FROM rotas WHERE id_rotas = ? AND id_trem = ?'
+            );
+            $stmtRota->bind_param('ii', $idRotas, $idTrem);
+            $stmtRota->execute();
+            $rotaPertenceAoTrem = $stmtRota->get_result()->num_rows === 1;
+            $stmtRota->close();
 
-            $stmt = $conn->prepare($sql);
-
-            if (!$stmt) {
-                error_log('Erro ao preparar cadastro de sensor: ' . $conn->error);
-                $mensagem = 'Não foi possível concluir o cadastro.';
+            if (!$rotaPertenceAoTrem) {
+                $mensagem = 'A rota selecionada não pertence ao trem escolhido.';
             } else {
-                $stmt->bind_param(
-                    'ssii',
-                    $nomeSensor,
-                    $tipoDado,
-                    $idTrem,
-                    $idRotas
-                );
+                $sql = "INSERT INTO sensores
+                        (nome_sensor, tipo_dado, id_trem, id_rotas)
+                        VALUES (?, ?, ?, ?)";
+                $stmt = $conn->prepare($sql);
 
-                if ($stmt->execute()) {
-                    $_SESSION['mensagem_cadastro'] = 'Sensor cadastrado com sucesso!';
-                    header('Location: cadastrar_sensores.php');
-                    exit;
+                if (!$stmt) {
+                    error_log('Erro ao preparar cadastro de sensor: ' . $conn->error);
+                    $mensagem = 'Não foi possível concluir o cadastro.';
+                } else {
+                    $stmt->bind_param(
+                        'ssii',
+                        $nomeSensor,
+                        $tipoDado,
+                        $idTrem,
+                        $idRotas
+                    );
+
+                    try {
+                        if ($stmt->execute()) {
+                            $_SESSION['mensagem_cadastro'] = 'Sensor cadastrado com sucesso!';
+                            header('Location: cadastrar_sensores.php');
+                            exit;
+                        }
+                    } catch (mysqli_sql_exception $e) {
+                        error_log('Erro ao cadastrar sensor: ' . $e->getMessage());
+                    }
+
+                    $mensagem = 'Não foi possível concluir o cadastro. Confira os vínculos selecionados.';
+                    $stmt->close();
                 }
-
-                error_log('Erro ao cadastrar sensor: ' . $stmt->error);
-                $mensagem = 'Não foi possível concluir o cadastro.';
-                $stmt->close();
             }
         }
     }
@@ -84,7 +99,7 @@ if (!$resultadoTrens) {
 }
 
 // Buscar rotas
-$sqlRotas = "SELECT id_rotas, nome FROM rotas ORDER BY nome";
+$sqlRotas = "SELECT id_rotas, nome, id_trem FROM rotas ORDER BY nome";
 $resultadoRotas = $conn->query($sqlRotas);
 
 if (!$resultadoRotas) {
@@ -261,6 +276,7 @@ if ($stmtBusca) {
                             id="nome_sensor"
                             name="nome_sensor"
                             placeholder="Nome do sensor"
+                            maxlength="100"
                             required>
 
                     </div>
@@ -316,7 +332,7 @@ if ($stmtBusca) {
 
                                 <?php while ($rota = $resultadoRotas->fetch_assoc()): ?>
 
-                                    <option value="<?= (int) $rota['id_rotas'] ?>">
+                                    <option value="<?= (int) $rota['id_rotas'] ?>" data-trem="<?= (int) $rota['id_trem'] ?>">
                                         <?= escapar($rota['nome']) ?>
                                     </option>
 
@@ -411,6 +427,32 @@ function fecharAviso() {
 </script>
 
 <script src="../../script/validacao.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const trem = document.getElementById('id_trem');
+    const rota = document.getElementById('id_rotas');
+
+    if (!trem || !rota) return;
+
+    const filtrarRotas = () => {
+        const rotaSelecionada = rota.value;
+
+        Array.from(rota.options).forEach((opcao) => {
+            if (!opcao.value) return;
+
+            const compativel = opcao.dataset.trem === trem.value;
+            opcao.hidden = !compativel;
+
+            if (!compativel && opcao.value === rotaSelecionada) {
+                rota.value = '';
+            }
+        });
+    };
+
+    trem.addEventListener('change', filtrarRotas);
+    filtrarRotas();
+});
+</script>
 
 <script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>

@@ -1,191 +1,91 @@
-# SISTEMA FERRORAMA – TREMTECH
+# Ferrorama — TremTech
 
-## Sobre o Projeto
+O TremTech é uma aplicação web local para organizar a operação de uma ferrovia em escala de Ferrorama. Reúne cadastros de usuários, trens, rotas e sensores, permite registrar falhas e oferece telas de consulta, monitoramento demonstrativo e relatório de falhas.
 
-O **TREMTECH** é um sistema web desenvolvido para o gerenciamento e monitoramento de uma estação de Ferrorama.
+## Problema e objetivo
 
-O sistema permite acompanhar informações dos trens, como velocidade, localização, consumo de energia, quantidade de passageiros, falhas e alertas.
+Em uma demonstração ferroviária, informações sobre trens, percursos, responsáveis e ocorrências podem ficar espalhadas. O TremTech reúne esses dados em um sistema único, facilita a consulta e ajuda a equipe a explicar os vínculos entre os registros.
 
-Os dados serão armazenados em um banco de dados, permitindo o registro e a consulta de informações e históricos da operação.
+## Funcionalidades atuais
 
----
+- Login, logout e dois perfis de acesso: Administrador e Funcionário.
+- CRUD de usuários, trens, rotas e sensores, com pesquisa nas listagens.
+- Associação de trens a usuários responsáveis, rotas a trens e sensores a um trem e a uma rota desse mesmo trem.
+- Registro manual de falhas, filtro por estado e ações para resolver ou reabrir ocorrências.
+- Home com indicadores de cadastros, falhas, clima de Joinville e consulta de CEP.
+- Monitoramento demonstrativo com seleção de sensor, valores de exemplo e animação do percurso com ponte e desvios.
+- Relatório de falhas por sensor e mês.
 
-## Objetivos do sistema
+### Limites que devem ser explicados na demonstração
 
-O objetivo do Tremtech é desenvolver um sistema web simples, organizado e eficiente para auxiliar no gerenciamento da operações ferroviárias.
+O sistema **não recebe dados de sensores físicos**. A velocidade exibida vem da velocidade média cadastrada no trem; a temperatura é um valor demonstrativo. O alerta de velocidade é exibido acima de 100 km/h, mas não cria automaticamente uma falha. A animação do percurso usa um caminho ilustrativo fixo e não desenha a geometria cadastrada na rota.
 
-O sistema busca:
+O relatório atual consulta falhas por sensor e mês; não é um histórico de medições nem gera gráficos/exportações. Clima e consulta de CEP são funções auxiliares da Home e dependem de serviços externos.
 
-* Melhorar o gerenciamento da estação;
-* Registrar informações dos trens;
-* Monitorar a velocidade dos trens;
-* Exibir a localização dos trens;
-* Controlar a quantidade de passageiros;
-* Monitorar o consumo de energia;
-* Registrar falhas e problemas;
-* Exibir alertas;
-* Consultar históricos de monitoramento;
-* Facilitar o acesso dos funcionários às informações da operação.
+Para ver os requisitos funcionais, não funcionais, regras de negócio, limitações e roteiro de aceite, consulte [REQUISITOS.md](REQUISITOS.md). Para aprender a usar as telas, consulte [MANUAL.md](MANUAL.md).
 
-  ---
+## Tecnologias e ambiente
 
-## Requisitos funcionais
+- PHP 8.2 com MySQLi e extensões `mysqli` e `mbstring`.
+- MySQL/MariaDB. O ambiente desta versão foi verificado com MariaDB 10.4.
+- Apache e XAMPP para executar localmente.
+- HTML, CSS e JavaScript.
+- Navegador atualizado.
 
-RF01 – O sistema deve permitir que o usuário realize login .
+Não há instalação de dependências por Composer ou Node.js. A Home consulta Open-Meteo para o clima e ViaCEP para endereços; ícones e algumas imagens também vêm de serviços externos. Sem internet, essas partes podem ficar indisponíveis.
 
-RF02 – O sistema deve validar as credenciais informadas pelo usuário com os dados cadastrados no banco de dados.
+## Instalação local
 
-RF03 – O sistema deve criar uma sessão para o usuário após a autenticação realizada com sucesso.
+1. Instale o XAMPP e copie a pasta do projeto para `C:\xampp\htdocs`.
+2. Inicie Apache e MySQL pelo painel do XAMPP.
+3. Abra o phpMyAdmin e importe `database/db.sql` uma vez para criar `SA_FERRORAMA` e as tabelas.
+4. Copie `infra/conexao.local.example.php` para `infra/conexao.local.php`. Edite host, usuário, senha, banco e porta para corresponder ao MySQL local. O arquivo real fica ignorado pelo Git.
+5. Importe `database/usuarios_demo.sql` para criar as contas fictícias de demonstração.
+6. Abra a landing page em `http://localhost/<pasta-do-projeto>/public/Tela_landing/landing.php` ou vá direto para `http://localhost/<pasta-do-projeto>/index.php`. Inclua a porta no endereço se o Apache não usar a padrão.
 
-RF04 – O sistema deve direcionar o usuário autenticado para a tela principal do sistema.
+Importe `database/db.sql` em um banco vazio. Ele não recria tabelas existentes e não deve ser usado como forma de limpar um banco com dados. Faça uma cópia antes de qualquer reinicialização.
 
-RF05 – O sistema deve informar ao usuário quando as credenciais utilizadas no login forem inválidas.
+As contas de demonstração são fictícias e exclusivas para uso local; suas credenciais estão somente no [manual](MANUAL.md), não neste README. Não as reutilize em um sistema publicado.
 
-RF06 – O sistema deve permitir que o usuário encerre sua sessão por meio da opção "Logout".
+## Perfis
 
-RF07 – O sistema deve permitir o cadastro de novos usuários.
+| Perfil | O que pode fazer |
+| --- | --- |
+| Administrador | Cadastrar, consultar, editar e excluir usuários, trens, rotas e sensores; registrar falhas e resolver ou reabrir ocorrências; consultar Home, monitoramento e relatórios. |
+| Funcionário | Consultar as informações liberadas, acompanhar falhas e acessar Home, monitoramento e relatórios. Não pode executar ações administrativas. |
 
-RF08 – O sistema deve apresentar uma lista dos usuários cadastrados.
+As restrições administrativas são verificadas no PHP no servidor. Ocultar um botão na página não é a única proteção.
 
-RF09 – O sistema deve permitir pesquisar usuários cadastrados por nome de usuário ou e-mail.
+## Estrutura
 
-RF10 – O sistema deve permitir excluir usuários cadastrados.
+```text
+assets/      CSS e imagens
+database/    Estrutura SQL e contas fictícias de demonstração
+doc/         Pesquisas e documentos do projeto
+infra/       Autenticação, configuração local do banco e integração de clima
+public/      Landing page e telas do sistema separadas por área
+script/      Interações e validações da interface
+index.php    Login
+logout.php   Encerramento da sessão
+README.md    Apresentação e instalação
+REQUISITOS.md Requisitos funcionais, não funcionais e regras de negócio
+MANUAL.md    Guia para quem vai usar o sistema
+```
 
-RF11 – O sistema deve apresentar uma tela principal após o login do usuário.
+## Integrantes e contribuições registradas
 
-RF12 – O sistema deve exibir o nome do usuário autenticado na tela principal.
+Conforme a divisão inicial descrita em `doc/organizacao-projeto.md`:
 
-RF13 – O sistema deve apresentar o status atual da operação do trem.
+- **Alana:** organização da equipe e do projeto, pesquisa sobre CRUD, documentação, licença e apoio à estilização.
+- **Piettra:** README e desenvolvimento da página de cadastro, além de apoio à estilização.
+- **Nicole:** página de login, estudo da identidade visual e apoio à estilização.
 
-RF14 – O sistema deve apresentar informações gerais da ferrovia.
+Essa divisão é a registrada no planejamento inicial; confirmem com a equipe se ela ainda representa as contribuições da versão final.
 
-RF15 – O sistema deve disponibilizar um botão para acessar o cadastro de sensores e trens.
+## Capturas da versão final
 
-RF16 – O sistema deve disponibilizar um botão para acessar o cadastro de usuários e rotas.
+A atividade pede capturas da interface no README. Elas ainda precisam ser feitas na estação final e adicionadas ao repositório. Não use imagens de mockup como se fossem capturas do sistema executando.
 
-RF17 – O sistema deve permitir o cadastro de sensores utilizados para o monitoramento ferroviário.
+## Preparação da entrega
 
-RF18 – O sistema deve apresentar uma lista dos sensores cadastrados.
-
-RF19 – O sistema deve permitir pesquisar sensores cadastrados.
-
-RF20 – O sistema deve permitir visualizar os detalhes de um sensor cadastrado.
-
-RF21 – O sistema deve permitir excluir sensores cadastrados.
-
-RF22 – O sistema deve solicitar a confirmação do usuário antes de excluir um sensor.
-
-RF23 – O sistema não deve permitir a exclusão de um sensor que possua dados registrados.
-
-RF24 – O sistema deve apresentar uma mensagem de erro, ao tentar excluir um sensor que possua dados registrados.
-
-RF25 – O sistema deve permitir o cadastro de trens.
-
-RF26 – O sistema deve permitir visualizar os trens cadastrados no sistema.
-
-RF27 – O sistema deve apresentar uma tela de monitoramento em tempo real dos dados coletados pelos sensores.
-
-RF28 – O sistema deve apresentar a velocidade atual do trem com base nos dados recebidos pelos sensores.
-
-RF29 – O sistema deve apresentar a temperatura atual registrada pelos sensores.
-
-RF30 – O sistema deve apresentar a localização atual do trem em uma representação de mapa.
-
-RF31 – O sistema deve apresentar o status operacional do trem.
-
-RF32 – O sistema deve classificar o status operacional do trem como Normal, Alerta ou Falha.
-
-RF33 – O sistema deve atualizar automaticamente as informações de monitoramento conforme novas leituras dos sensores forem recebidas.
-
-RF34 – O sistema deve apresentar as falhas operacionais identificadas durante o monitoramento.
-
-RF35 – O sistema deve apresentar separadamente a quantidade de falhas resolvidas e não resolvidas.
-
-RF36 – O sistema deve permitir filtrar as falhas operacionais por status.
-
-RF37 – O sistema deve permitir marcar uma falha operacional como resolvida.
-
-RF38 – O sistema deve permitir reabrir uma falha que tenha sido marcada como resolvida.
-
-RF39 – O sistema deve permitir gerar relatórios sobre os dados da operação ferroviária.
-
-RF40 – O sistema deve permitir selecionar o sensor que será utilizado para gerar o relatório.
-
-RF41 – O sistema deve permitir selecionar o período ou mês utilizado para gerar o relatório.
-
-RF42 – O sistema deve apresentar gráficos para auxiliar na análise dos dados da operação ferroviária.
-
-RF43 – O sistema deve permitir visualizar os relatórios gerados anteriormente.
-
-RF44 – O sistema deve permitir filtrar os relatórios por período e tipo de dado.
-
-RF45 – O sistema deve permitir cadastrar rotas.
-
-RF46 – O sistema deve permitir visualizar as rotas cadastradas e suas respectivas informações.
-
----
-
-## Tecnologias Utilizadas
-
-**HTML** - estruturação das páginas 
-**CSS** - estilização e identidade visual
-**JavaScript** - validações e interações da interface
-**PHP** - desenvolvimento da lógica e integração com banco de dados
-**MySQL** - armazenamento e gerenciamento de dados
-**Apache** - servidor utilizado para a execução do projeto localmente
-**XAMPP** - ambiente utilizado para a execução do Apache e MySQL
-**Visual Studio Code - editor de código utilizado pela equipe
-**GitHub** - versionamento e armazenamento do código fonte
-**GitHub** - organização e acompanhamento das tarefas (Kanban)
-
----
-
-## Banco de Dados
-
-O banco de dados será utilizado para armazenar as informações do sistema.
-
-Principais dados:
-
-* Trens;
-* Localizações;
-* Velocidades;
-* Passageiros;
-* Consumo de energia;
-* Alertas;
-* Falhas;
-* Manutenções;
-* Usuários;
-* Registros de monitoramento.
-
-## Funcionamento
-
-O sistema será dividido em três partes:
-
-**Front-end → Back-end → Banco de Dados**
-
-O **Front-end** será responsável pela interface e interação com o usuário.
-
-O **Back-end**, desenvolvido em PHP, será responsável pelo processamento das informações e pela comunicação com o banco de dados.
-
-O **MySQL** será responsável pelo armazenamento dos dados do sistema.
-
----
-
-## Outras Informações
-
-O **Sistema ferrrorama** está sendo desenvolvido de forma colaborativa utilizando **GitHub** para versionamento de código e **GitHub Projects** para o gerenciamento das atividades
-
-* **Qualidade de Código:** Ao longo do desenvolvimento, a equipe faz revisões no código, realiza testes das funcionalidades e mantém a estrutura do projeto organizada. Dessa forma, busca seguir os padrões estabelecidos e garantir que todas as partes do sistema funcionem de maneira integrada.
-
-**Desenvolvimento Incremental:** O sistema será construído de forma gradual, dividindo o desenvolvimento em diferentes etapas:
-
-1. Criação das interfaces do sistema (Front-end);
-2. Desenvolvimento e conexão do banco de dados;
-3. Programação das funcionalidades utilizando **PHP**;
-4. Realização de testes e validações para verificar o funcionamento do sistema;
-5. Integração das informações de monitoramento ao sistema.
-
-
-
-
-
+O código local não confirma a organização física da bancada, o teste com uma pessoa de fora da equipe, o quadro GitHub Projects nem a Release final. Antes da avaliação, a equipe deve seguir o roteiro em [REQUISITOS.md](REQUISITOS.md), testar os dois perfis e registrar as dificuldades encontradas.
