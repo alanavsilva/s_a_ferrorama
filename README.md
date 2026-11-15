@@ -32,38 +32,23 @@ Em uma demonstração ferroviária, informações sobre trens, percursos, respon
 | Administrador | Cadastrar, consultar, editar e excluir usuários, trens, rotas e sensores; registrar falhas e resolver ou reabrir ocorrências; consultar Home, monitoramento e relatórios. |
 | Funcionário | Consultar as informações liberadas, acompanhar falhas e acessar Home, monitoramento e relatórios. Não pode executar ações administrativas. |
 
-As restrições administrativas são verificadas no PHP no servidor. Ocultar um botão na página não é a única proteção.
 
 ## Estrutura
 
-```text
 assets/      CSS e imagens
-database/    Estrutura SQL e contas fictícias de demonstração
+database/    Estrutura SQL
 doc/         Pesquisas e documentos do projeto
-infra/       Autenticação, configuração local do banco e integração de clima
+infra/       Autenticação, configuração local do banco
 public/      Landing page e telas do sistema separadas por área
 script/      Interações e validações da interface
 index.php    Login
 logout.php   Encerramento da sessão
 README.md    Apresentação e instalação
-REQUISITOS.md Requisitos funcionais, não funcionais e regras de negócio
-MANUAL.md    Guia para quem vai usar o sistema
-```
+requisitos.md Requisitos funcionais, não funcionais e regras de negócio
+manual.md    Guia para quem vai usar o sistema
 
 ## Integrantes e contribuições registradas
 
-Conforme a divisão inicial descrita em `doc/organizacao-projeto.md`:
-
-- **Alana:** organização da equipe e do projeto, pesquisa sobre CRUD, documentação, licença e apoio à estilização.
-- **Piettra:** README e desenvolvimento da página de cadastro, além de apoio à estilização.
-- **Nicole:** página de login, estudo da identidade visual e apoio à estilização.
-
-Essa divisão é a registrada no planejamento inicial; confirmem com a equipe se ela ainda representa as contribuições da versão final.
-
-## Capturas da versão final
-
-A atividade pede capturas da interface no README. Elas ainda precisam ser feitas na estação final e adicionadas ao repositório. Não use imagens de mockup como se fossem capturas do sistema executando.
-
-## Preparação da entrega
-
-O código local não confirma a organização física da bancada, o teste com uma pessoa de fora da equipe, o quadro GitHub Projects nem a Release final. Antes da avaliação, a equipe deve seguir o roteiro em [REQUISITOS.md](REQUISITOS.md), testar os dois perfis e registrar as dificuldades encontradas.
+- **Alana:** organizou a equipe e a estrutura do projeto, pesquisou sobre CRUD e contribuiu com a documentação, a licença, a estilização e o desenvolvimento de diferentes telas.
+- **Piettra:** trabalhou no README, login e nas telas de cadastro e em outras partes da aplicação, além de colaborar com a estilização e os ajustes visuais.
+- **Nicole:** desenvolveu a tela de home, pesquisou a identidade visual e também colaborou na criação e nos ajustes de outras telas do sistema.
