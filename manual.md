@@ -2,11 +2,22 @@
 
 Este guia é para quem vai conhecer e usar o sistema na demonstração do Ferrorama. Os nomes dos menus correspondem aos que aparecem na aplicação.
 
-## 1. Preparar e abrir
 
-Na estação da demonstração, confirme que o XAMPP está aberto e que Apache e MySQL estão iniciados. Abra no navegador o endereço local configurado para a pasta do projeto. A landing page apresenta o sistema e o botão **Acessar sistema** leva ao login. Também é possível abrir diretamente `index.php`.
+### Instalação do projeto
 
-Se a equipe estiver configurando o sistema do zero, siga primeiro as instruções de instalação do [README](README.md). Não importe o esquema em uma base que já tenha tabelas e dados sem antes fazer uma cópia.
+1. Copie a pasta do projeto para a pasta pública do Apache. No XAMPP para Windows, normalmente é `C:\xampp\htdocs`.
+2. Inicie Apache e MySQL pelo painel do XAMPP.
+3. Abra o phpMyAdmin pelo painel ou pelo endereço local do XAMPP.
+4. Importe `database/db.sql` para criar o banco `SA_FERRORAMA` e as tabelas. Faça isso uma vez em uma base vazia.
+5. Copie `infra/conexao.local.example.php` para `infra/conexao.local.php` e preencha host, usuário, senha, nome do banco e porta conforme o MySQL da estação. Esse arquivo real é local e fica ignorado pelo Git.
+6. Importe `database/usuarios_demo.sql` para adicionar as contas fictícias de demonstração.
+7. Abra a landing page no navegador. Para a pasta instalada diretamente em `htdocs`, o formato do endereço é `http://localhost/<pasta-do-projeto>/public/Tela_landing/landing.php`. Também é possível abrir `http://localhost/<pasta-do-projeto>/index.php` para ir ao login. Acrescente a porta se o Apache estiver configurado para outra porta.
+
+O projeto está neste caminho de exemplo: `C:\xampp\htdocs\alana_v_silva_2026\s_a_ferrorama`. Nesse caso, os endereços são `http://localhost:8080/alana_v_silva_2026/s_a_ferrorama/public/Tela_landing/landing.php` e `http://localhost:8080/alana_v_silva_2026/s_a_ferrorama/index.php`.
+
+`database/db.sql` não apaga nem recria tabelas existentes. Antes de reinstalar ou limpar uma base que tenha dados, exporte uma cópia pelo phpMyAdmin. Não use as contas fictícias em um sistema publicado.
+
+A landing page apresenta o TremTech e o botão **Acessar sistema** leva ao login.
 
 ## 2. Entrar e sair
 

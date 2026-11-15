@@ -24,4 +24,8 @@ Sua função principal é receber as requisições feitas pelos navegadores e en
 Instalar e configurar o XAMPP é um processo simples e rápido. Acesse a Página Oficial do XAMPP, baixe a versão compatível com o seu sistema operacional e execute o instalador. Durante a instalação, escolha os componentes desejados, como Apache, MySQL e PHP. Após concluir, abra o painel de controle do XAMPP e inicie os módulos principais para começar a utilizar o ambiente de desenvolvimento local no seu computador.
 
 ### Importância do ambiente para desenvolvimento local
-Um ambiente de desenvolvimento local como o XAMPP é essencial porque simula um servidor web diretamente no seu computador. Ele permite que você crie, teste e depure sites e sistemas dinâmicos (como PHP e MySQL) com segurança e rapidez, sem precisar pagar por hospedagem ou domínios durante a fase de criação. 
+Um ambiente de desenvolvimento local como o XAMPP é essencial porque simula um servidor web diretamente no seu computador. Ele permite que você crie, teste e depure sites e sistemas dinâmicos (como PHP e MySQL) com segurança e rapidez, sem precisar pagar por hospedagem ou domínios durante a fase de criação.
+
+### Aplicação no TremTech
+
+O TremTech é executado localmente pelo Apache e usa PHP com MySQLi para acessar o banco MariaDB/MySQL. A cópia verificada para a entrega usa PHP 8.2 e MariaDB 10.4 no XAMPP. As instruções de instalação, banco e configuração local estão no `MANUAL.md`; a configuração com credenciais reais da estação não deve ser enviada ao repositório.

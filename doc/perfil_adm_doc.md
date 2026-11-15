@@ -1,45 +1,27 @@
-# Perfil de Administrador
+# Perfis de acesso do TremTech
 
-O sistema TremTech possuirá o perfil de Administrador, responsável pelo gerenciamento das principais funções do sistema. O Administrador terá acesso às funcionalidades necessárias para acompanhar os sensores, trens, monitoramento e relatórios da ferrovia.
+O banco de dados e a aplicação trabalham com dois perfis: `Administrador` e `Funcionário`. Os perfis são definidos no cadastro de usuários.
 
-O cadastro de um usuário como Administrador será realizado por meio da tela de cadastro de usuários, na qual será possível selecionar o tipo de usuário Administrador ou Funcionário.
+## Administrador
 
----
+O Administrador pode cadastrar, consultar, pesquisar, editar e excluir usuários, trens, rotas e sensores, respeitando os vínculos existentes. Também pode registrar falhas e resolver ou reabrir ocorrências. A Home, o monitoramento e os relatórios ficam disponíveis para consulta.
 
-### Permissões exclusivas do Administrador
+O servidor verifica o perfil antes de aceitar ações administrativas. O valor enviado pelo formulário não concede privilégios por conta própria.
 
--Cadastrar usuários.	
+## Funcionário
 
--Alterar dados de usuários.
+O Funcionário consulta as informações liberadas nas telas de usuários, trens, rotas e sensores, acompanha falhas, acessa o monitoramento e consulta relatórios. Não pode cadastrar, editar, excluir nem mudar o estado de falhas.
 
--Excluir usuários.	
+## Proteções e regras
 
--Definir perfil do usuário.
+- As telas internas exigem login.
+- Endpoints de edição e exclusão exigem perfil de Administrador no backend.
+- Os formulários de criação verificam o perfil também no processamento do POST.
+- Operações de escrita protegidas verificam um token CSRF.
+- Funcionários não podem alterar seu próprio perfil ou se conceder acesso administrativo por alteração do formulário.
+- A interface esconde as ações que o perfil não pode realizar, mas a decisão final é feita no servidor.
+- Um Administrador não pode excluir contas de Administrador pela tela de usuários. Contas vinculadas a trens também precisam ser desvinculadas antes de excluir.
 
--Cadastrar Administradores.
+## O que esta descrição não significa
 
--Cadastrar sensores.
-
--Excluir sensores.
-
--Cadastrar trens.	
-
--Gerar relatórios.	
-
----
-
-### Diferença entre Administrador e Funcionário
-
-**O sistema terá dois perfis principais:**
-
-**Administrador:** possui permissões para gerenciar os recursos administrativos e acompanhar as informações da ferrovia, incluindo sensores, trens, monitoramento e relatórios.
-
-**Funcionário:** terá acesso somente às funcionalidades definidas para sua função, sem poder alterar seu próprio nível de acesso ou conceder privilégios administrativos a si mesmo.
-
----
-
-### Proteção do cadastro de Administradores
-
-O cadastro de novos Administradores deverá ser protegido para impedir que usuários sem autorização alterem os dados enviados pelo formulário e atribuam a si mesmos o perfil administrativo.
-
-A verificação da permissão deverá ser realizada no servidor, e não somente no formulário da página. Dessa forma, mesmo que um usuário tente alterar o valor do campo de tipo de usuário, o sistema deverá verificar se ele possui autorização para criar ou atribuir o perfil de Administrador.
+Relatórios não são exclusivos do Administrador na aplicação atual. Funcionários podem consultá-los; o que permanece exclusivo do Administrador são as alterações e operações de gerenciamento descritas acima.

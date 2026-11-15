@@ -1,5 +1,7 @@
 # PDO
 
+> **Aplicação no TremTech:** este arquivo registra um estudo sobre PDO. A aplicação atual não usa PDO; a conexão é feita com MySQLi em `infra/conexao.php`, com consultas preparadas por `prepare()` e `bind_param()`. Portanto, a pesquisa não deve ser lida como a lista de tecnologias efetivamente adotadas.
+
 ### O que é PDO?
 A extensão PHP Data Objects (PDO) define uma interface leve e consistente para acessar bancos de dados no PHP. Cada driver de banco de dados que implementa a interface PDO pode expor recursos específicos do banco de dados como funções de extensão comuns. Observe que não é possível executar nenhuma função de banco de dados usando apenas a extensão PDO; um driver PDO de banco de dados deve ser usado para acessar o servidor de banco de dados.
 

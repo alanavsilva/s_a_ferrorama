@@ -32,3 +32,9 @@ Endpoints são endereços específicos de uma API que permitem acessar determina
 
 JSON é um formato utilizado para organizar e transmitir informações entre sistemas. Os dados são organizados em pares de chave e valor.
 
+## Uso de APIs no TremTech
+
+Na versão atual, a Home consulta o clima de Joinville na Open-Meteo usando uma requisição HTTP GET em PHP. A consulta de CEP chama a ViaCEP pelo JavaScript do navegador e recebe endereço em JSON.
+
+Os cadastros principais não são uma API REST pública: os formulários enviam dados às páginas PHP, que validam a sessão e gravam no MySQL/MariaDB. O sistema não envia nem recebe leituras de sensores físicos.
+

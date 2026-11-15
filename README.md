@@ -22,7 +22,7 @@ O sistema **não recebe dados de sensores físicos**. A velocidade exibida vem d
 
 O relatório atual consulta falhas por sensor e mês; não é um histórico de medições nem gera gráficos/exportações. Clima e consulta de CEP são funções auxiliares da Home e dependem de serviços externos.
 
-Para ver os requisitos funcionais, não funcionais, regras de negócio, limitações e roteiro de aceite, consulte [REQUISITOS.md](REQUISITOS.md). Para aprender a usar as telas, consulte [MANUAL.md](MANUAL.md).
+Para ver os requisitos funcionais, não funcionais, regras de negócio, limitações e roteiro de aceite, consulte [requisitos.md](requisitos.md). Para aprender a usar as telas, consulte [manual.md](manual.md).
 
 ## Tecnologias e ambiente
 
@@ -34,18 +34,9 @@ Para ver os requisitos funcionais, não funcionais, regras de negócio, limitaç
 
 Não há instalação de dependências por Composer ou Node.js. A Home consulta Open-Meteo para o clima e ViaCEP para endereços; ícones e algumas imagens também vêm de serviços externos. Sem internet, essas partes podem ficar indisponíveis.
 
-## Instalação local
+## Como executar
 
-1. Instale o XAMPP e copie a pasta do projeto para `C:\xampp\htdocs`.
-2. Inicie Apache e MySQL pelo painel do XAMPP.
-3. Abra o phpMyAdmin e importe `database/db.sql` uma vez para criar `SA_FERRORAMA` e as tabelas.
-4. Copie `infra/conexao.local.example.php` para `infra/conexao.local.php`. Edite host, usuário, senha, banco e porta para corresponder ao MySQL local. O arquivo real fica ignorado pelo Git.
-5. Importe `database/usuarios_demo.sql` para criar as contas fictícias de demonstração.
-6. Abra a landing page em `http://localhost/<pasta-do-projeto>/public/Tela_landing/landing.php` ou vá direto para `http://localhost/<pasta-do-projeto>/index.php`. Inclua a porta no endereço se o Apache não usar a padrão.
-
-Importe `database/db.sql` em um banco vazio. Ele não recria tabelas existentes e não deve ser usado como forma de limpar um banco com dados. Faça uma cópia antes de qualquer reinicialização.
-
-As contas de demonstração são fictícias e exclusivas para uso local; suas credenciais estão somente no [manual](MANUAL.md), não neste README. Não as reutilize em um sistema publicado.
+O sistema foi desenvolvido para rodar localmente com XAMPP. Instalação, configuração do banco, acesso e contas de demonstração estão no [manual.md](manual.md). As contas são fictícias e exclusivas da demonstração; não as reutilize em um sistema publicado.
 
 ## Perfis
 
@@ -68,19 +59,19 @@ script/      Interações e validações da interface
 index.php    Login
 logout.php   Encerramento da sessão
 README.md    Apresentação e instalação
-REQUISITOS.md Requisitos funcionais, não funcionais e regras de negócio
-MANUAL.md    Guia para quem vai usar o sistema
+requisitos.md Requisitos funcionais, não funcionais e regras de negócio
+manual.md     Guia para quem vai usar o sistema
 ```
 
 ## Integrantes e contribuições registradas
 
-Conforme a divisão inicial descrita em `doc/organizacao-projeto.md`:
+O trabalho foi colaborativo: as integrantes participaram do desenvolvimento e dos ajustes de várias telas, além da identidade visual e da integração da aplicação. Os focos abaixo ajudam a reconhecer contribuições, mas não representam a divisão exclusiva das páginas:
 
-- **Alana:** organização da equipe e do projeto, pesquisa sobre CRUD, documentação, licença e apoio à estilização.
-- **Piettra:** README e desenvolvimento da página de cadastro, além de apoio à estilização.
-- **Nicole:** página de login, estudo da identidade visual e apoio à estilização.
+- **Alana:** organização da equipe e da estrutura do projeto, pesquisa sobre CRUD, documentação, licença e contribuição no desenvolvimento e refinamento de várias telas e estilos.
+- **Piettra:** elaboração do README, desenvolvimento de telas de cadastro e contribuição em outras telas, na estilização e nos ajustes da aplicação.
+- **Nicole:** desenvolvimento da tela de login, estudo da identidade visual e contribuição no desenvolvimento e refinamento de outras telas e estilos.
 
-Essa divisão é a registrada no planejamento inicial; confirmem com a equipe se ela ainda representa as contribuições da versão final.
+As tarefas se complementaram ao longo do projeto. A documentação inicial da organização pode ser consultada em `doc/organizacao-projeto.md`.
 
 ## Capturas da versão final
 
@@ -88,4 +79,32 @@ A atividade pede capturas da interface no README. Elas ainda precisam ser feitas
 
 ## Preparação da entrega
 
-O código local não confirma a organização física da bancada, o teste com uma pessoa de fora da equipe, o quadro GitHub Projects nem a Release final. Antes da avaliação, a equipe deve seguir o roteiro em [REQUISITOS.md](REQUISITOS.md), testar os dois perfis e registrar as dificuldades encontradas.
+O código local não confirma a organização física da bancada, o teste com uma pessoa de fora da equipe, o quadro GitHub Projects nem a Release final. Antes da avaliação, a equipe deve seguir o roteiro em [requisitos.md](requisitos.md), testar os dois perfis e registrar as dificuldades encontradas.
+
+## Requisitos funcionais
+
+RF-01 — O sistema apresenta uma landing page pública com a finalidade do TremTech e acesso ao login.
+
+RF-02 — O sistema autentica usuários cadastrados, mantém a sessão durante o uso e permite logout.
+
+RF-03 — O sistema diferencia Administrador e Funcionário e protege no backend as ações administrativas.
+
+RF-04 — O sistema apresenta na Home os totais de usuários, trens, rotas e sensores, informações de velocidade média, falhas e funções auxiliares de clima e CEP.
+
+RF-05 — O Administrador pode cadastrar, consultar, pesquisar, editar e excluir usuários, respeitando as regras de e-mail e vínculos.
+
+RF-06 — O Administrador pode cadastrar, consultar, pesquisar, editar e excluir trens, associando cada trem a um usuário responsável.
+
+RF-07 — O Administrador pode cadastrar, consultar, pesquisar, editar e excluir rotas, com nome, descrição, distância, duração, data de criação e trem vinculado.
+
+RF-08 — O Administrador pode cadastrar, consultar, pesquisar, editar e excluir sensores, associando-os a um trem e a uma rota desse mesmo trem.
+
+RF-09 — O Administrador pode registrar falhas para sensores, filtrar sua situação e resolver ou reabrir ocorrências; o Funcionário pode acompanhá-las.
+
+RF-10 — O monitoramento permite selecionar sensores, consultar valores demonstrativos e visualizar uma animação ilustrativa de percurso.
+
+RF-11 — O sistema gera na tela um relatório de falhas por sensor e mês, com a situação das ocorrências.
+
+RF-12 — A Home consulta clima de Joinville e permite consultar endereço por CEP usando serviços externos.
+
+RF-13 — Os dados cadastrados são armazenados no MySQL/MariaDB e permanecem disponíveis após atualizar ou reabrir as páginas.

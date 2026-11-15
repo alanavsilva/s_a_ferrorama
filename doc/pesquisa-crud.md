@@ -20,12 +20,13 @@ A função “Read” é o que permite aos sistemas acessar e exibir dados. Ela 
 #### Delete (Apagar)
 Esta função é usada para remover dados de um sistema. Ela deve ser manuseada com cuidado, pois uma vez que os dados são apagados, podem não ser recuperáveis.
 
-### Aplicação no contexto do projeto
+### Aplicação no TremTech atual
 
-**C** = Vai acontecer principalmente de forma automática, por meio dos sensores instalados nas locomotivas e nos trilhos, que coletam informações de velocidade, localização, consumo de energia e possíveis falhas, enviando esses dados para um banco de dados central. Mas também podem ser criados registros manuais, como o cadastro de novas locomotivas ou sensores.
+Nesta versão, o CRUD é usado nos cadastros de usuários, trens, rotas e sensores. As operações são feitas pela interface administrativa, processadas em PHP e armazenadas no MySQL/MariaDB.
 
-**R** = Permitirá que os usuários acompanhem em tempo real o funcionamento do sistema ferroviário, sendo possível visualizar informações como a velocidade atual do trem, o histórico de consumo de energia e a ocorrência de falhas.
+- **Create (Criar):** o Administrador cadastra usuários, trens, rotas e sensores. Também registra falhas manualmente para um sensor.
+- **Read (Consultar):** os usuários autenticados consultam as informações permitidas pelo perfil. As listas oferecem pesquisa em cadastros, e a área de falhas permite filtrar pelo estado.
+- **Update (Atualizar):** o Administrador edita os cadastros e pode resolver ou reabrir falhas. A edição respeita os vínculos entre usuário, trem, rota e sensor.
+- **Delete (Excluir):** o Administrador pode excluir cadastros quando não há registros dependentes que precisem deles. Chaves estrangeiras e validações preservam as relações.
 
-**U** = Poderá ser utilizada para atualizar informações relacionadas às locomotivas ou aos sensores, garantindo que os dados permaneçam corretos e atualizados. 
-
-**D** = Servirá para remoção de sensores desativados ou a exclusão de registros antigos por exemplo.
+O projeto não recebe leituras de sensores físicos. Portanto, velocidade e temperatura mostradas no monitoramento são demonstrativas; consumo de energia, localização real e criação automática de falhas não fazem parte do CRUD atual.

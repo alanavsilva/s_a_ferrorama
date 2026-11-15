@@ -4,62 +4,26 @@
 
 ### Objetivo
 
-A Inteligência Artificial foi utilizada como apoio durante o desenvolvimento
-do sistema Ferrorama, principalmente na criação e organização das interfaces
-e na documentação do projeto.
+A Inteligência Artificial foi utilizada como apoio em diferentes etapas do sistema, incluindo a apresentação da Landing Page, ajustes de interface e organização da documentação. As sugestões foram adaptadas ao PHP, HTML e CSS já usados pelo projeto.
 
 ### Utilização da IA
 
-A IA foi utilizada para auxiliar na criação da Landing Page do sistema,
-incluindo a estrutura HTML e a estilização CSS.
+A IA auxiliou na organização de páginas, revisão de textos, sugestões de estilo coerentes com a identidade TremTech, identificação de problemas no código e organização da documentação.
 
-Também foi utilizada para:
+### Exemplos de pedidos
 
-- Organizar a estrutura das páginas;
-- Criar textos para apresentação do sistema;
-- Sugerir estilos para os elementos da interface;
-- Auxiliar na identificação e correção de problemas no código;
-- Organizar as etapas de desenvolvimento.
-
-### Prompts utilizados
-
-Foram utilizados prompts relacionados à criação da Landing Page,
-estilização das seções, organização do código e correção de problemas.
-
-Exemplos:
-
-- "Crie uma estrutura de Landing Page para o sistema Ferrorama."
-- "Adicione uma seção sobre o Ferrorama."
-- "Crie uma seção de funcionalidades para o sistema."
-- "Crie o CSS para estilizar a Landing Page."
+- "Explique melhor o objetivo do sistema na Landing Page e mantenha a identidade visual do site."
+- "Revise o layout para seguir o padrão das telas do sistema."
+- "Ajude a identificar e corrigir problemas no código existente."
 
 ### Alterações realizadas
 
-Após receber sugestões da IA, o código foi adaptado ao projeto
-Ferrorama e às necessidades da equipe.
+Na versão atual, a Landing Page contém navegação, apresentação do sistema, explicação resumida do TremTech, uma ilustração animada do percurso com ponte e desvios, acesso ao login e rodapé.
 
-Foram criadas e estilizadas as seguintes partes:
+Versões anteriores chegaram a ter seções de funcionalidades, benefícios e chamada final. Elas não fazem parte do layout atual e não devem ser descritas como conteúdo presente na Landing Page entregue.
 
-- Menu de navegação;
-- Apresentação inicial;
-- Seção Sobre;
-- Seção Funcionalidades;
-- Seção Benefícios;
-- Chamada final;
-- Rodapé.
+As sugestões da IA foram analisadas e adaptadas às necessidades do projeto pela equipe. Este registro descreve o uso da ferramenta como apoio e não substitui a autoria, as decisões ou a revisão da equipe.
 
-### Testes realizados
+### Verificação
 
-A Landing Page foi testada no navegador para verificar:
-
-- Funcionamento dos links;
-- Organização das seções;
-- Exibição dos textos;
-- Funcionamento dos botões;
-- Aplicação dos estilos CSS.
-
-### Conclusão
-
-A Inteligência Artificial foi utilizada como ferramenta de apoio ao
-desenvolvimento. As sugestões recebidas foram analisadas, adaptadas
-e aplicadas de acordo com as necessidades do projeto.
+As alterações foram conferidas no contexto do projeto. Os testes de navegação e aparência devem ser realizados na versão final da estação de demonstração; este documento não afirma uma auditoria completa de compatibilidade ou acessibilidade.

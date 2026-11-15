@@ -1,23 +1,34 @@
-# Organização do Projeto
+# Organização do projeto
 
-## Estrutura de pastas 
-Separação em: 
-- Pasta de visual ("assets")
-- Pasta de documentação ("doc")
-- Pasta de estrutura das telas ("public")
-- Pasta de validações ("script")
-E sem pastas temos o README, a primeira página a rodar(index) e a LICENSE.
+## Estrutura atual
 
-## Padrão de nomenclatura 
-Neste projeto está sendo utilizado o padrão kebab-case (de letras minúsculas) e separação de palavras por traço (-).
+- `assets/`: estilos e imagens usadas pela aplicação.
+- `database/`: estrutura do banco e dados fictícios de demonstração.
+- `doc/`: pesquisas e documentos da equipe.
+- `infra/`: autenticação, conexão local com o banco e integração de clima.
+- `public/`: landing page e telas divididas por área funcional.
+- `script/`: interações e validações executadas no navegador.
+- `index.php` e `logout.php`: entrada e encerramento da sessão.
+- `README.md`, `REQUISITOS.md` e `MANUAL.md`: apresentação, requisitos e instruções de uso.
 
+## Nomenclatura
 
-## Divisão inicial de responsabilidades entre os integrantes
+O projeto usa nomes em português e mistura convenções: nomes de algumas pastas e funções usam sublinhado, outras palavras usam iniciais maiúsculas e os arquivos seguem padrões diferentes. Portanto, não é correto dizer que todo o repositório segue kebab-case. Ao criar arquivos novos, mantenha os nomes claros e siga a convenção da pasta em que o arquivo será colocado.
+
+## Participação da equipe
+
+O desenvolvimento foi colaborativo. As integrantes participaram de várias telas, da identidade visual, da estilização e dos ajustes de integração. Os focos abaixo destacam contribuições, não uma divisão exclusiva de páginas.
+
 ### Alana
-Líder da equipe, responsável pela organização do projeto, criação das pastas, divisão de funções entre os membros, pesquisa sobre CRUD, documentação, licenciamento e apoio na estilização do trabalho.
+
+Organização da equipe e da estrutura do projeto, pesquisa sobre CRUD, documentação, licença e contribuição no desenvolvimento e refinamento de diferentes telas e estilos.
 
 ### Piettra
-Responsável pela elaboração do README e desenvolvimento da página de cadastro, além de auxiliar na estilização do projeto.
+
+Elaboração do README, desenvolvimento de telas de cadastro e contribuição em outras telas, na estilização e nos ajustes da aplicação.
 
 ### Nicole
-Responsável pelo desenvolvimento da página de login e pelo estudo da identidade visual do projeto, além de contribuir na estilização do trabalho.
+
+Desenvolvimento da tela de login, estudo da identidade visual e contribuição no desenvolvimento e refinamento de outras telas e estilos.
+
+As responsabilidades se complementaram ao longo do projeto. Esta descrição registra as frentes de trabalho conhecidas e evita atribuir cada módulo exclusivamente a uma integrante.

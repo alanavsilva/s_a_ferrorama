@@ -54,7 +54,7 @@ As operações de alteração e exclusão utilizam token CSRF.
 
 A exclusão de usuários foi alterada de `GET` para `POST`, evitando que uma simples abertura de URL execute uma operação administrativa.
 
-Também foi adicionada uma proteção para impedir que o administrador exclua a própria conta pela tela de exclusão.
+O endpoint impede a exclusão de qualquer conta cujo perfil seja Administrador, não apenas da conta da sessão atual. Usuários vinculados como responsáveis por trens também precisam ser desvinculados antes da exclusão.
 
 ### 7. Proteção das informações no frontend
 
@@ -73,6 +73,10 @@ Detalhes técnicos da conexão com o banco são registrados no log do servidor, 
 Após o login bem-sucedido, o identificador da sessão é regenerado com `session_regenerate_id(true)`.
 
 O cookie da sessão utiliza `HttpOnly` e `SameSite=Lax`. Em HTTPS, a opção `Secure` também é ativada.
+
+### 10. Configuração do banco
+
+As credenciais do banco são lidas de `infra/conexao.local.php`, arquivo de configuração local que não deve ser publicado no repositório. Cada instalação deve criar sua própria configuração seguindo o exemplo incluído no projeto.
 
 ## Criptografia
 
