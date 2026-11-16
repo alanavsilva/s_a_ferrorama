@@ -58,3 +58,28 @@ O sistema não permite excluir um Administrador pela tela. Também impede exclui
 
 Funcionários podem consultar os registros, mas não veem nem executam as ações administrativas.
 
+
+## 5. Consultar e gerenciar trens
+
+A tela **Trens** apresenta os trens cadastrados. Para cada trem, o sistema registra o nome, a velocidade média e o usuário responsável.
+
+### Cadastrar um trem
+
+1. Abra **Trens**.
+2. Clique em **Cadastrar trem**.
+3. Informe o nome e a velocidade média em km/h.
+4. Escolha um usuário já cadastrado como responsável.
+5. Envie o formulário e confira o resultado na lista.
+
+A velocidade aceita valores de 1 a 600 km/h. O formulário não possui campo de categoria ou tipo de trem.
+
+### Buscar, editar ou excluir
+
+- Use a busca por nome ou responsável para localizar um trem.
+- Use o ícone de lápis para alterar os dados ou trocar o responsável.
+- Use a lixeira e confirme para excluir.
+
+Um trem que esteja ligado a uma rota ou sensor não pode ser removido enquanto houver registros dependentes. Altere ou remova os vínculos necessários antes de tentar novamente.
+
+
+
