@@ -55,7 +55,7 @@
         </div>
         <div class="landing-objetivo-copy">
             <p class="landing-objetivo-destaque">O TremTech reúne as informações do Ferrorama para facilitar a organização dos cadastros e o acompanhamento das ocorrências.</p>
-            <p>As informações se conectam: cada trem tem um responsável, cada rota é ligada a um trem e cada sensor fica associado ao trem correspondente.</p>
+            <p>As informações se conectam: cada trem tem um responsável, cada rota é ligada a um trem e cada sensor fica vinculado a uma rota.</p>
         </div>
     </section>
     <section class="landing-perfis" aria-labelledby="titulo-perfis">
@@ -104,11 +104,11 @@
             </details>
             <details class="landing-recurso">
                 <summary><span class="landing-recurso-titulo">Sensores</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
-                <div class="landing-recurso-conteudo"><p>Consulte o tipo de cada sensor e veja a qual trem ele está associado.</p></div>
+                <div class="landing-recurso-conteudo"><p>Consulte o tipo de cada sensor e veja a rota à qual ele está vinculado.</p></div>
             </details>
             <details class="landing-recurso">
                 <summary><span class="landing-recurso-titulo">Falhas</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
-                <div class="landing-recurso-conteudo"><p>Consulte as ocorrências, confira o status e acompanhe as ações de resolução ou reabertura.</p></div>
+                <div class="landing-recurso-conteudo"><p>Cadastre falhas vinculadas a sensores de Status, confira a situação e acompanhe a resolução ou reabertura.</p></div>
             </details>
             <details class="landing-recurso">
                 <summary><span class="landing-recurso-titulo">Monitoramento</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
@@ -116,7 +116,7 @@
             </details>
             <details class="landing-recurso">
                 <summary><span class="landing-recurso-titulo">Relatórios</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
-                <div class="landing-recurso-conteudo"><p>Gere um panorama das falhas por sensor e mês, com descrição, data, status e totais de ocorrências resolvidas ou em aberto.</p></div>
+                <div class="landing-recurso-conteudo"><p>Consulte as leituras de velocidade e temperatura ou as falhas de um sensor na data selecionada.</p></div>
             </details>
         </div>
     </section>

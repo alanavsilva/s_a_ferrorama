@@ -13,6 +13,7 @@ $sensorSelecionado = filter_input(INPUT_GET, 'sensor_relatorios', FILTER_VALIDAT
 $periodoInformado = $_GET['periodo_relatorios'] ?? date('Y-m-d');
 $periodo = is_string($periodoInformado) ? trim($periodoInformado) : '';
 $sensorEscolhido = null;
+$leiturasDia = [];
 $totalResolvidas = 0;
 $totalAbertas = 0;
 
@@ -27,12 +28,7 @@ $resultadoSensores = $conn->query(
 );
 
 if ($resultadoSensores) {
-    $indiceTemperatura = 0;
     while ($sensor = $resultadoSensores->fetch_assoc()) {
-        if ($sensor['tipo_dado'] === 'Temperatura') {
-            $sensor['temperatura'] = 35 + ($indiceTemperatura % 4);
-            $indiceTemperatura++;
-        }
         $sensores[] = $sensor;
     }
 } else {
@@ -63,7 +59,35 @@ if (isset($_GET['gerar'])) {
         if (!$inicio) {
             $mensagem = 'O período informado é inválido.';
         } elseif ($sensorEscolhido['tipo_dado'] !== 'Status') {
-            $relatorioGerado = true;
+            $fim = $inicio->modify('+1 day');
+            $inicioSql = $inicio->format('Y-m-d H:i:s');
+            $fimSql = $fim->format('Y-m-d H:i:s');
+            $stmt = $conn->prepare(
+                'SELECT valor, data_leitura FROM leituras_sensores
+                 WHERE id_sensor = ? AND data_leitura >= ? AND data_leitura < ?
+                 ORDER BY data_leitura DESC, id_leitura DESC'
+            );
+            if ($stmt) {
+                $stmt->bind_param('iss', $sensorSelecionado, $inicioSql, $fimSql);
+                try {
+                    if ($stmt->execute()) {
+                        $resultado = $stmt->get_result();
+                        while ($leitura = $resultado->fetch_assoc()) {
+                            $leiturasDia[] = $leitura;
+                        }
+                        $relatorioGerado = true;
+                    } else {
+                        $mensagem = 'Não foi possível gerar o relatório.';
+                    }
+                } catch (mysqli_sql_exception $e) {
+                    error_log('Erro ao consultar leituras do relatório: ' . $e->getMessage());
+                    $mensagem = 'Não foi possível gerar o relatório.';
+                }
+                $stmt->close();
+            } else {
+                error_log('Erro ao preparar leituras do relatório: ' . $conn->error);
+                $mensagem = 'Não foi possível preparar o relatório.';
+            }
         } else {
             $fim = $inicio->modify('+1 day');
             $inicioSql = $inicio->format('Y-m-d H:i:s');
@@ -131,8 +155,9 @@ if ($relatorioGerado && $sensorEscolhido) {
             'responsavel' => $sensorEscolhido['nome_responsavel'] ?? 'Não definido',
             'data' => $periodo,
             'gerado_em' => date('Y-m-d H:i:s'),
-            'velocidade' => (float) ($sensorEscolhido['velocidade_media'] ?? 0),
-            'temperatura' => (int) ($sensorEscolhido['temperatura'] ?? 0),
+            'manual' => true,
+            'valor_leitura' => $leiturasDia[0]['valor'] ?? null,
+            'data_leitura' => $leiturasDia[0]['data_leitura'] ?? null,
             'total_falhas' => count($relatorio),
             'resolvidas' => $totalResolvidas,
             'abertas' => $totalAbertas
@@ -214,10 +239,23 @@ if ($relatorioGerado && $sensorEscolhido) {
                             <p>Falhas registradas: <strong><?= count($relatorio) ?></strong></p>
                             <p>Resolvidas: <strong><?= $totalResolvidas ?></strong> · Em aberto: <strong><?= $totalAbertas ?></strong></p>
                         <?php elseif ($sensorEscolhido['tipo_dado'] === 'Velocidade'): ?>
-                            <p>Velocidade média atual: <strong><?= escapar(number_format((float) $sensorEscolhido['velocidade_media'], 0, ',', '.')) ?> km/h</strong></p>
-                            <p>Essa leitura corresponde ao valor atual disponível para o trem vinculado.</p>
+                            <h3>Leituras de velocidade</h3>
+                            <?php if ($leiturasDia): ?>
+                                <?php foreach ($leiturasDia as $leitura): ?>
+                                    <p><strong><?= escapar(number_format((float) $leitura['valor'], 2, ',', '.')) ?> km/h</strong></p>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p>Nenhuma leitura registrada para este sensor na data selecionada.</p>
+                            <?php endif; ?>
                         <?php else: ?>
-                            <p>Temperatura exibida: <strong><?= (int) $sensorEscolhido['temperatura'] ?> °C</strong></p>
+                            <h3>Leituras de temperatura</h3>
+                            <?php if ($leiturasDia): ?>
+                                <?php foreach ($leiturasDia as $leitura): ?>
+                                    <p><strong><?= escapar(number_format((float) $leitura['valor'], 2, ',', '.')) ?> °C</strong></p>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p>Nenhuma leitura registrada para este sensor na data selecionada.</p>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                     <?php if ($sensorEscolhido['tipo_dado'] === 'Status' && $relatorio): ?>
@@ -228,7 +266,7 @@ if ($relatorioGerado && $sensorEscolhido) {
                                     <strong>Descrição da falha</strong>
                                     <p><?= escapar($falha['descricao']) ?></p>
                                     <div>
-                                        <span>Data: <?= escapar(date('d/m/Y H:i', strtotime($falha['data_registro']))) ?></span>
+                                        <span>Data: <?= escapar(date('d/m/Y', strtotime($falha['data_registro']))) ?></span>
                                         <span>Status: <?= (int) $falha['resolvida'] === 1 ? 'Resolvida' : 'Em aberto' ?></span>
                                     </div>
                                 </article>
@@ -259,7 +297,7 @@ if ($relatorioGerado && $sensorEscolhido) {
                                 <span>Gerado em: <?= escapar(date('d/m/Y H:i', strtotime($item['gerado_em']))) ?></span>
                             </div>
                             <strong class="resumo-historico-relatorio">
-                                <?php if ($item['tipo'] === 'Status'): ?><?= (int) $item['total_falhas'] ?> falha(s)<?php elseif ($item['tipo'] === 'Velocidade'): ?><?= escapar(number_format((float) $item['velocidade'], 0, ',', '.')) ?> km/h<?php else: ?><?= (int) $item['temperatura'] ?> °C<?php endif; ?>
+                                <?php if ($item['tipo'] === 'Status'): ?><?= (int) $item['total_falhas'] ?> falha(s)<?php elseif (!empty($item['manual']) && $item['valor_leitura'] !== null): ?><?= escapar(number_format((float) $item['valor_leitura'], 2, ',', '.')) ?> <?= $item['tipo'] === 'Velocidade' ? 'km/h' : '°C' ?><?php else: ?>-<?php endif; ?>
                             </strong>
                         </article>
                     <?php endforeach; ?>

@@ -37,13 +37,24 @@ CREATE TABLE sensores (
     FOREIGN KEY (id_rotas) REFERENCES rotas(id_rotas)
 );
 
+CREATE TABLE leituras_sensores (
+    id_leitura INT PRIMARY KEY AUTO_INCREMENT,
+    id_sensor INT NOT NULL,
+    valor DECIMAL(10, 2) NOT NULL,
+    data_leitura DATETIME NOT NULL,
+    FOREIGN KEY (id_sensor) REFERENCES sensores(id_sensor) ON DELETE CASCADE
+);
+
 CREATE TABLE falhas_operacionais (
     id_falha INT PRIMARY KEY AUTO_INCREMENT,
     id_sensor INT NOT NULL,
     descricao VARCHAR(200) NOT NULL,
     data_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     resolvida TINYINT(1) NOT NULL DEFAULT 0,
-    FOREIGN KEY (id_sensor) REFERENCES sensores(id_sensor)
+    origem ENUM('sensor', 'usuario') NOT NULL DEFAULT 'sensor',
+    id_usuario INT NULL,
+    FOREIGN KEY (id_sensor) REFERENCES sensores(id_sensor),
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE SET NULL
 );
 
 INSERT INTO usuarios (id_usuario, nome, email, tipo, senha) VALUES
@@ -66,7 +77,7 @@ INSERT INTO sensores (id_sensor, nome_sensor, tipo_dado, id_rotas) VALUES
 (2, 'Sensor Central', 'Temperatura', 2),
 (3, 'Sensor Sul', 'Status', 3);
 
-INSERT INTO falhas_operacionais (id_falha, id_sensor, descricao, resolvida) VALUES
-(1, 1, 'Velocidade acima do limite.', 0),
-(2, 2, 'Temperatura elevada no percurso.', 1),
-(3, 3, 'Leitura de status instável.', 0);
+INSERT INTO falhas_operacionais (id_falha, id_sensor, descricao, resolvida, origem, id_usuario) VALUES
+(1, 1, 'Velocidade acima do limite.', 0, 'sensor', NULL),
+(2, 2, 'Temperatura elevada no percurso.', 1, 'sensor', NULL),
+(3, 3, 'Leitura de status instável.', 0, 'sensor', NULL);

@@ -337,7 +337,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, r.nome
 
         <p> Sensor: <?= escapar($falha['nome_sensor'] ?? 'Removido') ?>
         - Trem: <?= escapar($falha['nome_trem'] ?? 'Não identificado') ?>
-        - <?= escapar(date('d/m/Y H:i', strtotime($falha['data_registro']))) ?>
+        - <?= escapar(date('d/m/Y', strtotime($falha['data_registro']))) ?>
        </p>
 
         </div>
