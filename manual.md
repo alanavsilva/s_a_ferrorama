@@ -124,6 +124,27 @@ A combinação de trem e rota precisa corresponder. Se escolher uma rota de outr
 - Use a lixeira e confirme para excluir.
 
 Um sensor ligado a uma falha não pode ser excluído, pois a falha usa esse registro como referência.
+ ## 8. Registrar e acompanhar falhas
+
+A tela **Falhas** reúne ocorrências registradas. Uma falha precisa estar relacionada a um sensor.
+
+### Registrar uma falha — Administrador
+
+1. Abra **Falhas**.
+2. Clique em **Cadastrar falha**.
+3. Escolha o sensor relacionado.
+4. Escreva a descrição da ocorrência, com pelo menos cinco e no máximo duzentos caracteres.
+5. Envie o formulário.
+
+A falha começa como **Não resolvida** e recebe a data e o horário do registro. As falhas são registradas manualmente; um alerta de velocidade não cria uma falha sozinho.
+
+### Consultar e alterar a situação
+
+- Use o filtro para ver todas as falhas, somente as resolvidas ou somente as não resolvidas.
+- O Administrador pode clicar em **Marcar como resolvida** para concluir uma ocorrência.
+- Para uma ocorrência já resolvida, o Administrador pode clicar em **Reabrir**.
+- O Funcionário pode consultar e acompanhar as falhas, mas não pode registrar nem alterar sua situação.
+
 
 
 
