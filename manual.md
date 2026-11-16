@@ -180,6 +180,15 @@ Em computadores compartilhados, sempre faça logout ao terminar de usar o sistem
 - **Clima ou CEP não carrega:** confira a conexão com a internet e tente novamente mais tarde. Essas consultas externas não impedem o uso dos cadastros principais.
 - **Aparece erro de banco de dados ou a página não abre:** peça ajuda à pessoa responsável pela instalação do TremTech.
 - **Os dados de monitoramento parecem estranhos:** lembre-se de que velocidade e temperatura são demonstrativas e não vêm de sensores físicos.
+## 13. Dicas de uso
+
+- Confira os dados antes de salvar alterações.
+- Verifique o registro selecionado antes de confirmar uma exclusão.
+- Escolha vínculos corretos entre usuários, trens, rotas e sensores.
+- Não compartilhe sua senha.
+- Use somente as ações disponíveis para seu perfil.
+- Trate o monitoramento e o percurso como demonstrações da interface.
+- Faça logout ao terminar.
 
 
 
