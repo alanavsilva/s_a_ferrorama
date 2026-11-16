@@ -5,6 +5,7 @@
 **Equipe:** Alana Veiga da Silva, Nicole Beloni da Silva e Piettra Nicole Cidral
 
 Este manual explica, passo a passo e sem exigir conhecimentos técnicos, como entrar no TremTech, consultar as informações e realizar as tarefas permitidas para cada perfil.
+
 ## 1. Conheça o sistema
 
 O TremTech organiza informações de usuários, trens, rotas, sensores e falhas operacionais. A página pública apresenta o projeto. Depois do login, o menu leva às telas internas.
@@ -22,6 +23,7 @@ As opções do menu e os botões disponíveis podem variar conforme o perfil con
 2. Na tela de login, digite seu **e-mail** e sua **senha**.
 3. Clique em **Entrar**.
 4. Se os dados estiverem corretos, a página inicial será aberta.
+
 ## 3. Usar a página inicial
 
 Depois do login, a **Home** mostra um resumo do sistema e atalhos para outras telas.
@@ -34,6 +36,7 @@ Depois do login, a **Home** mostra um resumo do sistema e atalhos para outras te
 - Os atalhos de cadastro aparecem para o Administrador. Para o Funcionário, aparecem opções de consulta compatíveis com seu perfil.
 
 Para abrir outra tela, clique no nome correspondente no menu: **Home**, **Usuários**, **Sensores**, **Trens**, **Rotas**, **Monitoramento**, **Falhas** ou **Relatórios**.
+
 ## 4. Consultar e gerenciar usuários
 
 A tela **Usuários** mostra as contas cadastradas. O Administrador também pode cadastrar, editar e excluir usuários.
@@ -57,6 +60,7 @@ O e-mail deve ser válido e não pode estar cadastrado em outra conta. A senha d
 O sistema não permite excluir um Administrador pela tela. Também impede excluir um usuário que ainda seja responsável por um trem. Nesse caso, primeiro edite o trem e escolha outro responsável.
 
 Funcionários podem consultar os registros, mas não veem nem executam as ações administrativas.
+
 ## 5. Consultar e gerenciar trens
 
 A tela **Trens** apresenta os trens cadastrados. Para cada trem, o sistema registra o nome, a velocidade média e o usuário responsável.
@@ -124,6 +128,7 @@ A combinação de trem e rota precisa corresponder. Se escolher uma rota de outr
 - Use a lixeira e confirme para excluir.
 
 Um sensor ligado a uma falha não pode ser excluído, pois a falha usa esse registro como referência.
+
  ## 8. Registrar e acompanhar falhas
 
 A tela **Falhas** reúne ocorrências registradas. Uma falha precisa estar relacionada a um sensor.
@@ -165,11 +170,13 @@ Esses dados servem para demonstrar a tela. Não os use como informação real pa
 5. Confira o total de falhas, as quantidades resolvidas e não resolvidas e a lista de ocorrências do período.
 
 O relatório reúne falhas do sensor escolhido no mês selecionado. Ele é exibido na tela; o sistema não salva um arquivo de relatório nem apresenta um histórico de relatórios gerados.
+
 ## 11. Sair do sistema
 
 Clique em **Logout** no menu ou no cabeçalho. Quando aparecer a confirmação, escolha a opção para sair. A sessão será encerrada e o sistema voltará para a tela de login.
 
 Em computadores compartilhados, sempre faça logout ao terminar de usar o sistema.
+
 ## 12. Se algo não funcionar
 
 - **Não consigo entrar:** confira o e-mail e a senha. Se o problema continuar, procure o Administrador.
@@ -180,6 +187,7 @@ Em computadores compartilhados, sempre faça logout ao terminar de usar o sistem
 - **Clima ou CEP não carrega:** confira a conexão com a internet e tente novamente mais tarde. Essas consultas externas não impedem o uso dos cadastros principais.
 - **Aparece erro de banco de dados ou a página não abre:** peça ajuda à pessoa responsável pela instalação do TremTech.
 - **Os dados de monitoramento parecem estranhos:** lembre-se de que velocidade e temperatura são demonstrativas e não vêm de sensores físicos.
+
 ## 13. Dicas de uso
 
 - Confira os dados antes de salvar alterações.
