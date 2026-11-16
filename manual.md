@@ -57,8 +57,6 @@ O e-mail deve ser válido e não pode estar cadastrado em outra conta. A senha d
 O sistema não permite excluir um Administrador pela tela. Também impede excluir um usuário que ainda seja responsável por um trem. Nesse caso, primeiro edite o trem e escolha outro responsável.
 
 Funcionários podem consultar os registros, mas não veem nem executam as ações administrativas.
-
-
 ## 5. Consultar e gerenciar trens
 
 A tela **Trens** apresenta os trens cadastrados. Para cada trem, o sistema registra o nome, a velocidade média e o usuário responsável.
@@ -80,6 +78,29 @@ A velocidade aceita valores de 1 a 600 km/h. O formulário não possui campo de 
 - Use a lixeira e confirme para excluir.
 
 Um trem que esteja ligado a uma rota ou sensor não pode ser removido enquanto houver registros dependentes. Altere ou remova os vínculos necessários antes de tentar novamente.
+
+## 6. Consultar e gerenciar rotas
+
+A tela **Rotas** mostra as rotas e o trem relacionado a cada uma.
+
+### Cadastrar uma rota
+
+1. Abra **Rotas**.
+2. Clique em **Cadastrar rota**.
+3. Informe o nome e a descrição.
+4. Informe a distância em quilômetros e o tempo previsto em minutos.
+5. Escolha um trem cadastrado e envie o formulário.
+6. Confira a rota na lista. A data de criação é registrada pelo sistema.
+
+A distância e o tempo devem ser maiores que zero. A rota precisa estar vinculada a um trem existente.
+
+### Buscar, editar ou excluir
+
+- Digite o nome da rota no campo de busca e clique em **Buscar**.
+- Use o lápis para editar as informações ou trocar o trem relacionado.
+- Use a lixeira e confirme para excluir.
+
+Uma rota com sensores vinculados não pode ser excluída. O vínculo precisa ser resolvido antes.
 
 
 
