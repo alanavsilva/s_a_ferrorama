@@ -56,6 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $senha = $_POST['senha'] ?? '';
         $tipoRecebido = $_POST['tipo'] ?? '';
         $acaoFormulario = $_POST['acao'] ?? 'criar';
+        validar_acao_crud($conn, $acaoFormulario, 'usuarios', 'id_usuario', 'id_usuario');
 
         if (!in_array($acaoFormulario, ['criar', 'editar'], true)) {
             $mensagem = 'Ação inválida.';
@@ -73,8 +74,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 'tipo' => $tipoRecebido
             ];
 
-            if ($nome === '' || $email === '') {
-                $mensagem = 'Preencha todos os campos obrigatórios.';
+            if ($nome === '' || $email === '' || mb_strlen($nome) > 100 || mb_strlen($email) > 100) {
+                $mensagem = 'Preencha os campos obrigatórios. Nome e e-mail devem ter até 100 caracteres.';
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $mensagem = 'Informe um email válido.';
             } elseif ($senha !== '' && strlen($senha) < 8) {
@@ -115,8 +116,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
                 $stmt->close();
             }
-        } elseif ($nome === '' || $email === '' || $senha === '') {
-            $mensagem = "Preencha todos os campos.";
+        } elseif ($nome === '' || $email === '' || $senha === '' || mb_strlen($nome) > 100 || mb_strlen($email) > 100) {
+            $mensagem = "Preencha os campos. Nome e e-mail devem ter até 100 caracteres.";
 
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $mensagem = "Informe um email válido.";

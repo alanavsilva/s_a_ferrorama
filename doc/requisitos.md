@@ -88,11 +88,11 @@ RF-43 — O sistema deve listar os sensores cadastrados.
 
 RF-44 — O sistema deve permitir que o administrador cadastre sensores.
 
-RF-45 — O sistema deve permitir associar um sensor a um trem.
+RF-45 — O sistema deve permitir associar um sensor a uma rota; o trem é identificado por essa rota.
 
-RF-46 — O sistema deve validar o trem selecionado para o sensor.
+RF-46 — O sistema deve validar a existência da rota selecionada para o sensor.
 
-RF-47 — O sistema deve permitir a busca de sensores por nome, tipo ou trem.
+RF-47 — O sistema deve permitir a busca de sensores por nome, tipo ou rota.
 
 RF-48 — O sistema deve permitir que o administrador edite sensores cadastrados.
 
@@ -116,9 +116,9 @@ RF-57 — O sistema deve permitir que funcionários consultem as falhas sem alte
 
 RF-58 — O sistema deve permitir selecionar um sensor na tela de monitoramento.
 
-RF-59 — O sistema deve exibir a velocidade média do trem associado ao sensor selecionado.
+RF-59 — O sistema deve exibir a última leitura registrada do sensor de velocidade selecionado.
 
-RF-60 — O sistema deve exibir a temperatura calculada para o sensor selecionado.
+RF-60 — O sistema deve exibir a última leitura registrada do sensor de temperatura selecionado.
 
 RF-61 — O sistema deve indicar alerta de velocidade quando a velocidade exibida superar 100 km/h.
 
@@ -130,9 +130,9 @@ RF-64 — O sistema deve mover um marcador sobre a ilustração fixa do trajeto 
 
 RF-65 — O sistema deve permitir selecionar um sensor para consulta de relatório.
 
-RF-66 — O sistema deve permitir selecionar o mês do relatório.
+RF-66 — O sistema deve permitir selecionar a data do relatório.
 
-RF-67 — O sistema deve listar as falhas do sensor selecionado no mês escolhido.
+RF-67 — O sistema deve listar as falhas do sensor de Status ou as leituras do sensor de Velocidade/Temperatura no dia escolhido.
 
 RF-68 — O sistema deve exibir nos relatórios a descrição, a data e a situação das falhas.
 
@@ -158,7 +158,7 @@ RN-08 — A distância e a duração de uma rota devem ser positivas.
 
 RN-09 — Sensores devem usar os tipos Velocidade, Temperatura ou Status.
 
-RN-10 — Cada sensor deve estar associado a um trem.
+RN-10 — Cada sensor deve estar associado a uma rota existente, que identifica o trem vinculado.
 
 RN-11 — Uma nova falha deve começar como não resolvida.
 
@@ -168,7 +168,9 @@ RN-13 — Um alerta de velocidade não deve criar uma falha automaticamente.
 
 RN-14 — O sistema deve impedir exclusões que deixem registros dependentes sem vínculo válido.
 
-RN-15 — O relatório deve considerar as falhas do sensor selecionado dentro do mês escolhido.
+RN-15 — O relatório deve considerar os registros do sensor selecionado dentro do dia escolhido.
+
+RN-16 — A temperatura acima de 40 °C deve ser indicada como alerta visual. Alertas de velocidade e temperatura não geram falhas automaticamente.
 
 ## Requisitos não funcionais
 

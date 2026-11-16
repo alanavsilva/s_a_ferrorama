@@ -9,7 +9,7 @@
 - `public/`: landing page e telas divididas por área funcional.
 - `script/`: interações e validações executadas no navegador.
 - `index.php` e `logout.php`: entrada e encerramento da sessão. A landing fica em `public/Tela_landing/landing.php`.
-- `README.md`, `REQUISITOS.md` e `MANUAL.md`: apresentação, requisitos e instruções de uso.
+- `README.md`, `doc/requisitos.md` e `manual.md`: apresentação, requisitos e instruções de uso.
 
 ## Nomenclatura
 

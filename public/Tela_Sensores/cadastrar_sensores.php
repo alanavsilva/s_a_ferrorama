@@ -49,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         verificar_csrf();
 
         $acao = $_POST['acao'] ?? 'criar';
+        validar_acao_crud($conn, $acao, 'sensores', 'id_sensor', 'id_sensor');
         $nomeSensor = trim($_POST['nome_sensor'] ?? '');
         $tipoDado = trim($_POST['tipo_dado'] ?? '');
         $idRota = filter_input(INPUT_POST, 'id_rotas', FILTER_VALIDATE_INT);
@@ -83,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 error_log('Erro ao preparar cadastro de sensor: ' . $conn->error);
                 $mensagem = 'Não foi possível concluir o cadastro.';
             } else {
-                if ($acao === 'editar' && $idAtualizar > 0) {
+                if ($acao === 'editar') {
                     $stmt->bind_param('ssii', $nomeSensor, $tipoDado, $idRota, $idAtualizar);
                 } else {
                     $stmt->bind_param('ssi', $nomeSensor, $tipoDado, $idRota);

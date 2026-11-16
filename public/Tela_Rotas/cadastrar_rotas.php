@@ -49,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         verificar_csrf();
 
         $acao = $_POST['acao'] ?? 'criar';
+        validar_acao_crud($conn, $acao, 'rotas', 'id_rotas', 'id_rota');
         $idAtualizar = filter_input(INPUT_POST, 'id_rota', FILTER_VALIDATE_INT) ?: 0;
 
         $nome = trim($_POST['nome'] ?? '');
@@ -98,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     error_log('Erro ao preparar cadastro de rota: ' . $conn->error);
                     $mensagem = 'Não foi possível concluir o cadastro.';
                 } else {
-                    if ($acao === 'editar' && $idAtualizar > 0) {
+                    if ($acao === 'editar') {
                         $stmt->bind_param('ssdiii', $nome, $descricao, $extensaoNumero, $tempoNumero, $idTrem, $idAtualizar);
                     } else {
                         $stmt->bind_param('ssdii', $nome, $descricao, $extensaoNumero, $tempoNumero, $idTrem);

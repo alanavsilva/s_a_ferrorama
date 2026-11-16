@@ -38,7 +38,7 @@ O sistema utiliza sessão para identificar o usuário autenticado.
 
 As páginas que exigem login verificam a sessão no servidor.
 
-A tela de gerenciamento de usuários exige perfil de `administrador` por meio de uma verificação no PHP.
+A consulta de usuários exige login. Cadastro, edição e exclusão exigem perfil de Administrador no PHP; funcionários possuem acesso somente de consulta.
 
 ### 5. Proteção do cadastro de Administrador
 
@@ -76,7 +76,7 @@ O cookie da sessão utiliza `HttpOnly` e `SameSite=Lax`. Em HTTPS, a opção `Se
 
 ### 10. Configuração do banco
 
-As credenciais do banco são lidas de `infra/conexao.local.php`, arquivo de configuração local que não deve ser publicado no repositório. Cada instalação deve criar sua própria configuração seguindo o exemplo incluído no projeto.
+A conexão está centralizada em `infra/conexao.php`. A instalação de demonstração utiliza os padrões locais do XAMPP. Caso sejam necessárias credenciais próprias, elas devem ser configuradas nas variáveis de ambiente `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` e `DB_PORT` do servidor, sem publicar senhas reais no repositório.
 
 ## Criptografia
 

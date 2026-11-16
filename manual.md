@@ -18,7 +18,7 @@ O sistema possui dois perfis:
 1. Abra o navegador.
 2. Digite o endereço informado pela equipe.
 3. No computador com a instalação atual, o endereço é:
-   `http://localhost/alana_v_silva_2026/s_a_ferrorama/index.php`
+   `http://localhost:8080/alana_v_silva_2026/s_a_ferrorama/index.php`
 4. Se a instalação utilizar outra pasta ou porta, use o endereço correspondente.
 
 O endereço com `localhost` funciona no próprio computador em que o sistema está instalado.
@@ -563,5 +563,3 @@ Para dificuldades de acesso ou problemas no sistema, procure o Administrador ou 
 - Alana Veiga da Silva.
 - Nicole Beloni da Silva.
 - Piettra Nicole Cidral.
-
-

@@ -70,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         verificar_csrf();
 
         $acao = $_POST['acao'] ?? 'criar';
+        validar_acao_crud($conn, $acao, 'trens', 'id_trem', 'id_trem');
         $idAtualizar = filter_input(INPUT_POST, 'id_trem', FILTER_VALIDATE_INT) ?: 0;
 
         $nome = trim($_POST['nome'] ?? '');
@@ -79,8 +80,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($nome === '' || $velocidade === '' || $id_usuario === '') {
             $mensagem = "Preencha todos os campos.";
 
-        } elseif (mb_strlen($nome) < 3) {
-            $erros['nome'] = 'O nome precisa ter ao menos 3 caracteres.';
+        } elseif (mb_strlen($nome) < 3 || mb_strlen($nome) > 100) {
+            $erros['nome'] = 'O nome deve ter entre 3 e 100 caracteres.';
 
         } elseif (!is_numeric($velocidade) || $velocidade < 1 || $velocidade > 600) {
             $erros['velocidade'] = 'Use um valor entre 1 e 600 km/h.';
@@ -115,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 } else {
 
-                    if ($acao === 'editar' && $idAtualizar > 0) {
+                    if ($acao === 'editar') {
                         $stmt->bind_param('sdii', $nome, $velocidadeBanco, $idUsuarioBanco, $idAtualizar);
                     } else {
                         $stmt->bind_param('sdi', $nome, $velocidadeBanco, $idUsuarioBanco);
