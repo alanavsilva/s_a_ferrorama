@@ -34,4 +34,27 @@ Depois do login, a **Home** mostra um resumo do sistema e atalhos para outras te
 - Os atalhos de cadastro aparecem para o Administrador. Para o Funcionário, aparecem opções de consulta compatíveis com seu perfil.
 
 Para abrir outra tela, clique no nome correspondente no menu: **Home**, **Usuários**, **Sensores**, **Trens**, **Rotas**, **Monitoramento**, **Falhas** ou **Relatórios**.
+## 4. Consultar e gerenciar usuários
+
+A tela **Usuários** mostra as contas cadastradas. O Administrador também pode cadastrar, editar e excluir usuários.
+
+### Cadastrar um usuário
+
+1. Abra **Usuários**.
+2. Clique em **Cadastrar usuário** para abrir o formulário.
+3. Informe o nome, o e-mail, a senha e o perfil.
+4. Clique no botão de cadastro do formulário.
+5. Confira a mensagem e procure o novo registro na lista.
+
+O e-mail deve ser válido e não pode estar cadastrado em outra conta. A senha deve ter pelo menos oito caracteres.
+
+### Buscar, editar ou excluir
+
+- Para buscar, digite o nome ou o e-mail no campo **Buscar** e clique em **Buscar**.
+- Para editar, use o ícone de lápis na linha da pessoa. Se não quiser trocar a senha, deixe o campo de nova senha vazio.
+- Para excluir, use o ícone de lixeira e confirme a ação.
+
+O sistema não permite excluir um Administrador pela tela. Também impede excluir um usuário que ainda seja responsável por um trem. Nesse caso, primeiro edite o trem e escolha outro responsável.
+
+Funcionários podem consultar os registros, mas não veem nem executam as ações administrativas.
 
