@@ -170,6 +170,17 @@ O relatório reúne falhas do sensor escolhido no mês selecionado. Ele é exibi
 Clique em **Logout** no menu ou no cabeçalho. Quando aparecer a confirmação, escolha a opção para sair. A sessão será encerrada e o sistema voltará para a tela de login.
 
 Em computadores compartilhados, sempre faça logout ao terminar de usar o sistema.
+## 12. Se algo não funcionar
+
+- **Não consigo entrar:** confira o e-mail e a senha. Se o problema continuar, procure o Administrador.
+- **Não aparece nenhum registro:** a lista pode estar vazia ou o filtro de busca pode não encontrar correspondências. Limpe a busca e tente novamente.
+- **Não consigo cadastrar ou editar:** essas ações são exclusivas do Administrador. Confira também se os dados obrigatórios foram preenchidos.
+- **Não consigo excluir:** o registro pode estar relacionado a outros dados. Veja as orientações de exclusão da tela correspondente.
+- **Não consigo vincular uma rota ao sensor:** confira se a rota pertence ao trem que selecionou.
+- **Clima ou CEP não carrega:** confira a conexão com a internet e tente novamente mais tarde. Essas consultas externas não impedem o uso dos cadastros principais.
+- **Aparece erro de banco de dados ou a página não abre:** peça ajuda à pessoa responsável pela instalação do TremTech.
+- **Os dados de monitoramento parecem estranhos:** lembre-se de que velocidade e temperatura são demonstrativas e não vêm de sensores físicos.
+
 
 
 
