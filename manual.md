@@ -22,4 +22,16 @@ As opções do menu e os botões disponíveis podem variar conforme o perfil con
 2. Na tela de login, digite seu **e-mail** e sua **senha**.
 3. Clique em **Entrar**.
 4. Se os dados estiverem corretos, a página inicial será aberta.
+## 3. Usar a página inicial
+
+Depois do login, a **Home** mostra um resumo do sistema e atalhos para outras telas.
+
+- Os cartões mostram a quantidade de usuários, rotas, sensores e trens cadastrados.
+- O cartão de velocidade percorre os trens cadastrados. Ele troca o trem exibido periodicamente e mostra a velocidade média registrada no cadastro.
+- A área de clima consulta informações externas para Joinville. Se a consulta não estiver disponível, a página pode apresentar uma mensagem de erro.
+- A consulta de CEP aceita oito números e, quando encontra o endereço, preenche logradouro, bairro, cidade e estado.
+- A área de falhas permite consultar ocorrências por situação. O Administrador também pode resolvê-las ou reabri-las.
+- Os atalhos de cadastro aparecem para o Administrador. Para o Funcionário, aparecem opções de consulta compatíveis com seu perfil.
+
+Para abrir outra tela, clique no nome correspondente no menu: **Home**, **Usuários**, **Sensores**, **Trens**, **Rotas**, **Monitoramento**, **Falhas** ou **Relatórios**.
 
