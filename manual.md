@@ -145,6 +145,17 @@ A falha começa como **Não resolvida** e recebe a data e o horário do registro
 - Para uma ocorrência já resolvida, o Administrador pode clicar em **Reabrir**.
 - O Funcionário pode consultar e acompanhar as falhas, mas não pode registrar nem alterar sua situação.
 
+## 9. Acompanhar o monitoramento
+
+1. Abra **Monitoramento**.
+2. Escolha um sensor na lista, se quiser consultar um específico.
+3. Observe os cartões de velocidade e temperatura, o estado operacional e o desenho do percurso.
+4. Consulte a lista de falhas apresentada na mesma tela. O Administrador pode resolver ou reabrir ocorrências por ali.
+
+**Importante:** o sistema não recebe dados de sensores físicos. A velocidade mostrada vem da velocidade média cadastrada para o trem relacionado. A temperatura é demonstrativa e varia entre 35 °C e 38 °C. O estado da velocidade aparece como **Alerta** acima de 100 km/h e como **Normal** até esse valor. O percurso com ponte e desvios é uma animação ilustrativa fixa; não representa a posição real de um trem nem é montado a partir da rota cadastrada.
+
+Esses dados servem para demonstrar a tela. Não os use como informação real para tomar decisões sobre uma operação ferroviária.
+
 
 
 
