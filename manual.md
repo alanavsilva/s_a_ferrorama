@@ -156,6 +156,17 @@ A falha começa como **Não resolvida** e recebe a data e o horário do registro
 
 Esses dados servem para demonstrar a tela. Não os use como informação real para tomar decisões sobre uma operação ferroviária.
 
+## 10. Consultar relatórios
+
+1. Abra **Relatórios**.
+2. Escolha um sensor cadastrado.
+3. Escolha o mês que deseja consultar.
+4. Clique em **Gerar relatório**.
+5. Confira o total de falhas, as quantidades resolvidas e não resolvidas e a lista de ocorrências do período.
+
+O relatório reúne falhas do sensor escolhido no mês selecionado. Ele é exibido na tela; o sistema não salva um arquivo de relatório nem apresenta um histórico de relatórios gerados.
+
+
 
 
 
