@@ -165,6 +165,11 @@ Esses dados servem para demonstrar a tela. Não os use como informação real pa
 5. Confira o total de falhas, as quantidades resolvidas e não resolvidas e a lista de ocorrências do período.
 
 O relatório reúne falhas do sensor escolhido no mês selecionado. Ele é exibido na tela; o sistema não salva um arquivo de relatório nem apresenta um histórico de relatórios gerados.
+## 11. Sair do sistema
+
+Clique em **Logout** no menu ou no cabeçalho. Quando aparecer a confirmação, escolha a opção para sair. A sessão será encerrada e o sistema voltará para a tela de login.
+
+Em computadores compartilhados, sempre faça logout ao terminar de usar o sistema.
 
 
 
