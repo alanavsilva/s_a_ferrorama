@@ -7,6 +7,8 @@ exigir_login();
 
 $ehAdministrador =
     strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
+$mensagemLeitura = $_SESSION['mensagem_leitura'] ?? '';
+unset($_SESSION['mensagem_leitura']);
 
 $filtro = $_GET['status'] ?? 'Todas';
 
@@ -59,7 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_falha'])) {
 }
 
 $carregarSensores = static function (mysqli $conn, string $tipo): array {
-    $stmt = $conn->prepare('SELECT s.id_sensor, s.nome_sensor, r.nome AS nome_rota, t.nome AS nome_trem, t.velocidade_media FROM sensores s LEFT JOIN rotas r ON r.id_rotas = s.id_rotas LEFT JOIN trens t ON t.id_trem = r.id_trem WHERE s.tipo_dado = ? ORDER BY s.nome_sensor');
+    $stmt = $conn->prepare('SELECT s.id_sensor, s.nome_sensor, r.nome AS nome_rota, t.nome AS nome_trem,
+        (SELECT l.valor FROM leituras_sensores l WHERE l.id_sensor = s.id_sensor ORDER BY l.data_leitura DESC, l.id_leitura DESC LIMIT 1) AS valor_leitura,
+        (SELECT l.data_leitura FROM leituras_sensores l WHERE l.id_sensor = s.id_sensor ORDER BY l.data_leitura DESC, l.id_leitura DESC LIMIT 1) AS data_leitura
+        FROM sensores s LEFT JOIN rotas r ON r.id_rotas = s.id_rotas LEFT JOIN trens t ON t.id_trem = r.id_trem
+        WHERE s.tipo_dado = ? ORDER BY s.nome_sensor');
     if (!$stmt) return [];
     $stmt->bind_param('s', $tipo);
     $stmt->execute();
@@ -72,10 +78,6 @@ $carregarSensores = static function (mysqli $conn, string $tipo): array {
 
 $sensoresVelocidade = $carregarSensores($conn, 'Velocidade');
 $sensoresTemperatura = $carregarSensores($conn, 'Temperatura');
-foreach ($sensoresTemperatura as $indice => &$sensorTemperatura) {
-    $sensorTemperatura['temperatura'] = 35 + ($indice % 4);
-}
-unset($sensorTemperatura);
 
 $resultadoRotas = $conn->query('SELECT r.id_rotas, r.nome, t.nome AS nome_trem FROM rotas r LEFT JOIN trens t ON t.id_trem = r.id_trem ORDER BY r.nome');
 $rotasMonitoramento = [];
@@ -148,7 +150,7 @@ if ($resultadoFalhas) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoramento | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-leitura-status">
 </head>
 
 <body class="body_geral">
@@ -221,6 +223,10 @@ if ($resultadoFalhas) {
 
         </div>
 
+        <?php if ($mensagemLeitura !== ''): ?>
+            <p class="mensagem-sucesso" role="status"><?= escapar($mensagemLeitura) ?></p>
+        <?php endif; ?>
+
         <section class="monitoramento-cartoes">
             <div class="monitoramento-grupo-cartao">
                 <form method="GET" class="monitoramento-filtro">
@@ -241,6 +247,7 @@ if ($resultadoFalhas) {
                 <strong id="valorVelocidade">- km/h</strong>
                 <p>Status operacional: <span id="statusVelocidade">-</span></p>
                 <p id="mensagemVelocidade">-</p>
+                <p id="dataVelocidade">-</p>
             </article>
             </div>
 
@@ -263,6 +270,7 @@ if ($resultadoFalhas) {
                 <strong id="valorTemperatura">- °C</strong>
                 <p>Status operacional: <span id="statusTemperatura">-</span></p>
                 <p id="mensagemTemperatura">-</p>
+                <p id="dataTemperatura">-</p>
             </article>
             </div>
         </section>
@@ -355,7 +363,7 @@ if ($resultadoFalhas) {
                                 <p>
                                     Sensor: <?= escapar($falha['nome_sensor'] ?? 'Removido') ?>
                                     - Trem: <?= escapar($falha['nome_trem'] ?? 'Não identificado') ?>
-                                    - <?= escapar(date('d/m/Y H:i', strtotime($falha['data_registro']))) ?>
+                                    - <?= escapar(date('d/m/Y', strtotime($falha['data_registro']))) ?>
                                 </p>
                             </div>
 
@@ -391,6 +399,13 @@ if ($resultadoFalhas) {
                 <?php endif; ?>
             </div>
         </section>
+        <?php if ($ehAdministrador): ?>
+            <div class="acao-leitura-monitoramento">
+                <a class="botao-leitura-monitoramento" href="registrar_leitura.php">
+                    Registrar leitura ou falha
+                </a>
+            </div>
+        <?php endif; ?>
     </main>
 </div>
 
@@ -411,25 +426,39 @@ const rotasMonitoramento = <?= json_encode(
 function mostrarVelocidade(sensor) {
     document.getElementById('nomeSensorVelocidade').textContent =
         sensor.nome_sensor + ' - ' + (sensor.nome_trem || 'Trem não definido');
-    document.getElementById('valorVelocidade').textContent =
-        Number(sensor.velocidade_media || 0).toFixed(0) + ' km/h';
-    document.getElementById('statusVelocidade').textContent =
-        Number(sensor.velocidade_media || 0) > 100 ? 'Alerta' : 'Normal';
-    document.getElementById('mensagemVelocidade').textContent =
-        Number(sensor.velocidade_media || 0) > 100
-            ? 'Velocidade acima da média'
-            : 'Velocidade dentro do limite';
+    if (sensor.valor_leitura === null) {
+        document.getElementById('valorVelocidade').textContent = '- km/h';
+        document.getElementById('statusVelocidade').textContent = '-';
+        document.getElementById('mensagemVelocidade').textContent = '-';
+        document.getElementById('dataVelocidade').textContent = '-';
+        return;
+    }
+    const velocidade = Number(sensor.valor_leitura);
+    document.getElementById('valorVelocidade').textContent = velocidade.toFixed(0) + ' km/h';
+    document.getElementById('statusVelocidade').textContent = velocidade > 100 ? 'Alerta' : 'Normal';
+    document.getElementById('mensagemVelocidade').textContent = velocidade > 100
+        ? 'Velocidade acima da média'
+        : 'Velocidade dentro do limite';
+    document.getElementById('dataVelocidade').textContent = 'Leitura cadastrada em ' + new Date(sensor.data_leitura.replace(' ', 'T')).toLocaleDateString('pt-BR');
 }
 
 function mostrarTemperatura(sensor) {
     document.getElementById('nomeSensorTemperatura').textContent =
         sensor.nome_sensor + ' - ' + (sensor.nome_trem || 'Trem não definido');
-    document.getElementById('valorTemperatura').textContent = sensor.temperatura + ' °C';
-    const temperatura = Number(sensor.temperatura || 0);
+    if (sensor.valor_leitura === null) {
+        document.getElementById('valorTemperatura').textContent = '- °C';
+        document.getElementById('statusTemperatura').textContent = '-';
+        document.getElementById('mensagemTemperatura').textContent = '-';
+        document.getElementById('dataTemperatura').textContent = '-';
+        return;
+    }
+    const temperatura = Number(sensor.valor_leitura);
+    document.getElementById('valorTemperatura').textContent = temperatura.toFixed(1) + ' °C';
     document.getElementById('statusTemperatura').textContent = temperatura > 40 ? 'Alerta' : 'Normal';
     document.getElementById('mensagemTemperatura').textContent = temperatura > 40
         ? 'Temperatura acima do limite'
         : 'Temperatura dentro do limite';
+    document.getElementById('dataTemperatura').textContent = 'Leitura cadastrada em ' + new Date(sensor.data_leitura.replace(' ', 'T')).toLocaleDateString('pt-BR');
 }
 
 const campoVelocidade = document.getElementById('velocidade');
@@ -439,20 +468,22 @@ function atualizarVelocidade() {
     const sensor = sensoresVelocidade.find((item) => Number(item.id_sensor) === Number(campoVelocidade.value)) || sensoresVelocidade[0];
     if (sensor) mostrarVelocidade(sensor);
     else {
-        document.getElementById('nomeSensorVelocidade').textContent = 'Sem leitura disponível';
+        document.getElementById('nomeSensorVelocidade').textContent = '-';
         document.getElementById('valorVelocidade').textContent = '- km/h';
         document.getElementById('statusVelocidade').textContent = '-';
-        document.getElementById('mensagemVelocidade').textContent = 'Nenhum sensor de velocidade cadastrado';
+        document.getElementById('mensagemVelocidade').textContent = '-';
+        document.getElementById('dataVelocidade').textContent = '-';
     }
 }
 function atualizarTemperatura() {
     const sensor = sensoresTemperatura.find((item) => Number(item.id_sensor) === Number(campoTemperatura.value)) || sensoresTemperatura[0];
     if (sensor) mostrarTemperatura(sensor);
     else {
-        document.getElementById('nomeSensorTemperatura').textContent = 'Sem leitura disponível';
+        document.getElementById('nomeSensorTemperatura').textContent = '-';
         document.getElementById('valorTemperatura').textContent = '- °C';
         document.getElementById('statusTemperatura').textContent = '-';
-        document.getElementById('mensagemTemperatura').textContent = 'Nenhum sensor de temperatura cadastrado';
+        document.getElementById('mensagemTemperatura').textContent = '-';
+        document.getElementById('dataTemperatura').textContent = '-';
     }
 }
 function atualizarRota() {

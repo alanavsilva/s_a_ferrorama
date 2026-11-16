@@ -63,8 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $mensagem = 'Selecione um sensor cadastrado do tipo Status.';
                 } else {
                     $stmt = $conn->prepare(
-                        'INSERT INTO falhas_operacionais (id_sensor, descricao, resolvida)
-                         VALUES (?, ?, 0)'
+                        'INSERT INTO falhas_operacionais (id_sensor, descricao, resolvida, origem, id_usuario)
+                         VALUES (?, ?, 0, \'sensor\', NULL)'
                     );
                     if (!$stmt) {
                         error_log('Erro ao preparar cadastro de falha: ' . $conn->error);
@@ -243,7 +243,7 @@ if (!$faltas) {
                                 <h3><?= escapar($falha['descricao']) ?></h3>
                                 <p>Sensor: <?= escapar($falha['nome_sensor'] ?? 'Removido') ?>
                                     - Trem: <?= escapar($falha['nome_trem'] ?? 'Não identificado') ?>
-                                    - <?= escapar(date('d/m/Y H:i', strtotime($falha['data_registro']))) ?>
+                                    - <?= escapar(date('d/m/Y', strtotime($falha['data_registro']))) ?>
                                 </p>
                             </div>
                             <?php if ($ehAdministrador): ?>
