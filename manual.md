@@ -102,5 +102,28 @@ A distância e o tempo devem ser maiores que zero. A rota precisa estar vinculad
 
 Uma rota com sensores vinculados não pode ser excluída. O vínculo precisa ser resolvido antes.
 
+## 7. Consultar e gerenciar sensores
+
+A tela **Sensores** apresenta os sensores cadastrados e seus vínculos com trem e rota.
+
+### Cadastrar um sensor
+
+1. Abra **Sensores**.
+2. Clique em **Cadastrar sensor**.
+3. Informe o nome e escolha o tipo de dado: **Velocidade**, **Temperatura** ou **Status**.
+4. Escolha um trem.
+5. Escolha uma rota pertencente ao mesmo trem.
+6. Envie o formulário e confira a lista.
+
+A combinação de trem e rota precisa corresponder. Se escolher uma rota de outro trem, o sistema não aceitará o cadastro.
+
+### Buscar, editar ou excluir
+
+- Busque pelo nome, tipo, trem ou rota.
+- Use o lápis para alterar os dados ou os vínculos, mantendo a correspondência entre trem e rota.
+- Use a lixeira e confirme para excluir.
+
+Um sensor ligado a uma falha não pode ser excluído, pois a falha usa esse registro como referência.
+
 
 
