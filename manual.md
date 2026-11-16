@@ -15,3 +15,11 @@ O sistema possui dois perfis:
 - **Funcionário:** pode consultar as informações disponibilizadas, acompanhar falhas, usar o monitoramento e consultar relatórios. Não pode fazer alterações administrativas.
 
 As opções do menu e os botões disponíveis podem variar conforme o perfil conectado.
+
+## 2. Entrar no sistema
+
+1. Abra o endereço do TremTech fornecido pela equipe.
+2. Na tela de login, digite seu **e-mail** e sua **senha**.
+3. Clique em **Entrar**.
+4. Se os dados estiverem corretos, a página inicial será aberta.
+
