@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($descricao === '' || mb_strlen($descricao) < 5 || mb_strlen($descricao) > 200 || !$idSensor || $idSensor < 1) {
             $mensagem = 'Informe uma descrição válida e selecione um sensor.';
         } else {
-            $check = $conn->prepare('SELECT id_sensor FROM sensores WHERE id_sensor = ?');
+            $check = $conn->prepare("SELECT id_sensor FROM sensores WHERE id_sensor = ? AND tipo_dado = 'Status'");
             if (!$check) {
                 error_log('Erro ao preparar validação de sensor: ' . $conn->error);
                 $mensagem = 'Não foi possível validar o sensor.';
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $check->close();
 
                 if (!$sensorExiste) {
-                    $mensagem = 'Selecione um sensor cadastrado.';
+                    $mensagem = 'Selecione um sensor cadastrado do tipo Status.';
                 } else {
                     $stmt = $conn->prepare(
                         'INSERT INTO falhas_operacionais (id_sensor, descricao, resolvida)
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
-$sensores = $conn->query('SELECT id_sensor, nome_sensor FROM sensores ORDER BY nome_sensor');
+$sensores = $conn->query("SELECT id_sensor, nome_sensor FROM sensores WHERE tipo_dado = 'Status' ORDER BY nome_sensor");
 if (!$sensores) {
     error_log('Erro ao carregar sensores para cadastro de falha: ' . $conn->error);
     $mensagem = 'Não foi possível carregar os sensores.';
@@ -105,7 +105,8 @@ $sqlFalhas = 'SELECT f.id_falha, f.descricao, f.data_registro, f.resolvida,
                      s.nome_sensor, t.nome AS nome_trem
               FROM falhas_operacionais AS f
               LEFT JOIN sensores AS s ON f.id_sensor = s.id_sensor
-              LEFT JOIN trens AS t ON s.id_trem = t.id_trem';
+              LEFT JOIN rotas AS r ON s.id_rotas = r.id_rotas
+              LEFT JOIN trens AS t ON r.id_trem = t.id_trem';
 if ($statusFiltro === 'resolvidas') {
     $sqlFalhas .= ' WHERE f.resolvida = 1';
 } elseif ($statusFiltro === 'nao_resolvidas') {
@@ -189,7 +190,7 @@ if (!$faltas) {
                 <form class="form-cadastro-user" method="POST">
                     <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
                     <div class="campo-user">
-                        <label for="id_sensor">Sensor relacionado</label>
+                        <label for="id_sensor">Sensor de status relacionado</label>
                         <select id="id_sensor" name="id_sensor" required>
                             <option value="">Selecione um sensor</option>
                             <?php if ($sensores): ?>
@@ -241,8 +242,8 @@ if (!$faltas) {
                             <div class="falha_dados">
                                 <h3><?= escapar($falha['descricao']) ?></h3>
                                 <p>Sensor: <?= escapar($falha['nome_sensor'] ?? 'Removido') ?>
-                                    — Trem: <?= escapar($falha['nome_trem'] ?? 'Não identificado') ?>
-                                    — <?= escapar(date('d/m/Y H:i', strtotime($falha['data_registro']))) ?>
+                                    - Trem: <?= escapar($falha['nome_trem'] ?? 'Não identificado') ?>
+                                    - <?= escapar(date('d/m/Y H:i', strtotime($falha['data_registro']))) ?>
                                 </p>
                             </div>
                             <?php if ($ehAdministrador): ?>

@@ -82,17 +82,17 @@ RF-40 — O sistema deve permitir a busca de rotas por nome, descrição ou trem
 
 RF-41 — O sistema deve permitir que o administrador edite os dados e o trem vinculado a uma rota.
 
-RF-42 — O sistema deve impedir a exclusão de rotas que possuam sensores vinculados.
+RF-42 — O sistema deve exibir o trem associado a cada rota cadastrada.
 
 RF-43 — O sistema deve listar os sensores cadastrados.
 
 RF-44 — O sistema deve permitir que o administrador cadastre sensores.
 
-RF-45 — O sistema deve permitir associar um sensor a um trem e a uma rota desse mesmo trem.
+RF-45 — O sistema deve permitir associar um sensor a um trem.
 
-RF-46 — O sistema deve recusar associações entre sensores, trens e rotas incompatíveis.
+RF-46 — O sistema deve validar o trem selecionado para o sensor.
 
-RF-47 — O sistema deve permitir a busca de sensores por nome, tipo, trem ou rota.
+RF-47 — O sistema deve permitir a busca de sensores por nome, tipo ou trem.
 
 RF-48 — O sistema deve permitir que o administrador edite sensores cadastrados.
 
@@ -118,13 +118,13 @@ RF-58 — O sistema deve permitir selecionar um sensor na tela de monitoramento.
 
 RF-59 — O sistema deve exibir a velocidade média do trem associado ao sensor selecionado.
 
-RF-60 — O sistema deve exibir uma temperatura demonstrativa para o sensor selecionado.
+RF-60 — O sistema deve exibir a temperatura calculada para o sensor selecionado.
 
 RF-61 — O sistema deve indicar alerta de velocidade quando a velocidade exibida superar 100 km/h.
 
 RF-62 — O sistema deve atualizar os dados exibidos ao trocar o sensor monitorado.
 
-RF-63 — O sistema deve exibir a rota associada ao sensor monitorado.
+RF-63 — O sistema deve exibir o trem associado ao sensor monitorado.
 
 RF-64 — O sistema deve mover um marcador sobre a ilustração fixa do trajeto na tela de monitoramento.
 
@@ -158,7 +158,7 @@ RN-08 — A distância e a duração de uma rota devem ser positivas.
 
 RN-09 — Sensores devem usar os tipos Velocidade, Temperatura ou Status.
 
-RN-10 — A rota associada a um sensor deve pertencer ao trem associado a esse sensor.
+RN-10 — Cada sensor deve estar associado a um trem.
 
 RN-11 — Uma nova falha deve começar como não resolvida.
 

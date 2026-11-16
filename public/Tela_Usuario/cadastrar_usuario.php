@@ -18,6 +18,28 @@ unset($_SESSION['aviso_exclusao']);
 
 $mensagem = '';
 $mensagemAcesso = '';
+$usuarioEdicao = null;
+$idEdicao = filter_input(INPUT_GET, 'editar', FILTER_VALIDATE_INT);
+
+if ($idEdicao) {
+    if (!$ehAdministrador) {
+        http_response_code(403);
+        exit('Acesso negado.');
+    }
+
+    $stmtEdicao = $conn->prepare(
+        'SELECT id_usuario, nome, email, tipo FROM usuarios WHERE id_usuario = ?'
+    );
+    $stmtEdicao->bind_param('i', $idEdicao);
+    $stmtEdicao->execute();
+    $usuarioEdicao = $stmtEdicao->get_result()->fetch_assoc();
+    $stmtEdicao->close();
+
+    if (!$usuarioEdicao) {
+        http_response_code(404);
+        exit('Usuário não encontrado.');
+    }
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
@@ -33,8 +55,67 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = trim($_POST['email'] ?? '');
         $senha = $_POST['senha'] ?? '';
         $tipoRecebido = $_POST['tipo'] ?? '';
+        $acaoFormulario = $_POST['acao'] ?? 'criar';
 
-        if ($nome === '' || $email === '' || $senha === '') {
+        if (!in_array($acaoFormulario, ['criar', 'editar'], true)) {
+            $mensagem = 'Ação inválida.';
+        } elseif ($acaoFormulario === 'editar') {
+            $idEdicao = filter_input(INPUT_POST, 'id_usuario', FILTER_VALIDATE_INT);
+            if (!$idEdicao || $idEdicao < 1) {
+                http_response_code(400);
+                exit('Usuário inválido.');
+            }
+
+            $usuarioEdicao = [
+                'id_usuario' => $idEdicao,
+                'nome' => $nome,
+                'email' => $email,
+                'tipo' => $tipoRecebido
+            ];
+
+            if ($nome === '' || $email === '') {
+                $mensagem = 'Preencha todos os campos obrigatórios.';
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $mensagem = 'Informe um email válido.';
+            } elseif ($senha !== '' && strlen($senha) < 8) {
+                $mensagem = 'A senha deve ter pelo menos 8 caracteres.';
+            } elseif (!in_array($tipoRecebido, ['Funcionário', 'Administrador'], true)) {
+                $mensagem = 'Tipo de usuário inválido.';
+            } else {
+                if ($senha !== '') {
+                    $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+                    $stmt = $conn->prepare(
+                        'UPDATE usuarios SET nome = ?, email = ?, senha = ?, tipo = ? WHERE id_usuario = ?'
+                    );
+                    $stmt->bind_param('ssssi', $nome, $email, $senhaHash, $tipoRecebido, $idEdicao);
+                } else {
+                    $stmt = $conn->prepare(
+                        'UPDATE usuarios SET nome = ?, email = ?, tipo = ? WHERE id_usuario = ?'
+                    );
+                    $stmt->bind_param('sssi', $nome, $email, $tipoRecebido, $idEdicao);
+                }
+
+                try {
+                    if ($stmt->execute()) {
+                        $_SESSION['mensagem_cadastro'] = 'Usuário atualizado com sucesso!';
+                        header('Location: cadastrar_usuario.php');
+                        exit;
+                    }
+                } catch (mysqli_sql_exception $e) {
+                    if ((int) $e->getCode() === 1062) {
+                        $mensagem = 'Este email já está cadastrado.';
+                    } else {
+                        error_log('Erro ao atualizar usuário: ' . $e->getMessage());
+                        $mensagem = 'Não foi possível atualizar o usuário.';
+                    }
+                }
+
+                if ($mensagem === '') {
+                    $mensagem = 'Não foi possível atualizar o usuário.';
+                }
+                $stmt->close();
+            }
+        } elseif ($nome === '' || $email === '' || $senha === '') {
             $mensagem = "Preencha todos os campos.";
 
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -88,7 +169,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-$manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST';
+$manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST' || $usuarioEdicao !== null;
+$modoEdicao = $usuarioEdicao !== null;
+$valorNome = $usuarioEdicao['nome'] ?? ($nome ?? '');
+$valorEmail = $usuarioEdicao['email'] ?? ($email ?? '');
+$valorTipo = $usuarioEdicao['tipo'] ?? ($tipoRecebido ?? 'Funcionário');
 
 $busca = trim($_GET['buscar'] ?? '');
 $textoBusca = "%" . $busca . "%";
@@ -134,7 +219,7 @@ if ($stmtBusca) {
 
     <title>Cadastro Usuário</title>
 
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-usuario-edicao2">
 
 </head>
 
@@ -226,17 +311,22 @@ if ($stmtBusca) {
 
         <?php if ($ehAdministrador): ?>
 
-            <section class="cadastro-usuario <?= $manterFormularioAberto ? 'ativo' : '' ?>" id="cadastro">
+            <section class="cadastro-usuario <?= $manterFormularioAberto ? 'ativo' : '' ?>" id="cadastro" <?= $manterFormularioAberto ? '' : 'hidden' ?>>
+                <h2><?= $modoEdicao ? 'Editar usuário' : 'Cadastrar novo usuário' ?></h2>
 
                 <form
                     class="form-cadastro-user"
                     method="POST"
-                    onsubmit="return validar_usuario()">
+                    novalidate>
 
                     <input
                         type="hidden"
                         name="csrf_token"
                         value="<?= escapar(token_csrf()) ?>">
+                    <input type="hidden" name="acao" value="<?= $modoEdicao ? 'editar' : 'criar' ?>">
+                    <?php if ($modoEdicao): ?>
+                        <input type="hidden" name="id_usuario" value="<?= (int) $usuarioEdicao['id_usuario'] ?>">
+                    <?php endif; ?>
 
                     <div class="campo-user">
 
@@ -247,6 +337,7 @@ if ($stmtBusca) {
                             id="nome"
                             name="nome"
                             placeholder="Nome completo"
+                            value="<?= escapar($valorNome) ?>"
                             required>
 
                     </div>
@@ -260,6 +351,7 @@ if ($stmtBusca) {
                             id="email"
                             name="email"
                             placeholder="Email"
+                            value="<?= escapar($valorEmail) ?>"
                             required>
 
                     </div>
@@ -272,8 +364,8 @@ if ($stmtBusca) {
                             type="password"
                             id="senha"
                             name="senha"
-                            placeholder="Senha"
-                            required>
+                            placeholder="<?= $modoEdicao ? 'Deixe em branco para manter a senha atual' : 'Senha com pelo menos 8 caracteres' ?>"
+                            <?= $modoEdicao ? '' : 'required' ?>>
 
                     </div>
 
@@ -283,8 +375,8 @@ if ($stmtBusca) {
 
                         <select id="tipo" name="tipo">
 
-                            <option value="Funcionário">Funcionário</option>
-                            <option value="Administrador">Administrador</option>
+                            <option value="Funcionário" <?= $valorTipo === 'Funcionário' ? 'selected' : '' ?>>Funcionário</option>
+                            <option value="Administrador" <?= $valorTipo === 'Administrador' ? 'selected' : '' ?>>Administrador</option>
 
                         </select>
 
@@ -298,9 +390,14 @@ if ($stmtBusca) {
 
                     <?php endif; ?>
 
-                    <button class="btn-cadastrar-form" type="submit">
-                        CADASTRAR NOVO USUÁRIO
-                    </button>
+                    <div class="acoes-form-edicao <?= $modoEdicao ? 'modo-edicao' : 'modo-cadastro' ?>">
+                        <button class="btn-cadastrar-form" type="submit">
+                            <?= $modoEdicao ? 'SALVAR ALTERAÇÕES' : 'CADASTRAR NOVO USUÁRIO' ?>
+                        </button>
+                        <?php if ($modoEdicao): ?>
+                            <a class="btn-cancelar-form" href="cadastrar_usuario.php">Cancelar</a>
+                        <?php endif; ?>
+                    </div>
 
                 </form>
 
@@ -325,11 +422,13 @@ if ($stmtBusca) {
 
             </form>
 
-            <?php if ($ehAdministrador): ?>
+            <?php if ($ehAdministrador && !$modoEdicao): ?>
                 <button
                     class="btn-cadastrar-user btn-cadastrar-user-compacto"
+                    id="btnAbrirCadastro"
                     type="button"
-                    onclick="alternarCadastroUsuario()">
+                    aria-expanded="<?= $manterFormularioAberto ? 'true' : 'false' ?>"
+                    aria-controls="cadastro">
                     Cadastrar usuário
                 </button>
             <?php endif; ?>
@@ -376,7 +475,7 @@ function fecharAviso() {
 
 </script>
 
-<script src="../../script/validacao.js?v=20261021-4"></script>
+<script src="../../script/validacao.js?v=20261115-senha"></script>
 
 <script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>

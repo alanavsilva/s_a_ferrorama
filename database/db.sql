@@ -33,9 +33,7 @@ CREATE TABLE sensores (
     id_sensor INT PRIMARY KEY AUTO_INCREMENT,
     nome_sensor VARCHAR(100) NOT NULL,
     tipo_dado ENUM('Velocidade', 'Temperatura', 'Status') NOT NULL,
-    id_trem INT NOT NULL,
     id_rotas INT NOT NULL,
-    FOREIGN KEY (id_trem) REFERENCES trens(id_trem),
     FOREIGN KEY (id_rotas) REFERENCES rotas(id_rotas)
 );
 
@@ -63,10 +61,10 @@ INSERT INTO rotas (id_rotas, nome, descricao, extensao, tempo, id_trem) VALUES
 (2, 'Rota Central', 'Percurso de demonstração da região central.', 18.0, 35, 2),
 (3, 'Rota Sul', 'Percurso de demonstração da região sul.', 9.5, 20, 3);
 
-INSERT INTO sensores (id_sensor, nome_sensor, tipo_dado, id_trem, id_rotas) VALUES
-(1, 'Sensor Norte', 'Velocidade', 1, 1),
-(2, 'Sensor Central', 'Temperatura', 2, 2),
-(3, 'Sensor Sul', 'Status', 3, 3);
+INSERT INTO sensores (id_sensor, nome_sensor, tipo_dado, id_rotas) VALUES
+(1, 'Sensor Norte', 'Velocidade', 1),
+(2, 'Sensor Central', 'Temperatura', 2),
+(3, 'Sensor Sul', 'Status', 3);
 
 INSERT INTO falhas_operacionais (id_falha, id_sensor, descricao, resolvida) VALUES
 (1, 1, 'Velocidade acima do limite.', 0),

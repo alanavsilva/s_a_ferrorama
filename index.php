@@ -1,123 +1,80 @@
-
 <?php
 require_once "infra/conexao.php";
 require_once "infra/auth.php";
 
 $erro = '';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-$email = trim($_POST["email"] ?? '');
-$senha = ($_POST["senha"]??'');
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = trim($_POST['email'] ?? '');
+    $senha = $_POST['senha'] ?? '';
 
-if ($email === '' || $senha === '') {
-        $erro = "Preencha todos os campos.";
+    if ($email === '' || $senha === '') {
+        $erro = 'Preencha todos os campos.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $erro = "Credenciais inválidas.";
+        $erro = 'Credenciais inválidas.';
     } else {
+        $stmt = $conn->prepare(
+            'SELECT id_usuario, nome, email, tipo, senha FROM usuarios WHERE email = ? LIMIT 1'
+        );
 
-$sql = "SELECT id_usuario, nome, email, tipo, senha
-        FROM usuarios
-        WHERE email = ? 
-        LIMIT 1";
-
-  $stmt = $conn->prepare($sql);
-
-   if (!$stmt) {
-
-            $erro = "Erro ao consultar o banco de dados.";
-
+        if (!$stmt) {
+            $erro = 'Erro ao consultar o banco de dados.';
         } else {
-
-           $stmt->bind_param("s", $email);
+            $stmt->bind_param('s', $email);
             $stmt->execute();
-            $resultado = $stmt->get_result();
-            $usuario = $resultado->fetch_assoc();
+            $usuario = $stmt->get_result()->fetch_assoc();
 
-
-       if ($usuario && password_verify($senha, $usuario['senha'])) {
-
+            if ($usuario && password_verify($senha, $usuario['senha'])) {
                 session_regenerate_id(true);
-
                 $_SESSION['id_usuario'] = $usuario['id_usuario'];
                 $_SESSION['nome'] = $usuario['nome'];
                 $_SESSION['email'] = $usuario['email'];
                 $_SESSION['tipo'] = $usuario['tipo'];
                 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-
                 $stmt->close();
-
-                header("Location: public/Tela_Home/home.php");
+                header('Location: public/Tela_Home/home.php');
                 exit;
-
-            } else {
-
-                $erro = "Email ou senha incorretos.";
             }
 
+            $erro = 'E-mail ou senha incorretos.';
             $stmt->close();
         }
     }
 }
 ?>
-
-
-<html lang="en">
-
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página login</title>
-   <link rel="stylesheet" href="../assets/style/style.css?v=20261115-ui">
-
+    <title>Entrar - TremTech</title>
+    <link rel="stylesheet" href="assets/style/style.css?v=20261115-layout2">
 </head>
-
 <body class="body_login">
     <main class="pagina-login">
         <section class="login-vizualizacao" id="login">
             <div class="painel-introducao">
-
-            <img
-        class="icone-trem"
-        src="https://img.icons8.com/ios/100/ffffff/train.png"
-        alt="Ícone de trem"
-    >
+                <img class="icone-trem" src="https://img.icons8.com/ios/100/ffffff/train.png" alt="Ícone de trem">
                 <p class="inicio_login">SISTEMA TREMTECH</p>
                 <h1>Controle sua ferrovia com praticidade.</h1>
-                <p class="introducao_login">
-                    Painel para acompanhar usuarios, trens, passagens e rotas disponiveis.
-                </p>
+                <p class="introducao_login">Painel para acompanhar usuários, trens e rotas disponíveis.</p>
             </div>
-
-
             <div id="login-cadastro">
-            <form class="login-painel" id="login-formulario" method="POST">
-                    <p class="introducao_formulario">Acesso administrador/funcionario</p>
+                <form class="login-painel" id="login-formulario" method="POST">
+                    <p class="introducao_formulario">Acesso de Administrador ou Funcionário</p>
                     <h2>Entrar no sistema</h2>
-
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" placeholder="Digite seu email" required>
-                    <br>
-
-                    <br>
-
-                    <label for="senha">
-                        Senha
-                    </label>
-                        <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
-                   
-                <p role="alert">
-                            <?= escapar($erro) ?>
-                        </p>
-
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" placeholder="Digite seu e-mail" required>
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
+                    <?php if ($erro !== ''): ?>
+                        <p role="alert"><?= escapar($erro) ?></p>
+                    <?php endif; ?>
                     <button id="botao-envio" type="submit">Entrar</button>
-</form>    
- <a href="public/Tela_Landing/landing.php" class="botao-landing">
-    Conheça o Ferrorama
-</a>
-</div>
-    </section>
-</main>
-    <link rel="stylesheet" href="assets/style/style.css?v=20261115-ui">
+                </form>
+                <a href="public/Tela_landing/landing.php" class="botao-landing">Conheça o Ferrorama</a>
+            </div>
+        </section>
+    </main>
 </body>
 </html>
-

@@ -19,6 +19,27 @@ unset($_SESSION['aviso_exclusao']);
 $mensagem = '';
 $mensagemAcesso = '';
 $busca = trim($_GET['buscar'] ?? '');
+$idEdicao = filter_input(INPUT_GET, 'editar', FILTER_VALIDATE_INT) ?: 0;
+$sensorEdicao = null;
+$nomeSensor = '';
+$tipoDado = '';
+$idRotaEdicao = '';
+
+if ($idEdicao > 0 && $ehAdministrador) {
+    $carregarEdicao = $conn->prepare('SELECT id_sensor, nome_sensor, tipo_dado, id_rotas FROM sensores WHERE id_sensor = ?');
+    $carregarEdicao->bind_param('i', $idEdicao);
+    $carregarEdicao->execute();
+    $sensorEdicao = $carregarEdicao->get_result()->fetch_assoc();
+    $carregarEdicao->close();
+    if (!$sensorEdicao) {
+        $idEdicao = 0;
+        $mensagemAcesso = 'Sensor não encontrado.';
+    } else {
+        $nomeSensor = $sensorEdicao['nome_sensor'];
+        $tipoDado = $sensorEdicao['tipo_dado'];
+        $idRotaEdicao = (string) $sensorEdicao['id_rotas'];
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$ehAdministrador) {
@@ -27,10 +48,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         verificar_csrf();
 
+        $acao = $_POST['acao'] ?? 'criar';
         $nomeSensor = trim($_POST['nome_sensor'] ?? '');
         $tipoDado = trim($_POST['tipo_dado'] ?? '');
-        $idTrem = filter_input(INPUT_POST, 'id_trem', FILTER_VALIDATE_INT);
-        $idRotas = filter_input(INPUT_POST, 'id_rotas', FILTER_VALIDATE_INT);
+        $idRota = filter_input(INPUT_POST, 'id_rotas', FILTER_VALIDATE_INT);
+        $idRotaEdicao = (string) ($idRota ?: '');
+        $idAtualizar = filter_input(INPUT_POST, 'id_sensor', FILTER_VALIDATE_INT) ?: 0;
 
         $tiposPermitidos = ['Velocidade', 'Temperatura', 'Status'];
 
@@ -38,68 +61,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mb_strlen($nomeSensor) < 3 ||
             mb_strlen($nomeSensor) > 100 ||
             !in_array($tipoDado, $tiposPermitidos, true) ||
-            !$idTrem ||
-            !$idRotas
+            !$idRota
         ) {
             $mensagem = 'Preencha todos os campos corretamente.';
         } else {
-            $stmtRota = $conn->prepare(
-                'SELECT id_rotas FROM rotas WHERE id_rotas = ? AND id_trem = ?'
-            );
-            $stmtRota->bind_param('ii', $idRotas, $idTrem);
-            $stmtRota->execute();
-            $rotaPertenceAoTrem = $stmtRota->get_result()->num_rows === 1;
-            $stmtRota->close();
+            $checkRota = $conn->prepare('SELECT id_rotas FROM rotas WHERE id_rotas = ?');
+            $checkRota->bind_param('i', $idRota);
+            $checkRota->execute();
+            $rotaExiste = $checkRota->get_result()->num_rows === 1;
+            $checkRota->close();
 
-            if (!$rotaPertenceAoTrem) {
-                $mensagem = 'A rota selecionada não pertence ao trem escolhido.';
+            if (!$rotaExiste) {
+                $mensagem = 'Selecione uma rota cadastrada.';
             } else {
-                $sql = "INSERT INTO sensores
-                        (nome_sensor, tipo_dado, id_trem, id_rotas)
-                        VALUES (?, ?, ?, ?)";
-                $stmt = $conn->prepare($sql);
+            $sql = $acao === 'editar'
+                ? 'UPDATE sensores SET nome_sensor = ?, tipo_dado = ?, id_rotas = ? WHERE id_sensor = ?'
+                : 'INSERT INTO sensores (nome_sensor, tipo_dado, id_rotas) VALUES (?, ?, ?)';
+            $stmt = $conn->prepare($sql);
 
-                if (!$stmt) {
-                    error_log('Erro ao preparar cadastro de sensor: ' . $conn->error);
-                    $mensagem = 'Não foi possível concluir o cadastro.';
+            if (!$stmt) {
+                error_log('Erro ao preparar cadastro de sensor: ' . $conn->error);
+                $mensagem = 'Não foi possível concluir o cadastro.';
+            } else {
+                if ($acao === 'editar' && $idAtualizar > 0) {
+                    $stmt->bind_param('ssii', $nomeSensor, $tipoDado, $idRota, $idAtualizar);
                 } else {
-                    $stmt->bind_param(
-                        'ssii',
-                        $nomeSensor,
-                        $tipoDado,
-                        $idTrem,
-                        $idRotas
-                    );
-
-                    try {
-                        if ($stmt->execute()) {
-                            $_SESSION['mensagem_cadastro'] = 'Sensor cadastrado com sucesso!';
-                            header('Location: cadastrar_sensores.php');
-                            exit;
-                        }
-                    } catch (mysqli_sql_exception $e) {
-                        error_log('Erro ao cadastrar sensor: ' . $e->getMessage());
-                    }
-
-                    $mensagem = 'Não foi possível concluir o cadastro. Confira os vínculos selecionados.';
-                    $stmt->close();
+                    $stmt->bind_param('ssi', $nomeSensor, $tipoDado, $idRota);
                 }
+
+                try {
+                    if ($stmt->execute()) {
+                        $_SESSION['mensagem_cadastro'] = $acao === 'editar' ? 'Sensor atualizado com sucesso!' : 'Sensor cadastrado com sucesso!';
+                        header('Location: cadastrar_sensores.php');
+                        exit;
+                    }
+                } catch (mysqli_sql_exception $e) {
+                    error_log('Erro ao cadastrar sensor: ' . $e->getMessage());
+                }
+
+                $mensagem = 'Não foi possível concluir o cadastro. Confira os dados selecionados.';
+                $stmt->close();
+            }
             }
         }
     }
 }
 
-// Buscar trens
-$sqlTrens = "SELECT id_trem, nome FROM trens ORDER BY nome";
-$resultadoTrens = $conn->query($sqlTrens);
-
-if (!$resultadoTrens) {
-    error_log('Erro ao carregar trens: ' . $conn->error);
-    $mensagemAcesso = 'Não foi possível carregar os trens.';
-}
-
 // Buscar rotas
-$sqlRotas = "SELECT id_rotas, nome, id_trem FROM rotas ORDER BY nome";
+$sqlRotas = "SELECT id_rotas, nome FROM rotas ORDER BY nome";
 $resultadoRotas = $conn->query($sqlRotas);
 
 if (!$resultadoRotas) {
@@ -115,14 +124,11 @@ $sql = "
         s.id_sensor,
         s.nome_sensor,
         s.tipo_dado,
-        t.nome AS trem_vinculado,
         r.nome AS rota_vinculada
     FROM sensores AS s
-    LEFT JOIN trens AS t ON t.id_trem = s.id_trem
     LEFT JOIN rotas AS r ON r.id_rotas = s.id_rotas
     WHERE s.nome_sensor LIKE ?
        OR s.tipo_dado LIKE ?
-       OR t.nome LIKE ?
        OR r.nome LIKE ?
     ORDER BY s.id_sensor
 ";
@@ -130,13 +136,7 @@ $sql = "
 $stmtBusca = $conn->prepare($sql);
 
 if ($stmtBusca) {
-    $stmtBusca->bind_param(
-        'ssss',
-        $textoBusca,
-        $textoBusca,
-        $textoBusca,
-        $textoBusca
-    );
+    $stmtBusca->bind_param('sss', $textoBusca, $textoBusca, $textoBusca);
 
     if ($stmtBusca->execute()) {
         $resultado = $stmtBusca->get_result();
@@ -255,7 +255,8 @@ if ($stmtBusca) {
 
         <?php if ($ehAdministrador): ?>
 
-            <section class="cadastro-usuario" id="cadastro" hidden>
+            <section class="cadastro-usuario <?= $idEdicao > 0 ? 'ativo' : '' ?>" id="cadastro" <?= $idEdicao > 0 ? '' : 'hidden' ?>>
+                <h2><?= $idEdicao > 0 ? 'Editar sensor' : 'Cadastrar novo sensor' ?></h2>
 
                 <form
                     class="form-cadastro-user"
@@ -266,6 +267,8 @@ if ($stmtBusca) {
                         type="hidden"
                         name="csrf_token"
                         value="<?= escapar(token_csrf()) ?>">
+                    <input type="hidden" name="acao" value="<?= $idEdicao > 0 ? 'editar' : 'criar' ?>">
+                    <?php if ($idEdicao > 0): ?><input type="hidden" name="id_sensor" value="<?= (int) $idEdicao ?>"><?php endif; ?>
 
                     <div class="campo-user">
 
@@ -277,6 +280,7 @@ if ($stmtBusca) {
                             name="nome_sensor"
                             placeholder="Nome do sensor"
                             maxlength="100"
+                            value="<?= escapar($nomeSensor) ?>"
                             required>
 
                     </div>
@@ -288,41 +292,17 @@ if ($stmtBusca) {
                         <select id="tipo_dado" name="tipo_dado" required>
 
                             <option value="">Selecione</option>
-                            <option value="Velocidade">Velocidade</option>
-                            <option value="Temperatura">Temperatura</option>
-                            <option value="Status">Status</option>
+                            <option value="Velocidade" <?= $tipoDado === 'Velocidade' ? 'selected' : '' ?>>Velocidade</option>
+                            <option value="Temperatura" <?= $tipoDado === 'Temperatura' ? 'selected' : '' ?>>Temperatura</option>
+                            <option value="Status" <?= $tipoDado === 'Status' ? 'selected' : '' ?>>Status</option>
 
                         </select>
 
                     </div>
 
-                    <div class="campo-user">
+                    <div class="campo-user campo-rota-sensor">
 
-                        <label for="id_trem">Trem vinculado</label>
-
-                        <select id="id_trem" name="id_trem" required>
-
-                            <option value="">Selecione um trem</option>
-
-                            <?php if ($resultadoTrens): ?>
-
-                                <?php while ($trem = $resultadoTrens->fetch_assoc()): ?>
-
-                                    <option value="<?= (int) $trem['id_trem'] ?>">
-                                        <?= escapar($trem['nome']) ?>
-                                    </option>
-
-                                <?php endwhile; ?>
-
-                            <?php endif; ?>
-
-                        </select>
-
-                    </div>
-
-                    <div class="campo-user">
-
-                        <label for="id_rotas">Rota vinculada</label>
+                            <label for="id_rotas">Rota vinculada</label>
 
                         <select id="id_rotas" name="id_rotas" required>
 
@@ -332,7 +312,7 @@ if ($stmtBusca) {
 
                                 <?php while ($rota = $resultadoRotas->fetch_assoc()): ?>
 
-                                    <option value="<?= (int) $rota['id_rotas'] ?>" data-trem="<?= (int) $rota['id_trem'] ?>">
+                                    <option value="<?= (int) $rota['id_rotas'] ?>" <?= (string) $rota['id_rotas'] === $idRotaEdicao ? 'selected' : '' ?>>
                                         <?= escapar($rota['nome']) ?>
                                     </option>
 
@@ -350,9 +330,14 @@ if ($stmtBusca) {
 
                     <?php endif; ?>
 
-                    <button class="btn-cadastrar-form" type="submit">
-                        CADASTRAR NOVO SENSOR
-                    </button>
+                    <?php if ($idEdicao > 0): ?>
+                        <div class="acoes-form-edicao modo-edicao">
+                            <button class="btn-cadastrar-form" type="submit">SALVAR ALTERAÇÕES</button>
+                            <a class="btn-cancelar-form" href="cadastrar_sensores.php">Cancelar</a>
+                        </div>
+                    <?php else: ?>
+                        <button class="btn-cadastrar-form" type="submit">CADASTRAR NOVO SENSOR</button>
+                    <?php endif; ?>
 
                 </form>
 
@@ -370,7 +355,7 @@ if ($stmtBusca) {
                     type="text"
                     id="buscar"
                     name="buscar"
-                    placeholder="Nome, tipo, trem ou rota"
+                    placeholder="Nome, tipo ou rota"
                     value="<?= escapar($busca) ?>">
 
                 <button type="submit">Buscar</button>
@@ -378,10 +363,10 @@ if ($stmtBusca) {
             </form>
 
             <?php if ($ehAdministrador): ?>
-                <button class="btn-cadastrar-user btn-cadastrar-user-compacto" id="btnAbrirCadastro"
+                <?php if ($idEdicao === 0): ?><button class="btn-cadastrar-user btn-cadastrar-user-compacto" id="btnAbrirCadastro"
                         type="button" aria-expanded="false" aria-controls="cadastro">
                     Cadastrar sensor
-                </button>
+                </button><?php endif; ?>
             <?php endif; ?>
 
         </section>
@@ -427,32 +412,6 @@ function fecharAviso() {
 </script>
 
 <script src="../../script/validacao.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const trem = document.getElementById('id_trem');
-    const rota = document.getElementById('id_rotas');
-
-    if (!trem || !rota) return;
-
-    const filtrarRotas = () => {
-        const rotaSelecionada = rota.value;
-
-        Array.from(rota.options).forEach((opcao) => {
-            if (!opcao.value) return;
-
-            const compativel = opcao.dataset.trem === trem.value;
-            opcao.hidden = !compativel;
-
-            if (!compativel && opcao.value === rotaSelecionada) {
-                rota.value = '';
-            }
-        });
-    };
-
-    trem.addEventListener('change', filtrarRotas);
-    filtrarRotas();
-});
-</script>
 
 <script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>

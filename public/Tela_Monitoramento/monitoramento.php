@@ -14,7 +14,9 @@ if (!in_array($filtro, ['Todas', 'Resolvida', 'Não resolvida'], true)) {
     $filtro = 'Todas';
 }
 
-$sensorSelecionado = filter_input(INPUT_GET, 'sensor', FILTER_VALIDATE_INT) ?: 0;
+$velocidadeSelecionada = filter_input(INPUT_GET, 'velocidade', FILTER_VALIDATE_INT) ?: 0;
+$temperaturaSelecionada = filter_input(INPUT_GET, 'temperatura', FILTER_VALIDATE_INT) ?: 0;
+$rotaSelecionada = filter_input(INPUT_GET, 'rota', FILTER_VALIDATE_INT) ?: 0;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_falha'])) {
     exigir_administrador();
@@ -42,57 +44,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_falha'])) {
         }
     }
 
-    $sensorRetorno = filter_input(INPUT_POST, 'sensor', FILTER_VALIDATE_INT) ?: 0;
+    $velocidadeRetorno = filter_input(INPUT_POST, 'velocidade', FILTER_VALIDATE_INT) ?: 0;
+    $temperaturaRetorno = filter_input(INPUT_POST, 'temperatura', FILTER_VALIDATE_INT) ?: 0;
+    $rotaRetorno = filter_input(INPUT_POST, 'rota', FILTER_VALIDATE_INT) ?: 0;
 
     header(
         'Location: monitoramento.php?status='
         . urlencode($filtro)
-        . '&sensor='
-        . $sensorRetorno
+        . '&velocidade=' . $velocidadeRetorno
+        . '&temperatura=' . $temperaturaRetorno
+        . '&rota=' . $rotaRetorno
     );
     exit;
 }
 
-$sensores = [];
+$carregarSensores = static function (mysqli $conn, string $tipo): array {
+    $stmt = $conn->prepare('SELECT s.id_sensor, s.nome_sensor, r.nome AS nome_rota, t.nome AS nome_trem, t.velocidade_media FROM sensores s LEFT JOIN rotas r ON r.id_rotas = s.id_rotas LEFT JOIN trens t ON t.id_trem = r.id_trem WHERE s.tipo_dado = ? ORDER BY s.nome_sensor');
+    if (!$stmt) return [];
+    $stmt->bind_param('s', $tipo);
+    $stmt->execute();
+    $resultado = $stmt->get_result();
+    $lista = [];
+    while ($linha = $resultado->fetch_assoc()) $lista[] = $linha;
+    $stmt->close();
+    return $lista;
+};
 
-$resultadoSensores = $conn->query(
-    'SELECT
-        s.id_sensor,
-        s.nome_sensor,
-        s.id_trem,
-        t.nome AS nome_trem,
-        t.velocidade_media,
-        r.nome AS nome_rota
-     FROM sensores AS s
-     LEFT JOIN trens AS t ON t.id_trem = s.id_trem
-     LEFT JOIN rotas AS r ON r.id_rotas = s.id_rotas
-     ORDER BY s.nome_sensor'
-);
+$sensoresVelocidade = $carregarSensores($conn, 'Velocidade');
+$sensoresTemperatura = $carregarSensores($conn, 'Temperatura');
+foreach ($sensoresTemperatura as $indice => &$sensorTemperatura) {
+    $sensorTemperatura['temperatura'] = 35 + ($indice % 4);
+}
+unset($sensorTemperatura);
 
-if ($resultadoSensores) {
-    $posicao = 0;
+$resultadoRotas = $conn->query('SELECT r.id_rotas, r.nome, t.nome AS nome_trem FROM rotas r LEFT JOIN trens t ON t.id_trem = r.id_trem ORDER BY r.nome');
+$rotasMonitoramento = [];
+if ($resultadoRotas) {
+    while ($rota = $resultadoRotas->fetch_assoc()) $rotasMonitoramento[] = $rota;
+}
 
-    while ($sensor = $resultadoSensores->fetch_assoc()) {
-        $sensor['temperatura_demo'] = 35 + ($posicao % 4);
-        $sensores[] = $sensor;
-        $posicao++;
+$validarSelecao = static function (array $lista, int $selecionado, string $campo): int {
+    foreach ($lista as $linha) {
+        if ((int) $linha[$campo] === $selecionado) return $selecionado;
     }
-} else {
-    error_log('Erro ao carregar sensores no monitoramento: ' . $conn->error);
-}
-
-$indiceInicial = 0;
-
-foreach ($sensores as $indice => $sensor) {
-    if ((int)$sensor['id_sensor'] === (int)$sensorSelecionado) {
-        $indiceInicial = $indice;
-        break;
-    }
-}
-
-if (!empty($sensores)) {
-    $sensorSelecionado = (int)$sensores[$indiceInicial]['id_sensor'];
-}
+    return isset($lista[0][$campo]) ? (int) $lista[0][$campo] : 0;
+};
+$velocidadeSelecionada = $validarSelecao($sensoresVelocidade, $velocidadeSelecionada, 'id_sensor');
+$temperaturaSelecionada = $validarSelecao($sensoresTemperatura, $temperaturaSelecionada, 'id_sensor');
+$rotaSelecionada = $validarSelecao($rotasMonitoramento, $rotaSelecionada, 'id_rotas');
 
 $totalResolvidas = (int)(
     $conn->query(
@@ -120,7 +119,8 @@ $sqlFalhas = '
         t.nome AS nome_trem
     FROM falhas_operacionais AS f
     LEFT JOIN sensores AS s ON s.id_sensor = f.id_sensor
-    LEFT JOIN trens AS t ON t.id_trem = s.id_trem
+    LEFT JOIN rotas AS r ON r.id_rotas = s.id_rotas
+    LEFT JOIN trens AS t ON t.id_trem = r.id_trem
 ';
 
 if ($filtro === 'Resolvida') {
@@ -204,7 +204,7 @@ if ($resultadoFalhas) {
 
     <main class="content-user">
         <p class="painel-user">PAINEL DE MONITORAMENTO</p>
-        <h1>Monitoramento em tempo real</h1>
+        <h1>Monitoramento ferroviário</h1>
        <div class="admin-badge-user">
 
             <div class="avatar-user"></div>
@@ -221,40 +221,67 @@ if ($resultadoFalhas) {
 
         </div>
 
-        <form method="GET" class="monitoramento-filtro">
-            <label for="sensor">Sensor</label>
-            <select id="sensor" name="sensor" onchange="this.form.submit()">
-                <?php foreach ($sensores as $sensor): ?>
-                    <option value="<?= (int)$sensor['id_sensor'] ?>"
-                        <?= (int)$sensorSelecionado === (int)$sensor['id_sensor'] ? 'selected' : '' ?>>
-                        <?= escapar($sensor['nome_sensor']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-            <input type="hidden" name="status" value="<?= escapar($filtro) ?>">
-        </form>
-
         <section class="monitoramento-cartoes">
+            <div class="monitoramento-grupo-cartao">
+                <form method="GET" class="monitoramento-filtro">
+                    <label for="velocidade">Sensor de velocidade</label>
+                    <select id="velocidade" name="velocidade" onchange="this.form.submit()">
+                        <?php if (empty($sensoresVelocidade)): ?><option value="0">Nenhum sensor de velocidade cadastrado</option><?php endif; ?>
+                        <?php foreach ($sensoresVelocidade as $sensor): ?>
+                            <option value="<?= (int)$sensor['id_sensor'] ?>" <?= $velocidadeSelecionada === (int)$sensor['id_sensor'] ? 'selected' : '' ?>><?= escapar($sensor['nome_sensor']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <input type="hidden" name="temperatura" value="<?= (int)$temperaturaSelecionada ?>">
+                    <input type="hidden" name="rota" value="<?= (int)$rotaSelecionada ?>">
+                    <input type="hidden" name="status" value="<?= escapar($filtro) ?>">
+                </form>
             <article class="monitoramento-cartao">
                 <h2>Velocidade atual</h2>
-                <p id="nomeSensorVelocidade">—</p>
-                <strong id="valorVelocidade">— km/h</strong>
-                <p>Status operacional: <span id="statusVelocidade">—</span></p>
-                <p id="mensagemVelocidade">—</p>
+                <p id="nomeSensorVelocidade">-</p>
+                <strong id="valorVelocidade">- km/h</strong>
+                <p>Status operacional: <span id="statusVelocidade">-</span></p>
+                <p id="mensagemVelocidade">-</p>
             </article>
+            </div>
 
+            <div class="monitoramento-grupo-cartao">
+                <form method="GET" class="monitoramento-filtro">
+                    <label for="temperatura">Sensor de temperatura</label>
+                    <select id="temperatura" name="temperatura" onchange="this.form.submit()">
+                        <?php if (empty($sensoresTemperatura)): ?><option value="0">Nenhum sensor de temperatura cadastrado</option><?php endif; ?>
+                        <?php foreach ($sensoresTemperatura as $sensor): ?>
+                            <option value="<?= (int)$sensor['id_sensor'] ?>" <?= $temperaturaSelecionada === (int)$sensor['id_sensor'] ? 'selected' : '' ?>><?= escapar($sensor['nome_sensor']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <input type="hidden" name="velocidade" value="<?= (int)$velocidadeSelecionada ?>">
+                    <input type="hidden" name="rota" value="<?= (int)$rotaSelecionada ?>">
+                    <input type="hidden" name="status" value="<?= escapar($filtro) ?>">
+                </form>
             <article class="monitoramento-cartao">
                 <h2>Temperatura atual</h2>
-                <p id="nomeSensorTemperatura">—</p>
-                <strong id="valorTemperatura">— °C</strong>
-                <p>Status operacional: <span id="statusTemperatura">—</span></p>
-                <p>Leitura demonstrativa</p>
+                <p id="nomeSensorTemperatura">-</p>
+                <strong id="valorTemperatura">- °C</strong>
+                <p>Status operacional: <span id="statusTemperatura">-</span></p>
+                <p id="mensagemTemperatura">-</p>
             </article>
+            </div>
         </section>
 
         <section class="monitoramento-localizacao">
             <h2>Localização</h2>
-            <p id="nomeRota">—</p>
+            <form method="GET" class="monitoramento-filtro monitoramento-filtro-rota">
+                <label for="rota">Rota</label>
+                <select id="rota" name="rota" onchange="this.form.submit()">
+                    <?php if (empty($rotasMonitoramento)): ?><option value="0">Nenhuma rota cadastrada</option><?php endif; ?>
+                    <?php foreach ($rotasMonitoramento as $rota): ?>
+                        <option value="<?= (int)$rota['id_rotas'] ?>" <?= $rotaSelecionada === (int)$rota['id_rotas'] ? 'selected' : '' ?>><?= escapar($rota['nome']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <input type="hidden" name="velocidade" value="<?= (int)$velocidadeSelecionada ?>">
+                <input type="hidden" name="temperatura" value="<?= (int)$temperaturaSelecionada ?>">
+                <input type="hidden" name="status" value="<?= escapar($filtro) ?>">
+            </form>
+            <p id="nomeRota">Percurso ferroviário</p>
 
             <svg class="mapa-trilhos" viewBox="0 0 760 330"
                  role="img" aria-label="Trajeto ferroviário com ponte e desvios">
@@ -302,7 +329,9 @@ if ($resultadoFalhas) {
                         <option value="Resolvida" <?= $filtro === 'Resolvida' ? 'selected' : '' ?>>Resolvidas</option>
                         <option value="Não resolvida" <?= $filtro === 'Não resolvida' ? 'selected' : '' ?>>Não resolvidas</option>
                     </select>
-                    <input type="hidden" name="sensor" value="<?= (int)$sensorSelecionado ?>">
+                    <input type="hidden" name="velocidade" value="<?= (int)$velocidadeSelecionada ?>">
+                    <input type="hidden" name="temperatura" value="<?= (int)$temperaturaSelecionada ?>">
+                    <input type="hidden" name="rota" value="<?= (int)$rotaSelecionada ?>">
                 </form>
             </div>
 
@@ -325,8 +354,8 @@ if ($resultadoFalhas) {
                                 <h3><?= escapar($falha['descricao']) ?></h3>
                                 <p>
                                     Sensor: <?= escapar($falha['nome_sensor'] ?? 'Removido') ?>
-                                    — Trem: <?= escapar($falha['nome_trem'] ?? 'Não identificado') ?>
-                                    — <?= escapar(date('d/m/Y H:i', strtotime($falha['data_registro']))) ?>
+                                    - Trem: <?= escapar($falha['nome_trem'] ?? 'Não identificado') ?>
+                                    - <?= escapar(date('d/m/Y H:i', strtotime($falha['data_registro']))) ?>
                                 </p>
                             </div>
 
@@ -338,8 +367,9 @@ if ($resultadoFalhas) {
                                            value="<?= (int)$falha['id_falha'] ?>">
                                     <input type="hidden" name="status"
                                            value="<?= escapar($filtro) ?>">
-                                    <input type="hidden" name="sensor"
-                                           value="<?= (int)$sensorSelecionado ?>">
+                                    <input type="hidden" name="velocidade" value="<?= (int)$velocidadeSelecionada ?>">
+                                    <input type="hidden" name="temperatura" value="<?= (int)$temperaturaSelecionada ?>">
+                                    <input type="hidden" name="rota" value="<?= (int)$rotaSelecionada ?>">
 
                                     <?php if ((int)$falha['resolvida'] === 1): ?>
                                         <button type="submit" name="acao_falha"
@@ -365,66 +395,78 @@ if ($resultadoFalhas) {
 </div>
 
 <script>
-const sensoresMonitorados = <?= json_encode(
-    $sensores,
+const sensoresVelocidade = <?= json_encode(
+    $sensoresVelocidade,
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+) ?>;
+const sensoresTemperatura = <?= json_encode(
+    $sensoresTemperatura,
+    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+) ?>;
+const rotasMonitoramento = <?= json_encode(
+    $rotasMonitoramento,
     JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
 ) ?>;
 
-let indiceSensor = <?= (int)$indiceInicial ?>;
-
-function mostrarLeituraSensor(indice) {
-    if (!sensoresMonitorados.length) {
-        document.getElementById('nomeSensorVelocidade').textContent =
-            'Nenhum sensor cadastrado';
-        document.getElementById('nomeSensorTemperatura').textContent =
-            'Nenhum sensor cadastrado';
-        document.getElementById('valorVelocidade').textContent = '— km/h';
-        document.getElementById('valorTemperatura').textContent = '— °C';
-        return;
-    }
-
-    const sensor = sensoresMonitorados[indice];
-
-    document.getElementById('sensor').value = sensor.id_sensor;
+function mostrarVelocidade(sensor) {
     document.getElementById('nomeSensorVelocidade').textContent =
-        sensor.nome_sensor + ' — ' + (sensor.nome_trem || 'Trem não definido');
-    document.getElementById('nomeSensorTemperatura').textContent =
-        sensor.nome_sensor;
+        sensor.nome_sensor + ' - ' + (sensor.nome_trem || 'Trem não definido');
     document.getElementById('valorVelocidade').textContent =
         Number(sensor.velocidade_media || 0).toFixed(0) + ' km/h';
-    document.getElementById('valorTemperatura').textContent =
-        sensor.temperatura_demo + ' °C';
     document.getElementById('statusVelocidade').textContent =
         Number(sensor.velocidade_media || 0) > 100 ? 'Alerta' : 'Normal';
     document.getElementById('mensagemVelocidade').textContent =
         Number(sensor.velocidade_media || 0) > 100
             ? 'Velocidade acima da média'
             : 'Velocidade dentro do limite';
-    document.getElementById('statusTemperatura').textContent = 'Normal';
-    document.getElementById('nomeRota').textContent =
-        sensor.nome_rota || 'Rota não definida';
 }
 
-mostrarLeituraSensor(indiceSensor);
+function mostrarTemperatura(sensor) {
+    document.getElementById('nomeSensorTemperatura').textContent =
+        sensor.nome_sensor + ' - ' + (sensor.nome_trem || 'Trem não definido');
+    document.getElementById('valorTemperatura').textContent = sensor.temperatura + ' °C';
+    const temperatura = Number(sensor.temperatura || 0);
+    document.getElementById('statusTemperatura').textContent = temperatura > 40 ? 'Alerta' : 'Normal';
+    document.getElementById('mensagemTemperatura').textContent = temperatura > 40
+        ? 'Temperatura acima do limite'
+        : 'Temperatura dentro do limite';
+}
 
-document.getElementById('sensor').addEventListener('change', function () {
-    const idSelecionado = Number(this.value);
-    const novoIndice = sensoresMonitorados.findIndex(
-        (sensor) => Number(sensor.id_sensor) === idSelecionado
-    );
-
-    if (novoIndice >= 0) {
-        indiceSensor = novoIndice;
-        mostrarLeituraSensor(indiceSensor);
+const campoVelocidade = document.getElementById('velocidade');
+const campoTemperatura = document.getElementById('temperatura');
+const campoRota = document.getElementById('rota');
+function atualizarVelocidade() {
+    const sensor = sensoresVelocidade.find((item) => Number(item.id_sensor) === Number(campoVelocidade.value)) || sensoresVelocidade[0];
+    if (sensor) mostrarVelocidade(sensor);
+    else {
+        document.getElementById('nomeSensorVelocidade').textContent = 'Sem leitura disponível';
+        document.getElementById('valorVelocidade').textContent = '- km/h';
+        document.getElementById('statusVelocidade').textContent = '-';
+        document.getElementById('mensagemVelocidade').textContent = 'Nenhum sensor de velocidade cadastrado';
     }
-});
-
-if (sensoresMonitorados.length > 1) {
-    setInterval(() => {
-        indiceSensor = (indiceSensor + 1) % sensoresMonitorados.length;
-        mostrarLeituraSensor(indiceSensor);
-    }, 3000);
 }
+function atualizarTemperatura() {
+    const sensor = sensoresTemperatura.find((item) => Number(item.id_sensor) === Number(campoTemperatura.value)) || sensoresTemperatura[0];
+    if (sensor) mostrarTemperatura(sensor);
+    else {
+        document.getElementById('nomeSensorTemperatura').textContent = 'Sem leitura disponível';
+        document.getElementById('valorTemperatura').textContent = '- °C';
+        document.getElementById('statusTemperatura').textContent = '-';
+        document.getElementById('mensagemTemperatura').textContent = 'Nenhum sensor de temperatura cadastrado';
+    }
+}
+function atualizarRota() {
+    const rota = rotasMonitoramento.find((item) => Number(item.id_rotas) === Number(campoRota.value)) || rotasMonitoramento[0];
+    document.getElementById('nomeRota').textContent = rota
+        ? rota.nome + ' - ' + (rota.nome_trem || 'Trem não definido')
+        : 'Nenhuma rota cadastrada';
+}
+atualizarVelocidade();
+atualizarTemperatura();
+atualizarRota();
+campoVelocidade.addEventListener('change', atualizarVelocidade);
+campoTemperatura.addEventListener('change', atualizarTemperatura);
+campoRota.addEventListener('change', atualizarRota);
 
 const caminhoDoTrem = [
     [70,175],[80,115],[150,75],[250,60],[360,65],[470,90],
@@ -461,3 +503,4 @@ setInterval(() => {
 <script src="../../script/confirmar_logout.js?v=20261107"></script>
 </body>
 </html>
+

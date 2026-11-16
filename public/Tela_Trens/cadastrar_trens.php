@@ -28,6 +28,8 @@ $nome = '';
 $velocidade = '';
 $id_usuario = '';
 $erros = [];
+$idEdicao = filter_input(INPUT_GET, 'editar', FILTER_VALIDATE_INT) ?: 0;
+$tremEdicao = null;
 
 $usuarios = [];
 
@@ -41,6 +43,22 @@ if ($resultadoUsuarios) {
     }
 }
 
+if ($idEdicao > 0 && $ehAdministrador) {
+    $stmtEdicao = $conn->prepare('SELECT id_trem, nome, velocidade_media, id_usuario FROM trens WHERE id_trem = ?');
+    $stmtEdicao->bind_param('i', $idEdicao);
+    $stmtEdicao->execute();
+    $tremEdicao = $stmtEdicao->get_result()->fetch_assoc();
+    $stmtEdicao->close();
+    if ($tremEdicao) {
+        $nome = $tremEdicao['nome'];
+        $velocidade = (string) $tremEdicao['velocidade_media'];
+        $id_usuario = (string) $tremEdicao['id_usuario'];
+    } else {
+        $idEdicao = 0;
+        $mensagemAcesso = 'Trem não encontrado.';
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$ehAdministrador) {
@@ -50,6 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
 
         verificar_csrf();
+
+        $acao = $_POST['acao'] ?? 'criar';
+        $idAtualizar = filter_input(INPUT_POST, 'id_trem', FILTER_VALIDATE_INT) ?: 0;
 
         $nome = trim($_POST['nome'] ?? '');
         $velocidade = trim($_POST['velocidade'] ?? '');
@@ -83,8 +104,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $velocidadeBanco = (float)$velocidade;
                 $idUsuarioBanco = (int)$id_usuario;
 
-                $sql = "INSERT INTO trens (nome, velocidade_media, id_usuario)
-                        VALUES (?, ?, ?)";
+                $sql = $acao === 'editar'
+                    ? 'UPDATE trens SET nome = ?, velocidade_media = ?, id_usuario = ? WHERE id_trem = ?'
+                    : 'INSERT INTO trens (nome, velocidade_media, id_usuario) VALUES (?, ?, ?)';
 
                 $stmt = $conn->prepare($sql);
 
@@ -93,12 +115,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 } else {
 
-                    $stmt->bind_param("sdi", $nome, $velocidadeBanco, $idUsuarioBanco);
+                    if ($acao === 'editar' && $idAtualizar > 0) {
+                        $stmt->bind_param('sdii', $nome, $velocidadeBanco, $idUsuarioBanco, $idAtualizar);
+                    } else {
+                        $stmt->bind_param('sdi', $nome, $velocidadeBanco, $idUsuarioBanco);
+                    }
 
                     try {
 
                         if ($stmt->execute()) {
-                            $_SESSION['mensagem_cadastro'] = 'Trem cadastrado com sucesso!';
+                            $_SESSION['mensagem_cadastro'] = $acao === 'editar' ? 'Trem atualizado com sucesso!' : 'Trem cadastrado com sucesso!';
                             $stmt->close();
 
                             header('Location: cadastrar_trens.php');
@@ -121,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST';
+$manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST' || $idEdicao > 0;
 
 $busca = trim($_GET['buscar'] ?? '');
 $textoBusca = "%" . $busca . "%";
@@ -277,7 +303,7 @@ if ($stmtBusca) {
         <?php if ($ehAdministrador): ?>
 
             <section
-                class="cadastro-usuario"
+                class="cadastro-usuario <?= $manterFormularioAberto ? 'ativo' : '' ?>"
                 id="cadastro"
                 <?= $manterFormularioAberto ? '' : 'hidden' ?>
             >
@@ -352,9 +378,17 @@ if ($stmtBusca) {
                         </p>
                     <?php endif; ?>
 
-                    <button class="btn-cadastrar-form" type="submit">
-                        CADASTRAR NOVO TREM
-                    </button>
+                    <?php if ($idEdicao > 0): ?>
+                        <input type="hidden" name="acao" value="editar">
+                        <input type="hidden" name="id_trem" value="<?= (int) $idEdicao ?>">
+                        <div class="acoes-form-edicao modo-edicao">
+                            <button class="btn-cadastrar-form" type="submit">SALVAR ALTERAÇÕES</button>
+                            <a class="btn-cancelar-form" href="cadastrar_trens.php">Cancelar</a>
+                        </div>
+                    <?php else: ?>
+                        <input type="hidden" name="acao" value="criar">
+                        <button class="btn-cadastrar-form" type="submit">CADASTRAR NOVO TREM</button>
+                    <?php endif; ?>
 
                 </form>
 
@@ -380,7 +414,7 @@ if ($stmtBusca) {
 
             </form>
 
-            <?php if ($ehAdministrador): ?>
+            <?php if ($ehAdministrador && $idEdicao === 0): ?>
                 <button class="btn-cadastrar-user btn-cadastrar-user-compacto" id="btnAbrirCadastro"
                         type="button" aria-expanded="<?= $manterFormularioAberto ? 'true' : 'false' ?>"
                         aria-controls="cadastro">

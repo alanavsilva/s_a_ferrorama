@@ -26,7 +26,8 @@ Nesta versão, o CRUD é usado nos cadastros de usuários, trens, rotas e sensor
 
 - **Create (Criar):** o Administrador cadastra usuários, trens, rotas e sensores. Também registra falhas manualmente para um sensor.
 - **Read (Consultar):** os usuários autenticados consultam as informações permitidas pelo perfil. As listas oferecem pesquisa em cadastros, e a área de falhas permite filtrar pelo estado.
-- **Update (Atualizar):** o Administrador edita os cadastros e pode resolver ou reabrir falhas. A edição respeita os vínculos entre usuário, trem, rota e sensor.
+- **Update (Atualizar):** o Administrador edita os cadastros e pode resolver ou reabrir falhas. A edição respeita os vínculos entre usuários e trens, trens e rotas, e sensores e trens.
 - **Delete (Excluir):** o Administrador pode excluir cadastros quando não há registros dependentes que precisem deles. Chaves estrangeiras e validações preservam as relações.
 
-O projeto não recebe leituras de sensores físicos. Portanto, velocidade e temperatura mostradas no monitoramento são demonstrativas; consumo de energia, localização real e criação automática de falhas não fazem parte do CRUD atual.
+O monitoramento apresenta a velocidade média cadastrada para o trem associado e a temperatura calculada pelo sistema. Consumo de energia, localização real e criação automática de falhas não fazem parte do CRUD atual.
+

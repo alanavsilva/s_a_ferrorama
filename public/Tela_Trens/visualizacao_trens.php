@@ -22,10 +22,10 @@ function mostrar_trens($resultado): void
             <tr>
                 <td><?= escapar($trem['nome'] ?? '') ?></td>
                 <td><?= escapar((string)($trem['velocidade_media'] ?? '')) ?> km/h</td>
-                <td><?= escapar($trem['nome_responsavel'] ?? '—') ?></td>
+                <td><?= escapar($trem['nome_responsavel'] ?? '-') ?></td>
                 <?php if ($ehAdministrador): ?>
                     <td class="acao_user">
-                        <a href="editar_t.php?id=<?= (int)$trem['id_trem'] ?>" class="acao-icone" aria-label="Editar trem">
+                        <a href="cadastrar_trens.php?editar=<?= (int)$trem['id_trem'] ?>#cadastro" class="acao-icone" aria-label="Editar trem">
                             <img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt="">
                         </a>
                         <form method="POST" action="excluir_t.php" class="js-confirmar-exclusao" data-titulo="Excluir trem" data-mensagem="Tem certeza de que deseja excluir este trem? Essa ação não pode ser desfeita.">

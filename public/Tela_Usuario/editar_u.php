@@ -3,6 +3,12 @@ require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
 
 exigir_administrador();
+$idParaEdicao = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if ($idParaEdicao && $idParaEdicao > 0) {
+    header('Location: cadastrar_usuario.php?editar=' . $idParaEdicao);
+    exit;
+}
+
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT)
     ?: filter_input(INPUT_POST, 'id_usuario', FILTER_VALIDATE_INT);
 if (!$id || $id < 1) { http_response_code(400); exit('Usuário inválido.'); }

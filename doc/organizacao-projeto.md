@@ -3,12 +3,12 @@
 ## Estrutura atual
 
 - `assets/`: estilos e imagens usadas pela aplicação.
-- `database/`: estrutura do banco e dados fictícios de demonstração.
+- `database/`: estrutura do banco e registros iniciais para apresentação.
 - `doc/`: pesquisas e documentos da equipe.
 - `infra/`: autenticação, conexão local com o banco e integração de clima.
 - `public/`: landing page e telas divididas por área funcional.
 - `script/`: interações e validações executadas no navegador.
-- `index.php` e `logout.php`: entrada e encerramento da sessão.
+- `index.php` e `logout.php`: entrada e encerramento da sessão. A landing fica em `public/Tela_landing/landing.php`.
 - `README.md`, `REQUISITOS.md` e `MANUAL.md`: apresentação, requisitos e instruções de uso.
 
 ## Nomenclatura
@@ -32,3 +32,5 @@ Elaboração do README, desenvolvimento de telas de cadastro e contribuição em
 Desenvolvimento da tela de login, estudo da identidade visual e contribuição no desenvolvimento e refinamento de outras telas e estilos.
 
 As responsabilidades se complementaram ao longo do projeto. Esta descrição registra as frentes de trabalho conhecidas e evita atribuir cada módulo exclusivamente a uma integrante.
+
+

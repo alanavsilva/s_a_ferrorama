@@ -16,9 +16,9 @@ function mostrar_rotas($resultado): void
         <thead>
             <tr>
                 <th>Nome da rota</th>
+                <th>Trem vinculado</th>
                 <th>Descrição</th>
                 <th>Distância</th>
-                <th>Trem vinculado</th>
                 <th>Tempo estimado</th>
                 <th>Data de criação</th>
                 <?php if ($ehAdministrador): ?><th>Ação</th><?php endif; ?>
@@ -28,14 +28,14 @@ function mostrar_rotas($resultado): void
         <?php while ($rota = $resultado->fetch_assoc()): ?>
             <tr>
                 <td><?= escapar($rota['nome'] ?? '') ?></td>
+                <td><?= escapar($rota['nome_trem'] ?? 'Trem não definido') ?></td>
                 <td><?= escapar($rota['descricao'] ?? '') ?></td>
                 <td><?= escapar(number_format((float)($rota['extensao'] ?? 0), 2, ',', '.')) ?> km</td>
-                <td><?= escapar($rota['nome_trem'] ?? 'Trem não definido') ?></td>
                 <td><?= (int)($rota['tempo'] ?? 0) ?> min</td>
-                <td><?= !empty($rota['data_criacao']) ? escapar(date('d/m/Y H:i', strtotime($rota['data_criacao']))) : '—' ?></td>
+                <td><?= !empty($rota['data_criacao']) ? escapar(date('d/m/Y H:i', strtotime($rota['data_criacao']))) : '-' ?></td>
                 <?php if ($ehAdministrador): ?>
                     <td class="acao_user">
-                        <a href="editar_r.php?id=<?= (int)$rota['id_rotas'] ?>" class="acao-icone editar-user" aria-label="Editar rota">
+                        <a href="cadastrar_rotas.php?editar=<?= (int)$rota['id_rotas'] ?>#cadastro" class="acao-icone editar-user" aria-label="Editar rota">
                             <img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt="">
                         </a>
                         <form method="POST" action="excluir_r.php" class="js-confirmar-exclusao" data-titulo="Excluir rota" data-mensagem="Sensores vinculados impedem a exclusão desta rota.">

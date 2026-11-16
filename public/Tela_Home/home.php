@@ -72,7 +72,7 @@ while ($trem = $resultadoTrensVelocidade->fetch_assoc()) {
 
 $totalResolvidas = (int) ($conn->query("SELECT COUNT(*) AS total FROM falhas_operacionais WHERE resolvida = 1")->fetch_assoc()['total'] ?? 0);
 $totalNaoResolvidas = (int) ($conn->query("SELECT COUNT(*) AS total FROM falhas_operacionais WHERE resolvida = 0")->fetch_assoc()['total'] ?? 0);
-$sqlFalhas = "SELECT f.id_falha, f.descricao, f.data_registro, f.resolvida, s.nome_sensor, t.nome AS nome_trem FROM falhas_operacionais AS f LEFT JOIN sensores AS s ON f.id_sensor = s.id_sensor LEFT JOIN trens AS t ON s.id_trem = t.id_trem";
+$sqlFalhas = "SELECT f.id_falha, f.descricao, f.data_registro, f.resolvida, s.nome_sensor, t.nome AS nome_trem FROM falhas_operacionais AS f LEFT JOIN sensores AS s ON f.id_sensor = s.id_sensor LEFT JOIN rotas AS r ON s.id_rotas = r.id_rotas LEFT JOIN trens AS t ON r.id_trem = t.id_trem";
 
 if ($statusFiltro === 'resolvidas') {
     $sqlFalhas .= " WHERE f.resolvida = 1";
@@ -85,7 +85,7 @@ $faltas = $conn->query($sqlFalhas);
 
 
 $usuarios = $conn->query("SELECT id_usuario, nome, email, tipo FROM usuarios ORDER BY nome");
-$sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome AS trem_vinculado, r.nome AS rota_vinculada FROM sensores AS s INNER JOIN trens AS t ON s.id_trem = t.id_trem INNER JOIN rotas AS r ON s.id_rotas = r.id_rotas ORDER BY s.id_sensor DESC");
+$sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, r.nome AS rota_vinculada FROM sensores AS s INNER JOIN rotas AS r ON s.id_rotas = r.id_rotas ORDER BY s.id_sensor DESC");
 ?>
 
 <!DOCTYPE html>
@@ -95,7 +95,7 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - TremTech</title>
 
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-layout4">
     <script src="../../script/validacao.js"></script>
   
 
@@ -157,30 +157,30 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     </p>
 </section>
 
-<div class="home_atualizacao">
-    <p>Última consulta: <?= date('d/m/Y H:i') ?></p>
-</div>
-
     <section class="home_indicadores">
 
         <div class="home_indicador">
-            <div class="home_indicador_nome">Usuários cadastrados</div>
-            <div class="home_indicador_numero"> <?= (int)$totalUsuarios ?> </div>
+            <span class="home_indicador-icone" aria-hidden="true"><img src="https://img.icons8.com/ios-filled/50/701015/user.png" alt=""></span>
+            <div><div class="home_indicador_nome">Usuários cadastrados</div>
+            <div class="home_indicador_numero"><?= (int)$totalUsuarios ?></div></div>
         </div>
 
         <div class="home_indicador">
-            <div class="home_indicador_nome">Rotas cadastradas</div>
-            <div class="home_indicador_numero"> <?= (int)$totalRotas ?> </div>
+            <span class="home_indicador-icone" aria-hidden="true"><img src="https://img.icons8.com/ios-filled/50/701015/map.png" alt=""></span>
+            <div><div class="home_indicador_nome">Rotas cadastradas</div>
+            <div class="home_indicador_numero"><?= (int)$totalRotas ?></div></div>
         </div>
 
         <div class="home_indicador">
-            <div class="home_indicador_nome">Sensores cadastrados</div>
-            <div class="home_indicador_numero"><?= (int)$totalSensores ?></div>
+            <span class="home_indicador-icone" aria-hidden="true"><img src="https://img.icons8.com/ios-filled/50/701015/radio-waves.png" alt=""></span>
+            <div><div class="home_indicador_nome">Sensores cadastrados</div>
+            <div class="home_indicador_numero"><?= (int)$totalSensores ?></div></div>
         </div> 
 
         <div class="home_indicador">
-            <div class="home_indicador_nome">Trens cadastrados</div>
-            <div class="home_indicador_numero"> <?= (int)$totalTrens ?> </div>
+            <span class="home_indicador-icone" aria-hidden="true"><img src="https://img.icons8.com/ios-filled/50/701015/train.png" alt=""></span>
+            <div><div class="home_indicador_nome">Trens cadastrados</div>
+            <div class="home_indicador_numero"><?= (int)$totalTrens ?></div></div>
         </div>
 
     </section>
@@ -188,49 +188,24 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 
     <section class="home_atalhos">
     <h2>Acesso rápido</h2>
+    <p class="home_atalhos-descricao">Escolha uma área para consultar ou gerenciar as informações do sistema.</p>
 
     <div class="home_atalhos_lista">
         <?php if ($ehAdministrador): ?>
-        <a href="../Tela_Usuario/cadastrar_usuario.php">
-            Cadastrar usuário
-        </a>
-        <a href="../Tela_Sensores/cadastrar_sensores.php">
-            Cadastrar sensor
-        </a>
-
-        <a href="../Tela_Trens/cadastrar_trens.php">
-            Cadastrar trem
-        </a>
-
-        <a href="../Tela_Rotas/cadastrar_rotas.php">
-            Cadastrar rota
-        </a>
-        <a href="../Tela_Falhas/cadastrar_falha.php">
-            Cadastrar falha
-        </a>
+        <a class="home_atalho" href="../Tela_Usuario/cadastrar_usuario.php"><strong>Usuários</strong><span>Organize as contas de acesso</span></a>
+        <a class="home_atalho" href="../Tela_Sensores/cadastrar_sensores.php"><strong>Sensores</strong><span>Cadastre e consulte sensores das rotas</span></a>
+        <a class="home_atalho" href="../Tela_Trens/cadastrar_trens.php"><strong>Trens</strong><span>Gerencie os trens e responsáveis</span></a>
+        <a class="home_atalho" href="../Tela_Rotas/cadastrar_rotas.php"><strong>Rotas</strong><span>Organize percursos e trens vinculados</span></a>
+        <a class="home_atalho" href="../Tela_Falhas/cadastrar_falha.php"><strong>Falhas</strong><span>Registre e acompanhe ocorrências</span></a>
         <?php else: ?>
-        <a href="../Tela_Usuario/cadastrar_usuario.php">
-            Tela de usuários
-        </a>
-        <a href="../Tela_Sensores/cadastrar_sensores.php">
-            Tela de sensores
-        </a>
-        <a href="../Tela_Trens/cadastrar_trens.php">
-            Tela de trens
-        </a>
-        <a href="../Tela_Rotas/cadastrar_rotas.php">
-            Tela de rotas
-        </a>
-        <a href="../Tela_Falhas/cadastrar_falha.php#falhas">
-            Ver falhas registradas
-        </a>
+        <a class="home_atalho" href="../Tela_Usuario/cadastrar_usuario.php"><strong>Usuários</strong><span>Consulte as contas cadastradas</span></a>
+        <a class="home_atalho" href="../Tela_Sensores/cadastrar_sensores.php"><strong>Sensores</strong><span>Consulte os sensores das rotas</span></a>
+        <a class="home_atalho" href="../Tela_Trens/cadastrar_trens.php"><strong>Trens</strong><span>Consulte trens e responsáveis</span></a>
+        <a class="home_atalho" href="../Tela_Rotas/cadastrar_rotas.php"><strong>Rotas</strong><span>Consulte percursos cadastrados</span></a>
+        <a class="home_atalho" href="../Tela_Falhas/cadastrar_falha.php#falhas"><strong>Falhas</strong><span>Acompanhe ocorrências registradas</span></a>
         <?php endif; ?>
-        <a href="../Tela_Monitoramento/monitoramento.php">
-            Ver monitoramento
-        </a>
-        <a href="../Tela_Relatorios/relatorios.php">
-            Relatórios
-        </a>
+        <a class="home_atalho" href="../Tela_Monitoramento/monitoramento.php"><strong>Monitoramento</strong><span>Acompanhe informações dos trens</span></a>
+        <a class="home_atalho home_atalho-destaque" href="../Tela_Relatorios/relatorios.php"><strong>Relatórios</strong><span>Consulte falhas por sensor e período</span></a>
     </div>
 </section>
 
@@ -277,12 +252,10 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
     <small>Fonte: Open-Meteo | Localização: Joinville, SC</small>
 </section>
 
-<br>
-
 <section class="home_caixa_cep">
     <h2>Consultar endereço por CEP</h2>
 
-    <form id="form_cep">
+    <form id="form_cep" class="home-cep-form">
         <label for="cep">CEP brasileiro</label>
 
         <input
@@ -300,24 +273,23 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
 
     <p id="mensagem_cep" role="status" aria-live="polite"></p>
 
-    <div>
-        <label for="logradouro">Logradouro</label>
-        <input type="text" id="logradouro" readonly>
-    </div>
-
-    <div>
-        <label for="bairro">Bairro</label>
-        <input type="text" id="bairro" readonly>
-    </div>
-
-    <div>
-        <label for="cidade">Cidade</label>
-        <input type="text" id="cidade" readonly>
-    </div>
-
-    <div>
-        <label for="uf">Estado (UF)</label>
-        <input type="text" id="uf" readonly>
+    <div class="home-cep-campos">
+        <div class="home-cep-campo">
+            <label for="logradouro">Logradouro</label>
+            <input type="text" id="logradouro" readonly>
+        </div>
+        <div class="home-cep-campo">
+            <label for="bairro">Bairro</label>
+            <input type="text" id="bairro" readonly>
+        </div>
+        <div class="home-cep-campo">
+            <label for="cidade">Cidade</label>
+            <input type="text" id="cidade" readonly>
+        </div>
+        <div class="home-cep-campo">
+            <label for="uf">Estado (UF)</label>
+            <input type="text" id="uf" readonly>
+        </div>
     </div>
 
     <small>Fonte: ViaCEP</small>
@@ -364,8 +336,8 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, t.nome
                     <h3><?= escapar($falha['descricao']) ?></h3>
 
         <p> Sensor: <?= escapar($falha['nome_sensor'] ?? 'Removido') ?>
-        — Trem: <?= escapar($falha['nome_trem'] ?? 'Não identificado') ?>
-        — <?= escapar(date('d/m/Y H:i', strtotime($falha['data_registro']))) ?>
+        - Trem: <?= escapar($falha['nome_trem'] ?? 'Não identificado') ?>
+        - <?= escapar(date('d/m/Y H:i', strtotime($falha['data_registro']))) ?>
        </p>
 
         </div>

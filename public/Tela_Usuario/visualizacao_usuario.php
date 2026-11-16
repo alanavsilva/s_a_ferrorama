@@ -45,7 +45,7 @@ if ($resultado->num_rows === 0) {
                 <?php if ($ehAdministrador) { ?>
                     <td class="acao_user">
                         <a
-                            href="editar_u.php?id=<?= (int)$usuario['id_usuario'] ?>"
+                            href="cadastrar_usuario.php?editar=<?= (int)$usuario['id_usuario'] ?>"
                             class="acao-icone editar-user"
                             aria-label="Editar usuário"
                         >

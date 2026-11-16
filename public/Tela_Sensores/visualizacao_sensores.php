@@ -19,14 +19,12 @@ function mostrar_sensores($resultado, bool $mostrarAcoes = true): void
 
     ?>
 
-          <table class="tabela-sensores">
+          <table class="tabela-usuarios tabela-sensores">
             <thead>
             <tr>
-                <th>ID</th>
                 <th>Nome do sensor</th>
-                <th>Trem vinculado</th>
-                <th>Tipo de dado registrado</th>
                 <th>Rota vinculada</th>
+                <th>Tipo de dado registrado</th>
 
                 <?php if ($exibirAcoes): ?>
                     <th>Ações</th>
@@ -37,16 +35,14 @@ function mostrar_sensores($resultado, bool $mostrarAcoes = true): void
         <tbody>
             <?php while ($sensor = $resultado->fetch_assoc()): ?>
                 <tr>
-                    <td><?= (int) $sensor['id_sensor'] ?></td>
                     <td><?= escapar($sensor['nome_sensor'] ?? '') ?></td>
-                    <td><?= escapar($sensor['trem_vinculado'] ?? '') ?></td>
-                    <td><?= escapar($sensor['tipo_dado'] ?? '') ?></td>
                     <td><?= escapar($sensor['rota_vinculada'] ?? '') ?></td>
+                    <td><?= escapar($sensor['tipo_dado'] ?? '') ?></td>
 
             <?php if ($exibirAcoes): ?>
-            <td class="acao_sensor">
+            <td class="acao_user acao_sensor">
                 
-            <a href="editar_s.php?id=<?= (int) $sensor['id_sensor'] ?>" class="acao-icone" aria-label="Editar sensor">
+            <a href="cadastrar_sensores.php?editar=<?= (int) $sensor['id_sensor'] ?>" class="acao-icone" aria-label="Editar sensor">
             <img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt="" >
             </a>
 

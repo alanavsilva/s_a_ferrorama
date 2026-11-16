@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ferrorama - Sistema TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-landing9">
 </head>
 <body class="landing-body">
 <nav class="home_barra" aria-label="Navegação principal">
@@ -20,23 +20,112 @@
 <main class="home_conteudo landing-main" id="inicio">
     <section class="home_boas_vindas landing-boas-vindas" aria-labelledby="titulo-inicio">
         <div>
-            <p>APRESENTAÇÃO DO SISTEMA TREMTECH</p>
-            <h1 id="titulo-inicio">Conheça o Ferrorama</h1>
-            <p class="landing-explicacao">O sistema organiza os cadastros de trens e responsáveis, rotas e sensores. Também registra falhas operacionais e reúne relatórios para consulta.</p>
+            <p>SISTEMA DE ORGANIZAÇÃO DO FERRORAMA</p>
+            <h1 id="titulo-inicio">Bem-vindo ao TremTech</h1>
+            <p class="landing-explicacao">Cadastros de trens, rotas e sensores, acompanhamento de falhas e relatórios: tudo em um só lugar.</p>
+            <a class="landing-cta" href="../../index.php">Acessar o sistema</a>
+        </div>
+        <aside class="landing-mini-stage" aria-label="Trem em movimento no trilho">
+            <div class="landing-mini-cabecalho">
+                <span class="landing-mini-identidade">TRENZINHO TREMTECH</span>
+                <span class="landing-mini-sinal-estacao" aria-hidden="true">●</span>
+            </div>
+            <div class="landing-mini-trilho" aria-hidden="true">
+                <span class="landing-mini-travessas"></span>
+                <span class="landing-mini-trilho-linha landing-mini-trilho-linha-cima"></span>
+                <span class="landing-mini-trilho-linha landing-mini-trilho-linha-baixo"></span>
+                <svg class="landing-mini-trem" viewBox="0 0 100 66">
+                    <rect x="10" y="10" width="80" height="42" rx="13" fill="#ffffff" stroke="#701015" stroke-width="4"/>
+                    <path d="M14 29h72" stroke="#701015" stroke-width="3"/>
+                    <rect x="20" y="17" width="20" height="10" rx="3" fill="#f1dddd"/>
+                    <rect x="45" y="17" width="20" height="10" rx="3" fill="#f1dddd"/>
+                    <rect x="70" y="17" width="11" height="10" rx="3" fill="#f1dddd"/>
+                    <circle cx="29" cy="53" r="7" fill="#ffffff" stroke="#701015" stroke-width="3"/>
+                    <circle cx="72" cy="53" r="7" fill="#ffffff" stroke="#701015" stroke-width="3"/>
+                    <circle cx="82" cy="36" r="3" fill="#b5222b"/>
+                </svg>
+            </div>
+            <p class="landing-mini-proxima">Próxima parada: <strong>Ferrorama</strong></p>
+        </aside>
+    </section>
+    <section class="home_sobre landing-sobre landing-objetivo" id="sobre" aria-labelledby="titulo-sobre">
+        <div class="landing-objetivo-intro">
+            <p class="landing-objetivo-etiqueta">SOBRE O PROJETO</p>
+            <h2 id="titulo-sobre">Para que serve o TremTech?</h2>
+        </div>
+        <div class="landing-objetivo-copy">
+            <p class="landing-objetivo-destaque">O TremTech reúne as informações do Ferrorama para facilitar a organização dos cadastros e o acompanhamento das ocorrências.</p>
+            <p>As informações se conectam: cada trem tem um responsável, cada rota é ligada a um trem e cada sensor fica associado ao trem correspondente.</p>
         </div>
     </section>
-    <section class="home_sobre landing-sobre" id="sobre" aria-labelledby="titulo-sobre">
-        <h2 id="titulo-sobre">Como funciona</h2>
-        <p>Administradores podem criar e alterar cadastros. Funcionários consultam as informações permitidas pelo sistema e acompanham as falhas.</p>
-        <p>As leituras do monitoramento são demonstrativas; o projeto não está conectado a sensores reais.</p>
+    <section class="landing-perfis" aria-labelledby="titulo-perfis">
+        <div class="landing-perfis-intro">
+            <p class="landing-recursos-etiqueta">PERFIS DE ACESSO</p>
+            <h2 id="titulo-perfis">Quem usa o TremTech?</h2>
+        </div>
+        <div class="landing-perfis-grade">
+            <article class="landing-perfil">
+                <span class="landing-perfil-marca" aria-hidden="true">A</span>
+                <div>
+                    <h3>Administrador</h3>
+                    <p>Organiza as contas, gerencia os cadastros de usuários, trens, rotas e sensores e cuida das falhas registradas.</p>
+                </div>
+            </article>
+            <article class="landing-perfil">
+                <span class="landing-perfil-marca" aria-hidden="true">F</span>
+                <div>
+                    <h3>Funcionário</h3>
+                    <p>Consulta as informações disponíveis sobre a operação e acompanha as falhas registradas no sistema.</p>
+                </div>
+            </article>
+        </div>
+    </section>
+    <section class="landing-recursos" aria-labelledby="titulo-recursos">
+        <div class="landing-recursos-intro">
+            <p class="landing-recursos-etiqueta">ÁREAS DO SISTEMA</p>
+            <h2 id="titulo-recursos">O que você encontra no TremTech</h2>
+        </div>
+<div class="landing-recursos-grade">
+            <details class="landing-recurso">
+                <summary><span class="landing-recurso-titulo">Página inicial</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
+                <div class="landing-recurso-conteudo"><p>Veja um resumo dos cadastros, acompanhe falhas e consulte informações de clima e CEP.</p></div>
+            </details>
+            <details class="landing-recurso">
+                <summary><span class="landing-recurso-titulo">Usuários</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
+                <div class="landing-recurso-conteudo"><p>O administrador cadastra e organiza as contas usadas para acessar o TremTech.</p></div>
+            </details>
+            <details class="landing-recurso">
+                <summary><span class="landing-recurso-titulo">Trens</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
+                <div class="landing-recurso-conteudo"><p>Consulte o nome, a velocidade média cadastrada e quem é responsável por cada trem.</p></div>
+            </details>
+            <details class="landing-recurso">
+                <summary><span class="landing-recurso-titulo">Rotas</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
+                <div class="landing-recurso-conteudo"><p>Veja a descrição, a distância, o tempo previsto e o trem relacionado a cada rota.</p></div>
+            </details>
+            <details class="landing-recurso">
+                <summary><span class="landing-recurso-titulo">Sensores</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
+                <div class="landing-recurso-conteudo"><p>Consulte o tipo de cada sensor e veja a qual trem ele está associado.</p></div>
+            </details>
+            <details class="landing-recurso">
+                <summary><span class="landing-recurso-titulo">Falhas</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
+                <div class="landing-recurso-conteudo"><p>Consulte as ocorrências, confira o status e acompanhe as ações de resolução ou reabertura.</p></div>
+            </details>
+            <details class="landing-recurso">
+                <summary><span class="landing-recurso-titulo">Monitoramento</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
+                <div class="landing-recurso-conteudo"><p>Veja a velocidade, a temperatura e o estado operacional relacionados ao sensor selecionado.</p></div>
+            </details>
+            <details class="landing-recurso">
+                <summary><span class="landing-recurso-titulo">Relatórios</span><span class="landing-recurso-sinal" aria-hidden="true"></span></summary>
+                <div class="landing-recurso-conteudo"><p>Gere um panorama das falhas por sensor e mês, com descrição, data, status e totais de ocorrências resolvidas ou em aberto.</p></div>
+            </details>
+        </div>
     </section>
     <section class="home_sobre landing-trajeto" id="trajeto" aria-labelledby="titulo-trajeto">
         <div class="landing-trajeto-cabecalho">
             <div>
-                <h2 id="titulo-trajeto">Trajeto ilustrativo</h2>
-                <p>A animação representa o percurso do trem e passa pela ponte e pelos desvios.</p>
+                <h2 id="titulo-trajeto">Percurso do trem</h2>
+                <p>Acompanhe o trem pelos trilhos, pela ponte e pelos desvios.</p>
             </div>
-            <span class="landing-trajeto-status"><span></span> Trajeto demonstrativo</span>
         </div>
         <svg class="mapa-trilhos landing-mapa-trilhos" viewBox="0 0 760 330"
              role="img" aria-label="Animação de um trem percorrendo trilhos, ponte e desvios">
@@ -92,3 +181,16 @@ setInterval(() => {
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+

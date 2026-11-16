@@ -1,29 +1,26 @@
 # Ferrorama — TremTech
 
-O TremTech é uma aplicação web local para organizar a operação de uma ferrovia em escala de Ferrorama. Reúne cadastros de usuários, trens, rotas e sensores, permite registrar falhas e oferece telas de consulta, monitoramento demonstrativo e relatório de falhas.
+O TremTech é uma aplicação web local para organizar a operação de uma ferrovia em escala de Ferrorama. Reúne cadastros de usuários, trens, rotas e sensores, permite registrar falhas e oferece telas de consulta, monitoramento por sensor e percurso animado e relatório de falhas.
 
 ## Problema e objetivo
 
 Em uma demonstração ferroviária, informações sobre trens, percursos, responsáveis e ocorrências podem ficar espalhadas. O TremTech reúne esses dados em um sistema único, facilita a consulta e ajuda a equipe a explicar os vínculos entre os registros.
 
-## Funcionalidades atuais
+## Tecnologias e ferramentas utilizadas
 
-- Login, logout e dois perfis de acesso: Administrador e Funcionário.
-- CRUD de usuários, trens, rotas e sensores, com pesquisa nas listagens.
-- Associação de trens a usuários responsáveis, rotas a trens e sensores a um trem e a uma rota desse mesmo trem.
-- Registro manual de falhas, filtro por estado e ações para resolver ou reabrir ocorrências.
-- Home com indicadores de cadastros, falhas, clima de Joinville e consulta de CEP.
-- Monitoramento demonstrativo com seleção de sensor, valores de exemplo e animação do percurso com ponte e desvios.
-- Relatório de falhas por sensor e mês.
+### Tecnologias do sistema
 
-## Tecnologias e ambiente
+- **HTML** — estrutura das páginas;
+- **CSS** — apresentação visual das telas;
+- **JavaScript** — interações e validações realizadas no navegador;
+- **PHP** — processamento das funcionalidades e comunicação com o banco de dados;
+- **MySQL** — armazenamento dos dados.
 
-- PHP
-- MySQL.
-- Apache e XAMPP.
-- HTML.
-- CSS.
-- JavaScript.
+### Ambiente e ferramentas de desenvolvimento
+
+- **Apache e XAMPP** — execução local do sistema e do banco de dados;
+- **Git e GitHub** — controle de versões e armazenamento do código;
+- **GitHub Projects** — organização das tarefas da equipe.
 
 ## Perfis
 
@@ -41,10 +38,12 @@ infra/       Autenticação, configuração local do banco
 public/      Landing page e telas do sistema separadas por área
 script/      Interações e validações da interface
 index.php    Login
+public/Tela_landing/landing.php Landing page
 logout.php   Encerramento da sessão
 README.md    Apresentação e instalação
 requisitos.md Requisitos funcionais, não funcionais e regras de negócio
 manual.md    Guia para quem vai usar o sistema
+
 
 ## Integrantes e contribuições registradas
 
@@ -136,17 +135,17 @@ RF-40 — O sistema deve permitir a busca de rotas por nome, descrição ou trem
 
 RF-41 — O sistema deve permitir que o administrador edite os dados e o trem vinculado a uma rota.
 
-RF-42 — O sistema deve impedir a exclusão de rotas que possuam sensores vinculados.
+RF-42 — O sistema deve exibir o trem associado a cada rota cadastrada.
 
 RF-43 — O sistema deve listar os sensores cadastrados.
 
 RF-44 — O sistema deve permitir que o administrador cadastre sensores.
 
-RF-45 — O sistema deve permitir associar um sensor a um trem e a uma rota desse mesmo trem.
+RF-45 — O sistema deve permitir associar um sensor a um trem.
 
-RF-46 — O sistema deve recusar associações entre sensores, trens e rotas incompatíveis.
+RF-46 — O sistema deve validar o trem selecionado para o sensor.
 
-RF-47 — O sistema deve permitir a busca de sensores por nome, tipo, trem ou rota.
+RF-47 — O sistema deve permitir a busca de sensores por nome, tipo ou trem.
 
 RF-48 — O sistema deve permitir que o administrador edite sensores cadastrados.
 
@@ -172,13 +171,13 @@ RF-58 — O sistema deve permitir selecionar um sensor na tela de monitoramento.
 
 RF-59 — O sistema deve exibir a velocidade média do trem associado ao sensor selecionado.
 
-RF-60 — O sistema deve exibir uma temperatura demonstrativa para o sensor selecionado.
+RF-60 — O sistema deve exibir a temperatura calculada para o sensor selecionado.
 
 RF-61 — O sistema deve indicar alerta de velocidade quando a velocidade exibida superar 100 km/h.
 
 RF-62 — O sistema deve atualizar os dados exibidos ao trocar o sensor monitorado.
 
-RF-63 — O sistema deve exibir a rota associada ao sensor monitorado.
+RF-63 — O sistema deve exibir o trem associado ao sensor monitorado.
 
 RF-64 — O sistema deve mover um marcador sobre a ilustração fixa do trajeto na tela de monitoramento.
 
@@ -191,3 +190,4 @@ RF-67 — O sistema deve listar as falhas do sensor selecionado no mês escolhid
 RF-68 — O sistema deve exibir nos relatórios a descrição, a data e a situação das falhas.
 
 RF-69 — O sistema deve exibir nos relatórios as quantidades de falhas resolvidas e não resolvidas.
+

@@ -10,6 +10,8 @@ $ehAdministrador =
 
 $mensagemSucesso = $_SESSION['mensagem_cadastro'] ?? '';
 unset($_SESSION['mensagem_cadastro']);
+$mensagemErro = $_SESSION['mensagem_erro'] ?? '';
+unset($_SESSION['mensagem_erro']);
 
 $mensagem = '';
 $mensagemAcesso = '';
@@ -18,6 +20,26 @@ $descricao = '';
 $extensao = '';
 $tempo = '';
 $idTrem = '';
+$idEdicao = filter_input(INPUT_GET, 'editar', FILTER_VALIDATE_INT) ?: 0;
+$rotaEdicao = null;
+
+if ($idEdicao > 0 && $ehAdministrador) {
+    $carregarEdicao = $conn->prepare('SELECT id_rotas, nome, descricao, extensao, tempo, id_trem FROM rotas WHERE id_rotas = ?');
+    $carregarEdicao->bind_param('i', $idEdicao);
+    $carregarEdicao->execute();
+    $rotaEdicao = $carregarEdicao->get_result()->fetch_assoc();
+    $carregarEdicao->close();
+    if ($rotaEdicao) {
+        $nome = $rotaEdicao['nome'];
+        $descricao = $rotaEdicao['descricao'];
+        $extensao = (string) $rotaEdicao['extensao'];
+        $tempo = (string) $rotaEdicao['tempo'];
+        $idTrem = (string) $rotaEdicao['id_trem'];
+    } else {
+        $idEdicao = 0;
+        $mensagemAcesso = 'Rota não encontrada.';
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$ehAdministrador) {
@@ -25,6 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mensagemAcesso = 'Você não tem permissão para cadastrar rotas.';
     } else {
         verificar_csrf();
+
+        $acao = $_POST['acao'] ?? 'criar';
+        $idAtualizar = filter_input(INPUT_POST, 'id_rota', FILTER_VALIDATE_INT) ?: 0;
 
         $nome = trim($_POST['nome'] ?? '');
         $descricao = trim($_POST['descricao'] ?? '');
@@ -64,19 +89,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $extensaoNumero = (float) $extensao;
                 $tempoNumero = (int) $tempo;
-                $stmt = $conn->prepare(
-                    'INSERT INTO rotas (nome, descricao, extensao, tempo, id_trem)
-                     VALUES (?, ?, ?, ?, ?)'
-                );
+                $sqlGravar = $acao === 'editar'
+                    ? 'UPDATE rotas SET nome = ?, descricao = ?, extensao = ?, tempo = ?, id_trem = ? WHERE id_rotas = ?'
+                    : 'INSERT INTO rotas (nome, descricao, extensao, tempo, id_trem) VALUES (?, ?, ?, ?, ?)';
+                $stmt = $conn->prepare($sqlGravar);
 
                 if (!$stmt) {
                     error_log('Erro ao preparar cadastro de rota: ' . $conn->error);
                     $mensagem = 'Não foi possível concluir o cadastro.';
                 } else {
-                    $stmt->bind_param('ssdii', $nome, $descricao, $extensaoNumero, $tempoNumero, $idTrem);
+                    if ($acao === 'editar' && $idAtualizar > 0) {
+                        $stmt->bind_param('ssdiii', $nome, $descricao, $extensaoNumero, $tempoNumero, $idTrem, $idAtualizar);
+                    } else {
+                        $stmt->bind_param('ssdii', $nome, $descricao, $extensaoNumero, $tempoNumero, $idTrem);
+                    }
                     try {
                         if ($stmt->execute()) {
-                            $_SESSION['mensagem_cadastro'] = 'Rota cadastrada com sucesso!';
+                            $_SESSION['mensagem_cadastro'] = $acao === 'editar' ? 'Rota atualizada com sucesso!' : 'Rota cadastrada com sucesso!';
                             header('Location: cadastrar_rotas.php');
                             exit;
                         }
@@ -94,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
+$manterFormularioAberto = ($_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '') || $idEdicao > 0;
 $resultadoTrens = $conn->query('SELECT id_trem, nome FROM trens ORDER BY nome');
 if (!$resultadoTrens) {
     error_log('Erro ao carregar trens: ' . $conn->error);
@@ -205,6 +234,10 @@ if ($stmt) {
             </p>
         <?php endif; ?>
 
+        <?php if ($mensagemErro !== ''): ?>
+            <p class="mensagem-erro" role="alert"><?= escapar($mensagemErro) ?></p>
+        <?php endif; ?>
+
         <?php if ($mensagemAcesso !== ''): ?>
             <p role="alert"><?= escapar($mensagemAcesso) ?></p>
         <?php endif; ?>
@@ -223,29 +256,18 @@ if ($stmt) {
         </div>
 
         <?php if ($ehAdministrador): ?>
-             <section class="cadastro-usuario" id="cadastro" <?= $manterFormularioAberto ? '' : 'hidden' ?>>
+             <section class="cadastro-usuario <?= $manterFormularioAberto ? 'ativo' : '' ?>" id="cadastro" <?= $manterFormularioAberto ? '' : 'hidden' ?>>
+                <h2><?= $idEdicao > 0 ? 'Editar rota' : 'Cadastrar nova rota' ?></h2>
                 <form class="form-cadastro-user" method="POST">
               <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
+              <input type="hidden" name="acao" value="<?= $idEdicao > 0 ? 'editar' : 'criar' ?>">
+              <?php if ($idEdicao > 0): ?><input type="hidden" name="id_rota" value="<?= (int) $idEdicao ?>"><?php endif; ?>
               
             <div class="campo-user">
                 <label for="nome">Nome da rota</label>
               <input type="text" id="nome" name="nome" minlength="3" maxlength="100" placeholder="Nome da rota" value="<?= escapar($nome) ?>" required>
             </div>
 
-            <div class="campo-user">
-              <label for="descricao">Descrição</label>
-              <textarea id="descricao" name="descricao" maxlength="255" rows="3" required><?= escapar($descricao) ?></textarea>
-            </div>
-
-            <div class="campo-user">
-              <label for="extensao">Extensão(km)</label>
-              <input type="number" id="extensao" name="extensao" min="0.01" step="0.01" placeholder="Ex:45" value="<?= escapar((string) $extensao) ?>" required>
-            </div>
-
-            <div class="campo-user">
-              <label for="minutos">Tempo estimado(min)</label>
-              <input type="number" id="minutos" name="tempo" min="1" step="1" placeholder="Ex:30" value="<?= escapar((string) $tempo) ?>" required>
-            </div>
             <div class="campo-user">
                 <label for="id_trem">Trem vinculado</label>
                 <select id="id_trem" name="id_trem" required>
@@ -257,15 +279,35 @@ if ($stmt) {
                     <?php endif; ?>
                 </select>
             </div>
+
+            <div class="campo-user campo-descricao-rota">
+              <label for="descricao">Descrição</label>
+              <textarea id="descricao" name="descricao" maxlength="255" rows="2" required><?= escapar($descricao) ?></textarea>
+            </div>
+
+            <div class="campo-user">
+              <label for="extensao">Extensão(km)</label>
+              <input type="number" id="extensao" name="extensao" min="0.01" step="0.01" placeholder="Ex:45" value="<?= escapar((string) $extensao) ?>" required>
+            </div>
+
+            <div class="campo-user">
+              <label for="minutos">Tempo estimado(min)</label>
+              <input type="number" id="minutos" name="tempo" min="1" step="1" placeholder="Ex:30" value="<?= escapar((string) $tempo) ?>" required>
+            </div>
 <?php if ($mensagem !== ''): ?>
                         <p class="mensagem-cadastro" role="alert">
                             <?= escapar($mensagem) ?>
                         </p>
                     <?php endif; ?>
 
-                    <button class="btn-cadastrar-form" type="submit">
-                        CADASTRAR ROTA
-                    </button>
+                    <?php if ($idEdicao > 0): ?>
+                        <div class="acoes-form-edicao modo-edicao">
+                            <button class="btn-cadastrar-form" type="submit">SALVAR ALTERAÇÕES</button>
+                            <a class="btn-cancelar-form" href="cadastrar_rotas.php">Cancelar</a>
+                        </div>
+                    <?php else: ?>
+                        <button class="btn-cadastrar-form" type="submit">CADASTRAR ROTA</button>
+                    <?php endif; ?>
                 </form>
             </section>
         <?php endif; ?>
@@ -283,7 +325,7 @@ if ($stmt) {
                 <button type="submit">Buscar</button>
             </form>
 
-            <?php if ($ehAdministrador): ?>
+            <?php if ($ehAdministrador && $idEdicao === 0): ?>
                 <button class="btn-cadastrar-user btn-cadastrar-user-compacto" id="btnAbrirCadastro"
                         type="button" aria-expanded="<?= $manterFormularioAberto ? 'true' : 'false' ?>"
                         aria-controls="cadastro">

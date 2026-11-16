@@ -18,21 +18,15 @@ function validar_usuario() {
         return false;
     }
 
-    if (senha.length < 8) {
-        alert("A senha deve ter pelo menos 8 caracteres.");
-        return false;
-    }
-
     return true;
 }
 
 function validar_sensor() {
     const nome = document.getElementById("nome_sensor")?.value.trim() ?? "";
     const tipo = document.getElementById("tipo_dado")?.value ?? "";
-    const trem = document.getElementById("id_trem")?.value ?? "";
     const rota = document.getElementById("id_rotas")?.value ?? "";
 
-    if (!nome || !tipo || !trem || !rota) {
+   if (!nome || !tipo || !rota) {
         alert("Preencha todos os campos.");
         return false;
     }

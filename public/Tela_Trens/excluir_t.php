@@ -37,7 +37,7 @@ if (!$trem) {
 }
 
 $stmt = $conn->prepare(
-    "SELECT id_sensor FROM sensores WHERE id_trem = ? LIMIT 1"
+    "SELECT s.id_sensor FROM sensores s INNER JOIN rotas r ON r.id_rotas = s.id_rotas WHERE r.id_trem = ? LIMIT 1"
 );
 $stmt->bind_param('i', $id);
 $stmt->execute();
