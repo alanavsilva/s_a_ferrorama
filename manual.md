@@ -190,6 +190,24 @@ Em computadores compartilhados, sempre faça logout ao terminar de usar o sistem
 - Trate o monitoramento e o percurso como demonstrações da interface.
 - Faça logout ao terminar.
 
+## 14. Instalação local — equipe responsável
+
+Esta seção é destinada a quem prepara o projeto no computador da demonstração.
+
+1. Coloque a pasta do projeto dentro da pasta `htdocs` do XAMPP.
+2. Inicie **Apache** e **MySQL** no painel do XAMPP.
+3. Abra o phpMyAdmin e importe `database/db.sql` para criar o banco e carregar os dados de demonstração.
+4. A conexão do projeto está configurada em `infra/conexao.php`. Se o MySQL da máquina usar outros dados, a pessoa responsável pela instalação deve ajustar essa configuração localmente.
+5. Abra `http://localhost/<pasta-do-projeto>/index.php` no navegador. Se o Apache estiver usando outra porta, inclua a porta no endereço.
+
+## 15. Equipe e suporte
+
+**Sistema:** TremTech  
+**Equipe de desenvolvimento:** Alana Veiga da Silva, Nicole Beloni da Silva e Piettra Nicole Cidral.
+
+Para dificuldades de acesso, dúvidas sobre os cadastros ou problemas de instalação, procure a equipe ou a pessoa responsável pela demonstração. Os canais de e-mail e telefone não foram definidos no projeto.
+
+
 
 
 
