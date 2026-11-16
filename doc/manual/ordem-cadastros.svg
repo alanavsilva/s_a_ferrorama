@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="240" viewBox="0 0 1000 240" role="img" aria-labelledby="titulo descricao">
+<title id="titulo">Ordem dos cadastros no TremTech</title>
+<desc id="descricao">Cadastre usuário, trem, rota e sensor nessa ordem. Depois registre leituras ou falhas e consulte monitoramento e relatórios.</desc>
+<rect width="1000" height="240" rx="16" fill="#faf5f5"/>
+<g font-family="Arial,sans-serif" text-anchor="middle" fill="#701015">
+<text x="500" y="35" font-size="23" font-weight="bold">Comece pelos registros que serão usados nos próximos cadastros</text>
+<g fill="#701015"><rect x="25" y="65" width="210" height="64" rx="10"/><rect x="270" y="65" width="210" height="64" rx="10"/><rect x="515" y="65" width="210" height="64" rx="10"/><rect x="760" y="65" width="210" height="64" rx="10"/></g>
+<g fill="white" font-size="20"><text x="130" y="104">1. Usuário</text><text x="375" y="104">2. Trem</text><text x="620" y="104">3. Rota</text><text x="865" y="104">4. Sensor</text></g>
+<g font-size="25"><text x="252" y="104">→</text><text x="497" y="104">→</text><text x="742" y="104">→</text></g>
+<g font-size="16"><text x="130" y="153">Responsável pelo trem</text><text x="375" y="153">Escolha o responsável</text><text x="620" y="153">Escolha o trem</text><text x="865" y="153">Escolha a rota</text></g>
+<text x="500" y="205" font-size="19">Depois: registre leituras ou falhas → consulte o monitoramento e os relatórios</text>
+</g></svg>

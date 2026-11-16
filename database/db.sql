@@ -73,11 +73,19 @@ INSERT INTO rotas (id_rotas, nome, descricao, extensao, tempo, id_trem) VALUES
 (3, 'Rota Sul', 'Percurso de demonstração da região sul.', 9.5, 20, 3);
 
 INSERT INTO sensores (id_sensor, nome_sensor, tipo_dado, id_rotas) VALUES
-(1, 'Sensor Norte', 'Velocidade', 1),
-(2, 'Sensor Central', 'Temperatura', 2),
-(3, 'Sensor Sul', 'Status', 3);
+(1, 'Sensor de Velocidade Norte', 'Velocidade', 1),
+(2, 'Sensor de Temperatura Central', 'Temperatura', 2),
+(3, 'Sensor de Status Sul', 'Status', 3);
 
-INSERT INTO falhas_operacionais (id_falha, id_sensor, descricao, resolvida, origem, id_usuario) VALUES
-(1, 1, 'Velocidade acima do limite.', 0, 'sensor', NULL),
-(2, 2, 'Temperatura elevada no percurso.', 1, 'sensor', NULL),
-(3, 3, 'Leitura de status instável.', 0, 'sensor', NULL);
+INSERT INTO leituras_sensores (id_leitura, id_sensor, valor, data_leitura) VALUES
+(1, 1, 125.00, '2026-11-13 00:00:00'),
+(2, 1, 25.00, '2026-11-14 00:00:00'),
+(3, 1, 72.00, '2026-11-15 00:00:00'),
+(4, 2, 55.00, '2026-11-13 00:00:00'),
+(5, 2, 18.00, '2026-11-14 00:00:00'),
+(6, 2, 35.00, '2026-11-15 00:00:00');
+
+INSERT INTO falhas_operacionais (id_falha, id_sensor, descricao, data_registro, resolvida, origem, id_usuario) VALUES
+(1, 3, 'Vibração irregular detectada no trecho sul.', '2026-11-13 00:00:00', 1, 'sensor', NULL),
+(2, 3, 'Sinal de status interrompido no trecho sul.', '2026-11-14 00:00:00', 0, 'sensor', NULL),
+(3, 3, 'Falha de comunicação no sensor de status.', '2026-11-15 00:00:00', 0, 'sensor', NULL);
