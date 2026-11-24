@@ -1,420 +1,141 @@
-
 <?php
+require_once '../../infra/conexao.php';
+require_once '../../infra/auth.php';
 
-require_once "../../infra/conexao.php";
-require_once "../../infra/auth.php";
-require_once "visualizacao_sensores.php";
-
+// Usuários logados podem consultar a lista. O cadastro exige perfil de administrador.
 exigir_login();
 
-$ehAdministrador =
-    strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
+$ehAdministrador = $_SESSION['tipo'] === 'Administrador';
+$tipos = ['Velocidade', 'Temperatura', 'Status'];
+$mensagem = $_SESSION['mensagem_sensor'] ?? '';
+unset($_SESSION['mensagem_sensor']);
 
-$mensagemSucesso = $_SESSION['mensagem_cadastro'] ?? '';
-unset($_SESSION['mensagem_cadastro']);
-
-$avisoExclusao = $_SESSION['aviso_exclusao'] ?? '';
-unset($_SESSION['aviso_exclusao']);
-
-$mensagem = '';
-$mensagemAcesso = '';
-$busca = trim($_GET['buscar'] ?? '');
-$idEdicao = filter_input(INPUT_GET, 'editar', FILTER_VALIDATE_INT) ?: 0;
-$sensorEdicao = null;
-$nomeSensor = '';
-$tipoDado = '';
-$idRotaEdicao = '';
-
-if ($idEdicao > 0 && $ehAdministrador) {
-    $carregarEdicao = $conn->prepare('SELECT id_sensor, nome_sensor, tipo_dado, id_rotas FROM sensores WHERE id_sensor = ?');
-    $carregarEdicao->bind_param('i', $idEdicao);
-    $carregarEdicao->execute();
-    $sensorEdicao = $carregarEdicao->get_result()->fetch_assoc();
-    $carregarEdicao->close();
-    if (!$sensorEdicao) {
-        $idEdicao = 0;
-        $mensagemAcesso = 'Sensor não encontrado.';
-    } else {
-        $nomeSensor = $sensorEdicao['nome_sensor'];
-        $tipoDado = $sensorEdicao['tipo_dado'];
-        $idRotaEdicao = (string) $sensorEdicao['id_rotas'];
-    }
-}
-
+// Recebe os dados do formulário, confere os campos e cadastra o registro.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!$ehAdministrador) {
-        http_response_code(403);
-        $mensagemAcesso = 'Você não tem permissão para cadastrar sensores.';
+    exigir_administrador();
+
+    $nome = trim($_POST['nome_sensor']);
+    $tipo = $_POST['tipo_dado'];
+    $idRota = (int) $_POST['id_rotas'];
+
+    $sql = "SELECT id_rotas FROM rotas WHERE id_rotas = $idRota";
+    $rotaEncontrada = mysqli_query($conn, $sql);
+
+    // in_array confere se o tipo enviado está na lista de tipos do banco.
+    if (mb_strlen($nome) < 3 || mb_strlen($nome) > 100 || !in_array($tipo, $tipos)) {
+        $mensagem = 'Informe um nome válido e selecione o tipo do sensor.';
+    } elseif (mysqli_num_rows($rotaEncontrada) === 0) {
+        $mensagem = 'Selecione uma rota cadastrada.';
     } else {
-        verificar_csrf();
+        $sql = "INSERT INTO sensores (nome_sensor, tipo_dado, id_rotas) VALUES (?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, 'ssi', $nome, $tipo, $idRota);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
 
-        $acao = $_POST['acao'] ?? 'criar';
-        validar_acao_crud($conn, $acao, 'sensores', 'id_sensor', 'id_sensor');
-        $nomeSensor = trim($_POST['nome_sensor'] ?? '');
-        $tipoDado = trim($_POST['tipo_dado'] ?? '');
-        $idRota = filter_input(INPUT_POST, 'id_rotas', FILTER_VALIDATE_INT);
-        $idRotaEdicao = (string) ($idRota ?: '');
-        $idAtualizar = filter_input(INPUT_POST, 'id_sensor', FILTER_VALIDATE_INT) ?: 0;
-
-        $tiposPermitidos = ['Velocidade', 'Temperatura', 'Status'];
-
-        if (
-            mb_strlen($nomeSensor) < 3 ||
-            mb_strlen($nomeSensor) > 100 ||
-            !in_array($tipoDado, $tiposPermitidos, true) ||
-            !$idRota
-        ) {
-            $mensagem = 'Preencha todos os campos corretamente.';
-        } else {
-            $checkRota = $conn->prepare('SELECT id_rotas FROM rotas WHERE id_rotas = ?');
-            $checkRota->bind_param('i', $idRota);
-            $checkRota->execute();
-            $rotaExiste = $checkRota->get_result()->num_rows === 1;
-            $checkRota->close();
-
-            if (!$rotaExiste) {
-                $mensagem = 'Selecione uma rota cadastrada.';
-            } else {
-            $sql = $acao === 'editar'
-                ? 'UPDATE sensores SET nome_sensor = ?, tipo_dado = ?, id_rotas = ? WHERE id_sensor = ?'
-                : 'INSERT INTO sensores (nome_sensor, tipo_dado, id_rotas) VALUES (?, ?, ?)';
-            $stmt = $conn->prepare($sql);
-
-            if (!$stmt) {
-                error_log('Erro ao preparar cadastro de sensor: ' . $conn->error);
-                $mensagem = 'Não foi possível concluir o cadastro.';
-            } else {
-                if ($acao === 'editar') {
-                    $stmt->bind_param('ssii', $nomeSensor, $tipoDado, $idRota, $idAtualizar);
-                } else {
-                    $stmt->bind_param('ssi', $nomeSensor, $tipoDado, $idRota);
-                }
-
-                try {
-                    if ($stmt->execute()) {
-                        $_SESSION['mensagem_cadastro'] = $acao === 'editar' ? 'Sensor atualizado com sucesso!' : 'Sensor cadastrado com sucesso!';
-                        header('Location: cadastrar_sensores.php');
-                        exit;
-                    }
-                } catch (mysqli_sql_exception $e) {
-                    error_log('Erro ao cadastrar sensor: ' . $e->getMessage());
-                }
-
-                $mensagem = 'Não foi possível concluir o cadastro. Confira os dados selecionados.';
-                $stmt->close();
-            }
-            }
-        }
+        $_SESSION['mensagem_sensor'] = 'Sensor cadastrado com sucesso!';
+        header('Location: cadastrar_sensores.php');
+        exit();
     }
 }
 
-// Buscar rotas
-$sqlRotas = "SELECT id_rotas, nome FROM rotas ORDER BY nome";
-$resultadoRotas = $conn->query($sqlRotas);
-
-if (!$resultadoRotas) {
-    error_log('Erro ao carregar rotas: ' . $conn->error);
-    $mensagemAcesso = 'Não foi possível carregar as rotas.';
-}
-
-// Pesquisa de sensores
-$textoBusca = '%' . $busca . '%';
-
-$sql = "
-    SELECT
-        s.id_sensor,
-        s.nome_sensor,
-        s.tipo_dado,
-        r.nome AS rota_vinculada
-    FROM sensores AS s
-    LEFT JOIN rotas AS r ON r.id_rotas = s.id_rotas
-    WHERE s.nome_sensor LIKE ?
-       OR s.tipo_dado LIKE ?
-       OR r.nome LIKE ?
-    ORDER BY s.id_sensor
-";
-
-$stmtBusca = $conn->prepare($sql);
-
-if ($stmtBusca) {
-    $stmtBusca->bind_param('sss', $textoBusca, $textoBusca, $textoBusca);
-
-    if ($stmtBusca->execute()) {
-        $resultado = $stmtBusca->get_result();
-    } else {
-        error_log('Erro ao consultar sensores: ' . $stmtBusca->error);
-        $resultado = false;
-        $mensagemAcesso = 'Não foi possível carregar os sensores.';
-    }
-
-    $stmtBusca->close();
-} else {
-    error_log('Erro ao preparar consulta dos sensores: ' . $conn->error);
-    $resultado = false;
-    $mensagemAcesso = 'Não foi possível preparar a consulta dos sensores.';
-}
-
+// Lê o texto digitado na busca antes de mostrar a tabela.
+$busca = trim($_GET['buscar'] ?? '');
+$rotas = mysqli_query($conn, "SELECT id_rotas, nome FROM rotas ORDER BY nome");
+$sensores = mysqli_query($conn, "SELECT * FROM sensores ORDER BY id_sensor");
+// Mantém o formulário aberto para mostrar um erro de cadastro.
+$cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Cadastro Sensores</title>
-
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
+    <title>Sensores | TremTech</title>
+    <link rel="stylesheet" href="../../assets/style/style.css?v=cadastro-3">
 </head>
-
 <body class="body_geral">
+    <?php include __DIR__ . '/../menu.php'; ?>
+    <div class="pagina">
 
-<div class="pagina">
+        <main class="content-user">
+            <p class="painel-user">PAINEL ADMINISTRATIVO</p>
+            <h1>Controle de sensores cadastrados</h1>
+            <h2>Sensores do sistema</h2>
 
-    <aside class="menu">
-
-        <img class="logo-trem"
-             src="https://img.icons8.com/ios/100/701015/train.png"
-             alt="Logo TremTech">
-
-        <p class="marca">SISTEMA TREMTECH</p>
-
-        <a href="../../public/Tela_Home/home.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');"></span>
-            Home
-        </a>
-
-        <a href="../../public/Tela_Usuario/cadastrar_usuario.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');"></span>
-            Usuários
-        </a>
-
-        <a class="ativo" href="../../public/Tela_Sensores/cadastrar_sensores.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');"></span>
-            Sensores
-        </a>
-
-        <a href="../../public/Tela_Trens/cadastrar_trens.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png');"></span>
-            Trens
-        </a>
-
-        <a href="../../public/Tela_Rotas/cadastrar_rotas.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png');"></span>
-            Rotas
-        </a>
-
-        <a href="../../public/Tela_Monitoramento/monitoramento.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');"></span>
-            Monitoramento
-        </a>
-
-        <a href="../../public/Tela_Falhas/cadastrar_falha.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
-            Falhas
-        </a>
-
-        <a href="../../public/Tela_Relatorios/relatorios.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png');"></span>
-            Relatórios
-        </a>
-
-
-        <a class="logout" href="../../logout.php" data-confirmar-logout><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>Logout</a>
-    </aside>
-
-    <main class="content-user">
-
-        <p class="painel-user">PAINEL ADMINISTRATIVO</p>
-
-        <h1>Controle de sensores cadastrados</h1>
-        <h2>Sensores do sistema</h2>
-
-        <?php if ($mensagemSucesso !== ''): ?>
-            <p class="mensagem-sucesso" role="status">
-                <?= escapar($mensagemSucesso) ?>
-            </p>
-        <?php endif; ?>
-
-        <?php if ($mensagemAcesso !== ''): ?>
-            <p role="alert"><?= escapar($mensagemAcesso) ?></p>
-        <?php endif; ?>
-        <div class="admin-badge-user">
-
-            <div class="avatar-user"></div>
-
-            <div>
-                <strong>
-                    <?= $ehAdministrador ? 'Administrador' : 'Funcionário' ?>
-                </strong>
-
-                <span><?= escapar($_SESSION['nome'] ?? '') ?></span>
+            <div class="admin-badge-user card-recuado">
+                <div class="avatar-user"></div>
+                <div>
+                    <strong><?php echo escapar($_SESSION['tipo']); ?></strong>
+                    <span><?php echo escapar($_SESSION['nome']); ?></span>
+                </div>
             </div>
 
-        </div>
+            <?php if ($mensagem !== '') { ?>
+                <p><?php echo escapar($mensagem); ?></p>
+            <?php } ?>
 
-        <?php if ($ehAdministrador): ?>
+            <?php if ($ehAdministrador) { ?>
+                <section id="cadastro" class="cadastro-usuario<?php if ($cadastroAberto) { echo ' ativo'; } ?>"
+                    <?php if (!$cadastroAberto) { echo 'hidden'; } ?>>
+                    <h2>Cadastrar novo sensor</h2>
 
-            <section class="cadastro-usuario <?= $idEdicao > 0 ? 'ativo' : '' ?>" id="cadastro" <?= $idEdicao > 0 ? '' : 'hidden' ?>>
-                <h2><?= $idEdicao > 0 ? 'Editar sensor' : 'Cadastrar novo sensor' ?></h2>
-
-                <form
-                    class="form-cadastro-user"
-                    method="POST"
-                    onsubmit="return validar_sensor()">
-
-                    <input
-                        type="hidden"
-                        name="csrf_token"
-                        value="<?= escapar(token_csrf()) ?>">
-                    <input type="hidden" name="acao" value="<?= $idEdicao > 0 ? 'editar' : 'criar' ?>">
-                    <?php if ($idEdicao > 0): ?><input type="hidden" name="id_sensor" value="<?= (int) $idEdicao ?>"><?php endif; ?>
-
-                    <div class="campo-user">
-
-                        <label for="nome_sensor">Nome do sensor</label>
-
-                        <input
-                            type="text"
-                            id="nome_sensor"
-                            name="nome_sensor"
-                            placeholder="Nome do sensor"
-                            maxlength="100"
-                            value="<?= escapar($nomeSensor) ?>"
-                            required>
-
-                    </div>
-
-                    <div class="campo-user">
-
-                        <label for="tipo_dado">Tipo de dado coletado</label>
-
-                        <select id="tipo_dado" name="tipo_dado" required>
-
-                            <option value="">Selecione</option>
-                            <option value="Velocidade" <?= $tipoDado === 'Velocidade' ? 'selected' : '' ?>>Velocidade</option>
-                            <option value="Temperatura" <?= $tipoDado === 'Temperatura' ? 'selected' : '' ?>>Temperatura</option>
-                            <option value="Status" <?= $tipoDado === 'Status' ? 'selected' : '' ?>>Status</option>
-
-                        </select>
-
-                    </div>
-
-                    <div class="campo-user campo-rota-sensor">
-
-                            <label for="id_rotas">Rota vinculada</label>
-
-                        <select id="id_rotas" name="id_rotas" required>
-
-                            <option value="">Selecione uma rota</option>
-
-                            <?php if ($resultadoRotas): ?>
-
-                                <?php while ($rota = $resultadoRotas->fetch_assoc()): ?>
-
-                                    <option value="<?= (int) $rota['id_rotas'] ?>" <?= (string) $rota['id_rotas'] === $idRotaEdicao ? 'selected' : '' ?>>
-                                        <?= escapar($rota['nome']) ?>
-                                    </option>
-
-                                <?php endwhile; ?>
-
-                            <?php endif; ?>
-
-                        </select>
-
-                    </div>
-
-                    <?php if ($mensagem !== ''): ?>
-
-                        <p role="alert"><?= escapar($mensagem) ?></p>
-
-                    <?php endif; ?>
-
-                    <?php if ($idEdicao > 0): ?>
-                        <div class="acoes-form-edicao modo-edicao">
-                            <button class="btn-cadastrar-form" type="submit">SALVAR ALTERAÇÕES</button>
-                            <a class="btn-cancelar-form" href="cadastrar_sensores.php">Cancelar</a>
+                    <form method="POST" class="form-cadastro-user">
+                        <div class="campo-user">
+                            <label for="nome_sensor">Nome do sensor</label>
+                            <input placeholder="Nome do sensor" type="text" id="nome_sensor" name="nome_sensor"
+                                   minlength="3" maxlength="100" required>
                         </div>
-                    <?php else: ?>
-                        <button class="btn-cadastrar-form" type="submit">CADASTRAR NOVO SENSOR</button>
-                    <?php endif; ?>
 
+                        <div class="campo-user">
+                            <label for="tipo_dado">Tipo de dado coletado</label>
+                            <select id="tipo_dado" name="tipo_dado" required>
+                                <option value="">Selecione</option>
+                                <?php foreach ($tipos as $tipo) { ?>
+                                    <option value="<?php echo $tipo; ?>"><?php echo $tipo; ?></option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="campo-user campo-rota-sensor">
+                            <label for="id_rotas">Rota vinculada</label>
+                            <select id="id_rotas" name="id_rotas" required>
+                                <option value="">Selecione uma rota</option>
+                                <?php while ($rota = mysqli_fetch_assoc($rotas)) { ?>
+                                    <option value="<?php echo $rota['id_rotas']; ?>">
+                                        <?php echo escapar($rota['nome']); ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-cadastrar-form">CADASTRAR NOVO SENSOR</button>
+                    </form>
+                </section>
+            <?php } ?>
+
+            <!-- Área de busca e botão para abrir o formulário de cadastro. -->
+            <section class="buscar-box-user buscar-usuarios-linha">
+                <form method="GET">
+                    <label for="buscar">Buscar</label>
+                    <input type="search" id="buscar" name="buscar" placeholder="Nome, tipo ou rota"
+                           value="<?php echo escapar($busca); ?>">
+                    <button type="submit">Buscar</button>
                 </form>
 
+                <?php if ($ehAdministrador) { ?>
+                    <button class="btn-cadastrar-user btn-cadastrar-user-compacto"
+                            id="btnAbrirCadastro" type="button" aria-controls="cadastro" aria-expanded="<?php echo $cadastroAberto ? 'true' : 'false'; ?>">
+                        Cadastrar sensor
+                    </button>
+                <?php } ?>
             </section>
 
-        <?php endif; ?>
-
-        <section class="buscar-box-user buscar-usuarios-linha">
-
-            <form method="GET">
-
-                <label for="buscar">Buscar</label>
-
-                <input
-                    type="text"
-                    id="buscar"
-                    name="buscar"
-                    placeholder="Nome, tipo ou rota"
-                    value="<?= escapar($busca) ?>">
-
-                <button type="submit">Buscar</button>
-
-            </form>
-
-            <?php if ($ehAdministrador): ?>
-                <?php if ($idEdicao === 0): ?><button class="btn-cadastrar-user btn-cadastrar-user-compacto" id="btnAbrirCadastro"
-                        type="button" aria-expanded="false" aria-controls="cadastro">
-                    Cadastrar sensor
-                </button><?php endif; ?>
-            <?php endif; ?>
-
-        </section>
-
-        <?php mostrar_sensores($resultado); ?>
-
-    </main>
-
-</div>
-
-<?php if ($avisoExclusao !== ''): ?>
-
-    <div class="modal-aviso" id="modalAviso">
-
-        <div class="conteudo-aviso">
-
-            <div class="icone-aviso">!</div>
-
-            <h2>Não foi possível excluir o sensor</h2>
-
-            <p><?= escapar($avisoExclusao) ?></p>
-
-            <button type="button" onclick="fecharAviso()">
-                Voltar
-            </button>
-
-        </div>
-
+            <?php include 'visualizacao_sensores.php'; ?>
+        </main>
     </div>
 
-<?php endif; ?>
-
-<script>
-
-function fecharAviso() {
-    const modal = document.getElementById("modalAviso");
-
-    if (modal) {
-        modal.remove();
-    }
-}
-
-</script>
-
-<script src="../../script/validacao.js"></script>
-
-<script src="../../script/confirmar_logout.js?v=20261107"></script>
+<script src="../../script/validacao.js?v=cadastro-3"></script>
 </body>
 </html>
-

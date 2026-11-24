@@ -54,7 +54,7 @@ As operações de alteração e exclusão utilizam token CSRF.
 
 A exclusão de usuários foi alterada de `GET` para `POST`, evitando que uma simples abertura de URL execute uma operação administrativa.
 
-O endpoint impede a exclusão de qualquer conta cujo perfil seja Administrador, não apenas da conta da sessão atual. Usuários vinculados como responsáveis por trens também precisam ser desvinculados antes da exclusão.
+O PHP exige perfil de Administrador para excluir contas. A exclusão é bloqueada se houver trens ou falhas vinculados à conta.
 
 ### 7. Proteção das informações no frontend
 

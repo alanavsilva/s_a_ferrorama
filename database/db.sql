@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS SA_FERRORAMA;
+CREATE DATABASE SA_FERRORAMA;
 USE SA_FERRORAMA;
 
 CREATE TABLE usuarios (
@@ -23,10 +23,8 @@ CREATE TABLE rotas (
     descricao VARCHAR(255) NOT NULL,
     extensao FLOAT NOT NULL,
     tempo INT NOT NULL,
-    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     id_trem INT NOT NULL,
-    CONSTRAINT fk_rotas_trens
-        FOREIGN KEY (id_trem) REFERENCES trens(id_trem)
+       FOREIGN KEY (id_trem) REFERENCES trens(id_trem)
 );
 
 CREATE TABLE sensores (
@@ -42,7 +40,7 @@ CREATE TABLE leituras_sensores (
     id_sensor INT NOT NULL,
     valor DECIMAL(10, 2) NOT NULL,
     data_leitura DATETIME NOT NULL,
-    FOREIGN KEY (id_sensor) REFERENCES sensores(id_sensor) ON DELETE CASCADE
+    FOREIGN KEY (id_sensor) REFERENCES sensores(id_sensor)
 );
 
 CREATE TABLE falhas_operacionais (
@@ -50,8 +48,7 @@ CREATE TABLE falhas_operacionais (
     id_sensor INT NOT NULL,
     descricao VARCHAR(200) NOT NULL,
     data_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    resolvida TINYINT(1) NOT NULL DEFAULT 0,
-    origem ENUM('sensor', 'usuario') NOT NULL DEFAULT 'sensor',
+    situacao ENUM('Não resolvida', 'Resolvida') NOT NULL,    origem ENUM('sensor', 'usuario') NOT NULL DEFAULT 'sensor',
     id_usuario INT NULL,
     FOREIGN KEY (id_sensor) REFERENCES sensores(id_sensor),
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE SET NULL
@@ -85,7 +82,7 @@ INSERT INTO leituras_sensores (id_leitura, id_sensor, valor, data_leitura) VALUE
 (5, 2, 18.00, '2026-11-14 00:00:00'),
 (6, 2, 35.00, '2026-11-15 00:00:00');
 
-INSERT INTO falhas_operacionais (id_falha, id_sensor, descricao, data_registro, resolvida, origem, id_usuario) VALUES
-(1, 3, 'Vibração irregular detectada no trecho sul.', '2026-11-13 00:00:00', 1, 'sensor', NULL),
-(2, 3, 'Sinal de status interrompido no trecho sul.', '2026-11-14 00:00:00', 0, 'sensor', NULL),
-(3, 3, 'Falha de comunicação no sensor de status.', '2026-11-15 00:00:00', 0, 'sensor', NULL);
+INSERT INTO falhas_operacionais (id_falha, id_sensor, descricao, data_registro, situacao, origem, id_usuario)
+VALUES (1, 3, 'Vibração irregular detectada no trecho sul.', '2026-11-13 00:00:00', 'Resolvida', 'sensor', NULL),
+    (2, 3, 'Sinal de status interrompido no trecho sul.', '2026-11-14 00:00:00', 'Não resolvida', 'sensor', NULL),
+    (3, 3, 'Falha de comunicação no sensor de status.', '2026-11-15 00:00:00', 'Não resolvida', 'sensor', NULL);

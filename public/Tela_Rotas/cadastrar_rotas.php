@@ -1,359 +1,156 @@
 <?php
-require_once "../../infra/conexao.php";
-require_once "../../infra/auth.php";
-require_once "visualizacao_rotas.php";
+require_once '../../infra/conexao.php';
+require_once '../../infra/auth.php';
 
+// Usuários logados podem consultar a lista. O cadastro exige perfil de administrador.
 exigir_login();
 
-$ehAdministrador =
-    strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
-
-$mensagemSucesso = $_SESSION['mensagem_cadastro'] ?? '';
-unset($_SESSION['mensagem_cadastro']);
-$mensagemErro = $_SESSION['mensagem_erro'] ?? '';
-unset($_SESSION['mensagem_erro']);
-
+$ehAdministrador = $_SESSION['tipo'] === 'Administrador';
 $mensagem = '';
-$mensagemAcesso = '';
-$nome = '';
-$descricao = '';
-$extensao = '';
-$tempo = '';
-$idTrem = '';
-$idEdicao = filter_input(INPUT_GET, 'editar', FILTER_VALIDATE_INT) ?: 0;
-$rotaEdicao = null;
 
-if ($idEdicao > 0 && $ehAdministrador) {
-    $carregarEdicao = $conn->prepare('SELECT id_rotas, nome, descricao, extensao, tempo, id_trem FROM rotas WHERE id_rotas = ?');
-    $carregarEdicao->bind_param('i', $idEdicao);
-    $carregarEdicao->execute();
-    $rotaEdicao = $carregarEdicao->get_result()->fetch_assoc();
-    $carregarEdicao->close();
-    if ($rotaEdicao) {
-        $nome = $rotaEdicao['nome'];
-        $descricao = $rotaEdicao['descricao'];
-        $extensao = (string) $rotaEdicao['extensao'];
-        $tempo = (string) $rotaEdicao['tempo'];
-        $idTrem = (string) $rotaEdicao['id_trem'];
-    } else {
-        $idEdicao = 0;
-        $mensagemAcesso = 'Rota não encontrada.';
-    }
+if (isset($_SESSION['mensagem_rota'])) {
+    $mensagem = $_SESSION['mensagem_rota'];
+    unset($_SESSION['mensagem_rota']);
 }
 
+// Recebe os dados do formulário, confere os campos e cadastra o registro.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!$ehAdministrador) {
-        http_response_code(403);
-        $mensagemAcesso = 'Você não tem permissão para cadastrar rotas.';
+    exigir_administrador();
+
+    $nome = trim($_POST['nome']);
+    $descricao = trim($_POST['descricao']);
+    $extensao = (float) $_POST['extensao'];
+    $tempo = (int) $_POST['tempo'];
+    $idTrem = (int) $_POST['id_trem'];
+
+    $sql = "SELECT id_trem FROM trens WHERE id_trem = $idTrem";
+    $tremEncontrado = mysqli_query($conn, $sql);
+
+    if ($nome === '' || $descricao === '' || $extensao <= 0 || $tempo <= 0) {
+        $mensagem = 'Preencha os campos com valores válidos.';
+    } elseif (mysqli_num_rows($tremEncontrado) === 0) {
+        $mensagem = 'Selecione um trem cadastrado.';
     } else {
-        verificar_csrf();
+        $sql = "INSERT INTO rotas (nome, descricao, extensao, tempo, id_trem)
+                VALUES (?, ?, ?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, 'ssdii', $nome, $descricao, $extensao, $tempo, $idTrem);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
 
-        $acao = $_POST['acao'] ?? 'criar';
-        validar_acao_crud($conn, $acao, 'rotas', 'id_rotas', 'id_rota');
-        $idAtualizar = filter_input(INPUT_POST, 'id_rota', FILTER_VALIDATE_INT) ?: 0;
-
-        $nome = trim($_POST['nome'] ?? '');
-        $descricao = trim($_POST['descricao'] ?? '');
-        $extensao = filter_var(
-            $_POST['extensao'] ?? '',
-            FILTER_VALIDATE_FLOAT
-        );
-        $tempo = filter_var(
-            $_POST['tempo'] ?? '',
-            FILTER_VALIDATE_INT
-        );
-        $idTrem = filter_var($_POST['id_trem'] ?? '', FILTER_VALIDATE_INT);
-
-        if (
-            $nome === ''
-            || mb_strlen($nome) < 3
-            || mb_strlen($nome) > 100
-            || $descricao === ''
-            || mb_strlen($descricao) > 255
-            || $extensao === false
-            || $extensao <= 0
-            || $tempo === false
-            || $tempo <= 0
-            || $idTrem === false
-            || $idTrem < 1
-        ) {
-            $mensagem = 'Preencha os campos com valores válidos.';
-        } else {
-            $checkTrem = $conn->prepare('SELECT id_trem FROM trens WHERE id_trem = ?');
-            $checkTrem->bind_param('i', $idTrem);
-            $checkTrem->execute();
-            $tremExiste = $checkTrem->get_result()->num_rows === 1;
-            $checkTrem->close();
-
-            if (!$tremExiste) {
-                $mensagem = 'Selecione um trem cadastrado.';
-            } else {
-                $extensaoNumero = (float) $extensao;
-                $tempoNumero = (int) $tempo;
-                $sqlGravar = $acao === 'editar'
-                    ? 'UPDATE rotas SET nome = ?, descricao = ?, extensao = ?, tempo = ?, id_trem = ? WHERE id_rotas = ?'
-                    : 'INSERT INTO rotas (nome, descricao, extensao, tempo, id_trem) VALUES (?, ?, ?, ?, ?)';
-                $stmt = $conn->prepare($sqlGravar);
-
-                if (!$stmt) {
-                    error_log('Erro ao preparar cadastro de rota: ' . $conn->error);
-                    $mensagem = 'Não foi possível concluir o cadastro.';
-                } else {
-                    if ($acao === 'editar') {
-                        $stmt->bind_param('ssdiii', $nome, $descricao, $extensaoNumero, $tempoNumero, $idTrem, $idAtualizar);
-                    } else {
-                        $stmt->bind_param('ssdii', $nome, $descricao, $extensaoNumero, $tempoNumero, $idTrem);
-                    }
-                    try {
-                        if ($stmt->execute()) {
-                            $_SESSION['mensagem_cadastro'] = $acao === 'editar' ? 'Rota atualizada com sucesso!' : 'Rota cadastrada com sucesso!';
-                            header('Location: cadastrar_rotas.php');
-                            exit;
-                        }
-                        error_log('Erro ao cadastrar rota: ' . $stmt->error);
-                        $mensagem = 'Não foi possível concluir o cadastro.';
-                    } catch (mysqli_sql_exception $e) {
-                        error_log('Erro ao cadastrar rota: ' . $e->getMessage());
-                        $mensagem = 'Não foi possível concluir o cadastro.';
-                    } finally {
-                        $stmt->close();
-                    }
-                }
-            }
-        }
+        $_SESSION['mensagem_rota'] = 'Rota cadastrada com sucesso!';
+        header('Location: cadastrar_rotas.php');
+        exit();
     }
 }
 
-$manterFormularioAberto = ($_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '') || $idEdicao > 0;
-$resultadoTrens = $conn->query('SELECT id_trem, nome FROM trens ORDER BY nome');
-if (!$resultadoTrens) {
-    error_log('Erro ao carregar trens: ' . $conn->error);
-    $mensagemAcesso = 'Não foi possível carregar os trens cadastrados.';
+// Lê o texto digitado na busca antes de mostrar a tabela.
+$busca = '';
+
+if (isset($_GET['buscar'])) {
+    $busca = trim($_GET['buscar']);
 }
 
-$busca = trim($_GET['buscar'] ?? '');
-$like = '%' . $busca . '%';
-
-$stmt = $conn->prepare(
-    'SELECT r.id_rotas, r.nome, r.descricao, r.extensao, r.tempo,
-            r.data_criacao, r.id_trem, t.nome AS nome_trem
-     FROM rotas AS r
-     LEFT JOIN trens AS t ON t.id_trem = r.id_trem
-     WHERE r.nome LIKE ? OR r.descricao LIKE ? OR t.nome LIKE ?
-     ORDER BY r.nome'
-);
-
-if ($stmt) {
-    $stmt->bind_param('sss', $like, $like, $like);
-    try {
-        $stmt->execute();
-        $resultado = $stmt->get_result();
-    } catch (mysqli_sql_exception $e) {
-        error_log('Erro ao consultar rotas: ' . $e->getMessage());
-        $resultado = false;
-        $mensagemAcesso = 'Não foi possível carregar as rotas.';
-    }
-    $stmt->close();
-} else {
-    error_log('Erro ao consultar rotas: ' . $conn->error);
-    $resultado = false;
-    $mensagemAcesso = 'Não foi possível carregar as rotas.';
-}
+$trens = mysqli_query($conn, "SELECT id_trem, nome FROM trens ORDER BY nome");
+$rotas = mysqli_query($conn, "SELECT * FROM rotas ORDER BY nome");
+// Mantém o formulário aberto para mostrar um erro de cadastro.
+$cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Rotas | TremTech</title>
-
-  <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotas | TremTech</title>
+    <link rel="stylesheet" href="../../assets/style/style.css?v=cadastro-3">
 </head>
 
 <body class="body_geral">
-   <div class="pagina">
+    <?php include __DIR__ . '/../menu.php'; ?>
+    <div class="pagina">
 
-    <aside class="menu">
-       <img class="logo-trem"
-    src="https://img.icons8.com/ios/100/701015/train.png"
-    alt="Logo TremTech">
+        <main class="content-user">
+            <p class="painel-user">PAINEL ADMINISTRATIVO</p>
+            <h1>Controle de rotas cadastradas</h1>
+            <h2>Rotas do sistema</h2>
 
-  <p class="marca">SISTEMA TREMTECH</p>
-     <a href="../../public/Tela_Home/home.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');"></span>
-  Home
-</a>
-
-<a href="../../public/Tela_Usuario/cadastrar_usuario.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');"></span>
-  Usuários
-</a>
-
-<a href="../../public/Tela_Sensores/cadastrar_sensores.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');"></span>
-  Sensores
-</a>
-
-<a href="../../public/Tela_Trens/cadastrar_trens.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/train.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/train.png');"></span>
-  Trens
-</a>
-
-<a class="ativo" href="../../public/Tela_Rotas/cadastrar_rotas.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/map.png');"></span>
-  Rotas
-</a>
-<a href="../../public/Tela_Monitoramento/monitoramento.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/visible.png');"></span>
-  Monitoramento
-</a>
-<a href="../../public/Tela_Falhas/cadastrar_falha.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
-  Falhas
-</a>
-
-<a href="../../public/Tela_Relatorios/relatorios.php">
-  <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/report-card.png');"></span>
-  Relatórios
-</a>
-
-
-        <a class="logout" href="../../logout.php" data-confirmar-logout><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>Logout</a>
-    </aside>
-
-    <main class="content-user">
-        <p class="painel-user">PAINEL ADMINISTRATIVO</p>
-        <h1>Controle de rotas cadastradas</h1>
-        <h2>Rotas do sistema</h2>
-
-           <?php if ($mensagemSucesso !== ''): ?>
-            <p class="mensagem-sucesso" role="status">
-                <?= escapar($mensagemSucesso) ?>
-            </p>
-        <?php endif; ?>
-
-        <?php if ($mensagemErro !== ''): ?>
-            <p class="mensagem-erro" role="alert"><?= escapar($mensagemErro) ?></p>
-        <?php endif; ?>
-
-        <?php if ($mensagemAcesso !== ''): ?>
-            <p role="alert"><?= escapar($mensagemAcesso) ?></p>
-        <?php endif; ?>
-        <div class="admin-badge-user card-recuado">
-
-            <div class="avatar-user"></div>
-
-            <div>
-                <strong>
-                    <?= $ehAdministrador ? 'Administrador' : 'Funcionário' ?>
-                </strong>
-
-                <span><?= escapar($_SESSION['nome'] ?? '') ?></span>
+            <div class="admin-badge-user card-recuado">
+                <div class="avatar-user"></div>
+                <div>
+                    <strong><?php echo escapar($_SESSION['tipo']); ?></strong>
+                    <span><?php echo escapar($_SESSION['nome']); ?></span>
+                </div>
             </div>
 
-        </div>
+            <?php if ($mensagem !== '') { ?>
+                <p><?php echo escapar($mensagem); ?></p>
+            <?php } ?>
 
-        <?php if ($ehAdministrador): ?>
-             <section class="cadastro-usuario <?= $manterFormularioAberto ? 'ativo' : '' ?>" id="cadastro" <?= $manterFormularioAberto ? '' : 'hidden' ?>>
-                <h2><?= $idEdicao > 0 ? 'Editar rota' : 'Cadastrar nova rota' ?></h2>
-                <form class="form-cadastro-user" method="POST">
-              <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
-              <input type="hidden" name="acao" value="<?= $idEdicao > 0 ? 'editar' : 'criar' ?>">
-              <?php if ($idEdicao > 0): ?><input type="hidden" name="id_rota" value="<?= (int) $idEdicao ?>"><?php endif; ?>
-              
-            <div class="campo-user">
-                <label for="nome">Nome da rota</label>
-              <input type="text" id="nome" name="nome" minlength="3" maxlength="100" placeholder="Nome da rota" value="<?= escapar($nome) ?>" required>
-            </div>
+            <?php if ($ehAdministrador) { ?>
+                <section id="cadastro" class="cadastro-usuario<?php if ($cadastroAberto) { echo ' ativo'; } ?>"
+                    <?php if (!$cadastroAberto) { echo 'hidden'; } ?>>
+                    <h2>Cadastrar nova rota</h2>
 
-            <div class="campo-user">
-                <label for="id_trem">Trem vinculado</label>
-                <select id="id_trem" name="id_trem" required>
-                    <option value="">Selecione um trem</option>
-                    <?php if ($resultadoTrens): ?>
-                        <?php while ($trem = $resultadoTrens->fetch_assoc()): ?>
-                            <option value="<?= (int) $trem['id_trem'] ?>" <?= (string) $idTrem === (string) $trem['id_trem'] ? 'selected' : '' ?>><?= escapar($trem['nome']) ?></option>
-                        <?php endwhile; ?>
-                    <?php endif; ?>
-                </select>
-            </div>
-
-            <div class="campo-user campo-descricao-rota">
-              <label for="descricao">Descrição</label>
-              <textarea id="descricao" name="descricao" maxlength="255" rows="2" required><?= escapar($descricao) ?></textarea>
-            </div>
-
-            <div class="campo-user">
-              <label for="extensao">Extensão(km)</label>
-              <input type="number" id="extensao" name="extensao" min="0.01" step="0.01" placeholder="Ex:45" value="<?= escapar((string) $extensao) ?>" required>
-            </div>
-
-            <div class="campo-user">
-              <label for="minutos">Tempo estimado(min)</label>
-              <input type="number" id="minutos" name="tempo" min="1" step="1" placeholder="Ex:30" value="<?= escapar((string) $tempo) ?>" required>
-            </div>
-<?php if ($mensagem !== ''): ?>
-                        <p class="mensagem-cadastro" role="alert">
-                            <?= escapar($mensagem) ?>
-                        </p>
-                    <?php endif; ?>
-
-                    <?php if ($idEdicao > 0): ?>
-                        <div class="acoes-form-edicao modo-edicao">
-                            <button class="btn-cadastrar-form" type="submit">SALVAR ALTERAÇÕES</button>
-                            <a class="btn-cancelar-form" href="cadastrar_rotas.php">Cancelar</a>
+                    <form method="POST" class="form-cadastro-user">
+                        <div class="campo-user">
+                            <label for="nome">Nome da rota</label>
+                            <input placeholder="Nome da rota" type="text" id="nome" name="nome" minlength="3" maxlength="100" required>
                         </div>
-                    <?php else: ?>
-                        <button class="btn-cadastrar-form" type="submit">CADASTRAR ROTA</button>
-                    <?php endif; ?>
+
+                        <div class="campo-user">
+                            <label for="id_trem">Trem vinculado</label>
+                            <select id="id_trem" name="id_trem" required>
+                                <option value="">Selecione um trem</option>
+    
+                                <?php while ($trem = mysqli_fetch_assoc($trens)) { ?>
+                                    <option value="<?php echo $trem['id_trem']; ?>">
+                                        <?php echo escapar($trem['nome']); ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="campo-user campo-descricao-rota">
+                            <label for="descricao">Descrição</label>
+                            <textarea rows="2" id="descricao" name="descricao" maxlength="255" required></textarea>
+                        </div>
+
+                        <div class="campo-user">
+                            <label for="extensao">Extensão(km)</label>
+                            <input placeholder="Ex:45" type="number" id="extensao" name="extensao" min="0.01" step="0.01" required>
+                        </div>
+
+                        <div class="campo-user">
+                            <label for="tempo">Tempo estimado(min)</label>
+                            <input placeholder="Ex:30" type="number" id="tempo" name="tempo" min="1" required>
+                        </div>
+
+                        <button type="submit" class="btn-cadastrar-form">CADASTRAR NOVA ROTA</button>
+                    </form>
+                </section>
+            <?php } ?>
+
+            <!-- Área de busca e botão para abrir o formulário de cadastro. -->
+            <section class="buscar-box-user buscar-usuarios-linha">
+                <form method="GET">
+                    <label for="buscar">Buscar rota</label>
+                    <input type="search" id="buscar" name="buscar" placeholder="Nome da rota" value="<?php echo escapar($busca); ?>">
+                    <button type="submit">Buscar</button>
                 </form>
+
+                <?php if ($ehAdministrador) { ?>
+                    <button class="btn-cadastrar-user btn-cadastrar-user-compacto"
+                            id="btnAbrirCadastro" type="button" aria-controls="cadastro" aria-expanded="<?php echo $cadastroAberto ? 'true' : 'false'; ?>">
+                        Cadastrar rota
+                    </button>
+                <?php } ?>
             </section>
-        <?php endif; ?>
 
-        <section class="buscar-box-user buscar-usuarios-linha">
-            <form method="GET">
-                <label for="buscar">Buscar rota</label>
-                <input
-                    type="search"
-                    id="buscar"
-                    name="buscar"
-                    placeholder="Nome da rota"
-                    value="<?= escapar($busca) ?>"
-                >
-                <button type="submit">Buscar</button>
-            </form>
+            <?php include 'visualizacao_rotas.php'; ?>
+        </main>
+    </div>
 
-            <?php if ($ehAdministrador && $idEdicao === 0): ?>
-                <button class="btn-cadastrar-user btn-cadastrar-user-compacto" id="btnAbrirCadastro"
-                        type="button" aria-expanded="<?= $manterFormularioAberto ? 'true' : 'false' ?>"
-                        aria-controls="cadastro">
-                    Cadastrar rota
-                </button>
-            <?php endif; ?>
-        </section>
-
-        <?php mostrar_rotas($resultado); ?>
-    </main>
-</div>
-
-<script>
-(() => {
-    const botao = document.getElementById('btnAbrirCadastro');
-    const formulario = document.getElementById('cadastro');
-
-    if (!botao || !formulario) return;
-
-    botao.addEventListener('click', () => {
-        formulario.hidden = !formulario.hidden;
-        formulario.classList.toggle('ativo', !formulario.hidden);
-        botao.setAttribute('aria-expanded', String(!formulario.hidden));
-    });
-})();
-</script>
-<script src="../../script/confirmar_logout.js?v=20261107"></script>
+<script src="../../script/validacao.js?v=cadastro-3"></script>
 </body>
 </html>
-      

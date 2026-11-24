@@ -20,7 +20,7 @@ O Funcionário consulta as informações liberadas nas telas de usuários, trens
 - Operações de escrita protegidas verificam um token CSRF.
 - Funcionários não podem alterar seu próprio perfil ou se conceder acesso administrativo por alteração do formulário.
 - A interface esconde as ações que o perfil não pode realizar, mas a decisão final é feita no servidor.
-- Um Administrador não pode excluir contas de Administrador pela tela de usuários. Contas vinculadas a trens também precisam ser desvinculadas antes de excluir.
+- Administradores podem excluir contas de qualquer perfil. A exclusão é bloqueada se houver trens ou falhas vinculados à conta.
 
 ## O que esta descrição não significa
 

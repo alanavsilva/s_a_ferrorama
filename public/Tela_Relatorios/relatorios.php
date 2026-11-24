@@ -2,310 +2,325 @@
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
+// Os dois perfis podem consultar relatórios depois de entrar no sistema.
 exigir_login();
 
-$ehAdministrador = strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
-$sensores = [];
-$relatorio = [];
+$sensorSelecionado = (int) ($_GET['sensor_relatorios'] ?? 0);
+$data = $_GET['periodo_relatorios'] ?? date('Y-m-d');
 $mensagem = '';
 $relatorioGerado = false;
-$sensorSelecionado = filter_input(INPUT_GET, 'sensor_relatorios', FILTER_VALIDATE_INT) ?: 0;
-$periodoInformado = $_GET['periodo_relatorios'] ?? date('Y-m-d');
-$periodo = is_string($periodoInformado) ? trim($periodoInformado) : '';
-$sensorEscolhido = null;
-$leiturasDia = [];
+
+$leituras = [];
+$falhas = [];
 $totalResolvidas = 0;
 $totalAbertas = 0;
+$unidade = '';
+$chaveAtual = '';
 
-$resultadoSensores = $conn->query(
-    'SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, r.nome AS nome_rota,
-            t.nome AS nome_trem, t.velocidade_media, u.nome AS nome_responsavel
-     FROM sensores s
-     INNER JOIN rotas r ON r.id_rotas = s.id_rotas
-     INNER JOIN trens t ON t.id_trem = r.id_trem
-     LEFT JOIN usuarios u ON u.id_usuario = t.id_usuario
-     ORDER BY s.nome_sensor'
-);
+$historico = $_SESSION['historico_relatorios'] ?? [];
 
-if ($resultadoSensores) {
-    while ($sensor = $resultadoSensores->fetch_assoc()) {
-        $sensores[] = $sensor;
-    }
-} else {
-    error_log('Erro ao carregar sensores para relatório: ' . $conn->error);
-    $mensagem = 'Não foi possível carregar os sensores.';
-}
+$sql = "SELECT * FROM sensores ORDER BY nome_sensor";
+$sensores = mysqli_query($conn, $sql);
 
-$partesPeriodo = explode('-', $periodo);
-$periodoValido = count($partesPeriodo) === 3
-    && preg_match('/^\d{4}-\d{2}-\d{2}$/', $periodo) === 1
-    && checkdate((int) ($partesPeriodo[1] ?? 0), (int) ($partesPeriodo[2] ?? 0), (int) ($partesPeriodo[0] ?? 0));
-$sensorValido = false;
-
-foreach ($sensores as $sensor) {
-    if ((int) $sensor['id_sensor'] === $sensorSelecionado) {
-        $sensorValido = true;
-        $sensorEscolhido = $sensor;
-        break;
-    }
-}
-
+// Gera o relatório somente quando o formulário envia um sensor e uma data.
 if (isset($_GET['gerar'])) {
-    if (!$sensorValido || !$periodoValido) {
-        $mensagem = $sensorValido ? 'Selecione uma data válida.' : 'Selecione um sensor cadastrado.';
+    $sql = "SELECT * FROM sensores WHERE id_sensor = $sensorSelecionado";
+    $resultado = mysqli_query($conn, $sql);
+    $sensorEscolhido = mysqli_fetch_assoc($resultado);
+
+    // Converte a data e compara com o texto original para rejeitar datas inválidas.
+    $dataConvertida = strtotime($data);
+
+    if (!$sensorEscolhido) {
+        $mensagem = 'Selecione um sensor cadastrado.';
+    } elseif ($dataConvertida === false || date('Y-m-d', $dataConvertida) !== $data) {
+        $mensagem = 'Selecione uma data válida.';
+        $data = date('Y-m-d');
     } else {
-        $inicio = DateTimeImmutable::createFromFormat('!Y-m-d', $periodo);
+        // O sensor aponta para a rota, e a rota aponta para o trem.
+        $idRota = (int) $sensorEscolhido['id_rotas'];
+        $sql = "SELECT * FROM rotas WHERE id_rotas = $idRota";
+        $resultado = mysqli_query($conn, $sql);
+        $rota = mysqli_fetch_assoc($resultado);
 
-        if (!$inicio) {
-            $mensagem = 'O período informado é inválido.';
-        } elseif ($sensorEscolhido['tipo_dado'] !== 'Status') {
-            $fim = $inicio->modify('+1 day');
-            $inicioSql = $inicio->format('Y-m-d H:i:s');
-            $fimSql = $fim->format('Y-m-d H:i:s');
-            $stmt = $conn->prepare(
-                'SELECT valor, data_leitura FROM leituras_sensores
-                 WHERE id_sensor = ? AND data_leitura >= ? AND data_leitura < ?
-                 ORDER BY data_leitura DESC, id_leitura DESC'
-            );
-            if ($stmt) {
-                $stmt->bind_param('iss', $sensorSelecionado, $inicioSql, $fimSql);
-                try {
-                    if ($stmt->execute()) {
-                        $resultado = $stmt->get_result();
-                        while ($leitura = $resultado->fetch_assoc()) {
-                            $leiturasDia[] = $leitura;
-                        }
-                        $relatorioGerado = true;
-                    } else {
-                        $mensagem = 'Não foi possível gerar o relatório.';
-                    }
-                } catch (mysqli_sql_exception $e) {
-                    error_log('Erro ao consultar leituras do relatório: ' . $e->getMessage());
-                    $mensagem = 'Não foi possível gerar o relatório.';
-                }
-                $stmt->close();
-            } else {
-                error_log('Erro ao preparar leituras do relatório: ' . $conn->error);
-                $mensagem = 'Não foi possível preparar o relatório.';
+        $idTrem = (int) $rota['id_trem'];
+        $sql = "SELECT * FROM trens WHERE id_trem = $idTrem";
+        $resultado = mysqli_query($conn, $sql);
+        $trem = mysqli_fetch_assoc($resultado);
+
+        $responsavel = 'Não definido';
+
+        if (isset($trem['id_usuario'])) {
+            $idUsuario = (int) $trem['id_usuario'];
+            $sql = "SELECT nome FROM usuarios WHERE id_usuario = $idUsuario";
+            $resultado = mysqli_query($conn, $sql);
+            $usuario = mysqli_fetch_assoc($resultado);
+
+            if ($usuario) {
+                $responsavel = $usuario['nome'];
             }
+        }
+
+        $tipo = $sensorEscolhido['tipo_dado'];
+
+        // DATE() usa só o dia do registro, sem levar em conta a hora.
+        if ($tipo === 'Status') {
+            $sql = "SELECT descricao, data_registro, situacao
+                    FROM falhas_operacionais
+                    WHERE id_sensor = $sensorSelecionado AND DATE(data_registro) = ?
+                    ORDER BY data_registro DESC";
         } else {
-            $fim = $inicio->modify('+1 day');
-            $inicioSql = $inicio->format('Y-m-d H:i:s');
-            $fimSql = $fim->format('Y-m-d H:i:s');
+            $sql = "SELECT valor, data_leitura FROM leituras_sensores
+                    WHERE id_sensor = $sensorSelecionado AND DATE(data_leitura) = ?
+                    ORDER BY data_leitura DESC, id_leitura DESC";
 
-            $stmt = $conn->prepare(
-                'SELECT f.descricao, f.data_registro, f.resolvida,
-                        s.nome_sensor, s.tipo_dado, t.nome AS nome_trem
-                 FROM falhas_operacionais f
-                 INNER JOIN sensores s ON s.id_sensor = f.id_sensor
-                 INNER JOIN rotas r ON r.id_rotas = s.id_rotas
-                 INNER JOIN trens t ON t.id_trem = r.id_trem
-                 WHERE f.id_sensor = ?
-                   AND f.data_registro >= ?
-                   AND f.data_registro < ?
-                 ORDER BY f.data_registro DESC'
-            );
-
-            if ($stmt) {
-                $stmt->bind_param('iss', $sensorSelecionado, $inicioSql, $fimSql);
-
-                try {
-                    if ($stmt->execute()) {
-                        $resultado = $stmt->get_result();
-                        while ($falha = $resultado->fetch_assoc()) {
-                            $relatorio[] = $falha;
-                            if ((int) $falha['resolvida'] === 1) {
-                                $totalResolvidas++;
-                            } else {
-                                $totalAbertas++;
-                            }
-                        }
-                        $relatorioGerado = true;
-                    } else {
-                        $mensagem = 'Não foi possível gerar o relatório.';
-                        error_log('Erro ao consultar relatório: ' . $stmt->error);
-                    }
-                } catch (mysqli_sql_exception $e) {
-                    error_log('Erro ao gerar relatório: ' . $e->getMessage());
-                    $mensagem = 'Não foi possível gerar o relatório.';
-                }
-
-                $stmt->close();
+            if ($tipo === 'Velocidade') {
+                $unidade = 'km/h';
             } else {
-                error_log('Erro ao preparar relatório: ' . $conn->error);
-                $mensagem = 'Não foi possível preparar o relatório.';
+                $unidade = '°C';
             }
+        }
+
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, 's', $data);
+        mysqli_stmt_execute($stmt);
+        $resultado = mysqli_stmt_get_result($stmt);
+
+        while ($linha = mysqli_fetch_assoc($resultado)) {
+            if ($tipo === 'Status') {
+                $falhas[] = $linha;
+
+                if ($linha['situacao'] === 'Resolvida') {
+                    $totalResolvidas++;
+                } else {
+                    $totalAbertas++;
+                }
+            } else {
+                $leituras[] = $linha;
+            }
+        }
+
+        mysqli_stmt_close($stmt);
+        $relatorioGerado = true;
+
+        // O ID do sensor e a data identificam a consulta no histórico.
+        $chaveAtual = $sensorSelecionado . '|' . $data;
+        $ultimaChave = $historico[0]['chave'] ?? '';
+
+        if ($chaveAtual !== $ultimaChave) {
+            $valorLeitura = null;
+
+            if (isset($leituras[0])) {
+                $valorLeitura = $leituras[0]['valor'];
+            }
+
+            $item = [
+                'chave' => $chaveAtual,
+                'sensor' => $sensorEscolhido['nome_sensor'],
+                'tipo' => $tipo,
+                'trem' => $trem['nome'],
+                'rota' => $rota['nome'],
+                'responsavel' => $responsavel,
+                'data' => $data,
+                'gerado_em' => date('Y-m-d H:i:s'),
+                'valor_leitura' => $valorLeitura,
+                'total_falhas' => count($falhas)
+            ];
+
+            // Coloca o relatório novo no começo e guarda só os 20 mais recentes.
+            array_unshift($historico, $item);
+            $historico = array_slice($historico, 0, 20);
+            $_SESSION['historico_relatorios'] = $historico;
         }
     }
 }
 
-$historicoRelatorios = $_SESSION['historico_relatorios'] ?? [];
-if (!is_array($historicoRelatorios)) $historicoRelatorios = [];
-$assinaturaAtual = '';
-if ($relatorioGerado && $sensorEscolhido) {
-    $assinaturaAtual = hash('sha256', $sensorSelecionado . '|' . $periodo . '|' . $sensorEscolhido['tipo_dado']);
-    $ultimoRelatorio = $historicoRelatorios[0] ?? null;
-    if (!is_array($ultimoRelatorio) || ($ultimoRelatorio['assinatura'] ?? '') !== $assinaturaAtual) {
-        array_unshift($historicoRelatorios, [
-            'assinatura' => $assinaturaAtual,
-            'sensor' => $sensorEscolhido['nome_sensor'],
-            'tipo' => $sensorEscolhido['tipo_dado'],
-            'trem' => $sensorEscolhido['nome_trem'],
-            'rota' => $sensorEscolhido['nome_rota'],
-            'responsavel' => $sensorEscolhido['nome_responsavel'] ?? 'Não definido',
-            'data' => $periodo,
-            'gerado_em' => date('Y-m-d H:i:s'),
-            'manual' => true,
-            'valor_leitura' => $leiturasDia[0]['valor'] ?? null,
-            'data_leitura' => $leiturasDia[0]['data_leitura'] ?? null,
-            'total_falhas' => count($relatorio),
-            'resolvidas' => $totalResolvidas,
-            'abertas' => $totalAbertas
-        ]);
-        $historicoRelatorios = array_slice($historicoRelatorios, 0, 20);
-        $_SESSION['historico_relatorios'] = $historicoRelatorios;
+// Separa os itens que vão aparecer abaixo do relatório aberto.
+$relatoriosAnteriores = [];
+
+foreach ($historico as $item) {
+    if ($chaveAtual === '' || ($item['chave'] ?? '') !== $chaveAtual) {
+        $relatoriosAnteriores[] = $item;
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatórios - TREMTECH</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
+    <title>Relatórios - TremTech</title>
+    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-topo-2">
 </head>
+
 <body class="pagina-relatorios">
-<div class="pagina">
-    <aside class="menu">
-        <img class="logo-trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
-        <p class="marca">SISTEMA TREMTECH</p>
-        <a href="../Tela_Home/home.php"><span class="icone" style="mask-image:url('https://img.icons8.com/ios-filled/18/000000/home.png');-webkit-mask-image:url('https://img.icons8.com/ios-filled/18/000000/home.png');"></span>Home</a>
-        <a href="../Tela_Usuario/cadastrar_usuario.php"><span class="icone" style="mask-image:url('https://img.icons8.com/ios-filled/18/000000/user.png');-webkit-mask-image:url('https://img.icons8.com/ios-filled/18/000000/user.png');"></span>Usuários</a>
-        <a href="../Tela_Sensores/cadastrar_sensores.php"><span class="icone" style="mask-image:url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');-webkit-mask-image:url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');"></span>Sensores</a>
-        <a href="../Tela_Trens/cadastrar_trens.php"><span class="icone" style="mask-image:url('https://img.icons8.com/ios-filled/18/000000/train.png');-webkit-mask-image:url('https://img.icons8.com/ios-filled/18/000000/train.png');"></span>Trens</a>
-        <a href="../Tela_Rotas/cadastrar_rotas.php"><span class="icone" style="mask-image:url('https://img.icons8.com/ios-filled/18/000000/map.png');-webkit-mask-image:url('https://img.icons8.com/ios-filled/18/000000/map.png');"></span>Rotas</a>
-        <a href="../Tela_Monitoramento/monitoramento.php"><span class="icone" style="mask-image:url('https://img.icons8.com/ios-filled/18/000000/visible.png');-webkit-mask-image:url('https://img.icons8.com/ios-filled/18/000000/visible.png');"></span>Monitoramento</a>
-        <a href="../Tela_Falhas/cadastrar_falha.php"><span class="icone" style="mask-image:url('https://img.icons8.com/ios-filled/18/701015/error.png');-webkit-mask-image:url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>Falhas</a>
-        <a class="ativo" href="relatorios.php"><span class="icone" style="mask-image:url('https://img.icons8.com/ios-filled/18/000000/report-card.png');-webkit-mask-image:url('https://img.icons8.com/ios-filled/18/000000/report-card.png');"></span>Relatórios</a>
-        <a class="logout" href="../../logout.php" data-confirmar-logout><span class="icone" style="mask-image:url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');-webkit-mask-image:url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>Logout</a>
-    </aside>
+    <?php include __DIR__ . '/../menu.php'; ?>
+    <div class="pagina">
 
-    <main class="content-user conteudo-relatorios">
-        <header class="cabecalho-relatorios">
-            <div class="titulo-area-relatorios">
-                <p class="sobretitulo-relatorios">PAINEL DE RELATÓRIOS</p>
-                <h1>Relatórios do sistema</h1>
-            </div>
-            <div class="admin-badge-user card-recuado">
-                <div class="avatar-user"></div>
-                <div><strong><?= $ehAdministrador ? 'Administrador' : 'Funcionário' ?></strong><span><?= escapar($_SESSION['nome'] ?? '') ?></span></div>
-            </div>
-        </header>
-
-        <section class="area-relatorios">
-            <form class="formulario-relatorios" action="relatorios.php" method="GET">
-                <h2>Gerar relatório</h2>
-                <div class="campo-relatorios">
-                    <label for="sensor-relatorios">Sensor</label>
-                    <select name="sensor_relatorios" id="sensor-relatorios" required>
-                        <option value="">Selecione um sensor</option>
-                        <?php foreach ($sensores as $sensor): ?>
-                            <option value="<?= (int) $sensor['id_sensor'] ?>" <?= $sensorSelecionado === (int) $sensor['id_sensor'] ? 'selected' : '' ?>>
-                                <?= escapar($sensor['nome_sensor']) ?> - <?= escapar($sensor['nome_trem']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+        <main class="content-user conteudo-relatorios">
+            <header class="cabecalho-relatorios">
+                <div class="titulo-area-relatorios">
+                    <p class="sobretitulo-relatorios">PAINEL DE RELATÓRIOS</p>
+                    <h1>Relatórios do sistema</h1>
                 </div>
-                <div class="campo-relatorios">
-                    <label for="periodo-relatorios">Dia do relatório</label>
-                    <input type="date" name="periodo_relatorios" id="periodo-relatorios" value="<?= escapar($periodoValido ? $periodo : date('Y-m-d')) ?>" required>
+
+                <div class="admin-badge-user card-recuado">
+                    <div class="avatar-user"></div>
+                    <div>
+                        <strong><?php echo escapar($_SESSION['tipo']); ?></strong>
+                        <span><?php echo escapar($_SESSION['nome']); ?></span>
+                    </div>
                 </div>
-                <button type="submit" name="gerar" value="1" class="botao-relatorios" <?= count($sensores) === 0 ? 'disabled' : '' ?>>Gerar relatório</button>
-                <?php if ($mensagem !== ''): ?><p class="mensagem-relatorios" role="alert"><?= escapar($mensagem) ?></p><?php endif; ?>
-                <?php if (count($sensores) === 0): ?><p class="mensagem-relatorios">Cadastre um sensor antes de gerar o relatório.</p><?php endif; ?>
-            </form>
+            </header>
 
-            <section class="resultado-relatorios" aria-live="polite">
-                <?php if ($relatorioGerado): ?>
-                    <div class="resumo-relatorio">
-                        <h2>Relatório gerado</h2>
-                        <p>Responsável: <strong><?= escapar($sensorEscolhido['nome_responsavel'] ?? 'Não definido') ?></strong></p>
-                        <p>Sensor: <strong><?= escapar($sensorEscolhido['nome_sensor']) ?></strong> (<?= escapar($sensorEscolhido['tipo_dado']) ?>)</p>
-                        <p>Trem: <strong><?= escapar($sensorEscolhido['nome_trem']) ?></strong></p>
-                        <p>Rota: <strong><?= escapar($sensorEscolhido['nome_rota']) ?></strong></p>
-                        <p>Data consultada: <strong><?= escapar(date('d/m/Y', strtotime($periodo))) ?></strong></p>
-                        <?php if ($sensorEscolhido['tipo_dado'] === 'Status'): ?>
-                            <p>Falhas registradas: <strong><?= count($relatorio) ?></strong></p>
-                            <p>Resolvidas: <strong><?= $totalResolvidas ?></strong> · Em aberto: <strong><?= $totalAbertas ?></strong></p>
-                        <?php elseif ($sensorEscolhido['tipo_dado'] === 'Velocidade'): ?>
-                            <h3>Leituras de velocidade</h3>
-                            <?php if ($leiturasDia): ?>
-                                <?php foreach ($leiturasDia as $leitura): ?>
-                                    <p><strong><?= escapar(number_format((float) $leitura['valor'], 2, ',', '.')) ?> km/h</strong></p>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <p>Nenhuma leitura registrada para este sensor na data selecionada.</p>
-                            <?php endif; ?>
-                        <?php else: ?>
-                            <h3>Leituras de temperatura</h3>
-                            <?php if ($leiturasDia): ?>
-                                <?php foreach ($leiturasDia as $leitura): ?>
-                                    <p><strong><?= escapar(number_format((float) $leitura['valor'], 2, ',', '.')) ?> °C</strong></p>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <p>Nenhuma leitura registrada para este sensor na data selecionada.</p>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                    <?php if ($sensorEscolhido['tipo_dado'] === 'Status' && $relatorio): ?>
-                        <section class="lista-falhas-relatorio">
-                            <h3>Falhas do dia</h3>
-                            <?php foreach ($relatorio as $falha): ?>
-                                <article class="relatorio-falha-linha">
-                                    <strong>Descrição da falha</strong>
-                                    <p><?= escapar($falha['descricao']) ?></p>
-                                    <div>
-                                        <span>Data: <?= escapar(date('d/m/Y', strtotime($falha['data_registro']))) ?></span>
-                                        <span>Status: <?= (int) $falha['resolvida'] === 1 ? 'Resolvida' : 'Em aberto' ?></span>
-                                    </div>
-                                </article>
-                            <?php endforeach; ?>
-                        </section>
-                    <?php elseif ($sensorEscolhido['tipo_dado'] === 'Status'): ?>
-                        <p class="relatorio-sem-falhas">Nenhuma falha foi registrada para este sensor na data selecionada.</p>
-                    <?php endif; ?>
-                <?php else: ?>
-                    <div class="estado-vazio-relatorios">
-                        <h2>Relatório</h2>
-                        <p>Selecione um sensor para consultar a informação correspondente ao tipo de leitura.</p>
-                    </div>
-                <?php endif; ?>
-            </section>
+            <section class="area-relatorios">
+                <form class="formulario-relatorios" method="GET">
+                    <h2>Gerar relatório</h2>
 
-            <?php $relatoriosAnteriores = array_values(array_filter($historicoRelatorios, static fn($item) => ($item['assinatura'] ?? '') !== $assinaturaAtual)); ?>
-            <?php if ($relatoriosAnteriores): ?>
-                <section class="historico-relatorios">
-                    <h2>Histórico de relatórios</h2>
-                    <?php foreach ($relatoriosAnteriores as $item): ?>
-                        <article class="item-historico-relatorio">
-                            <div><strong>Responsável: <?= escapar($item['responsavel']) ?></strong>
-                                <span><?= escapar($item['sensor']) ?> - <?= escapar($item['tipo']) ?></span>
-                                <span><?= escapar($item['trem']) ?> - <?= escapar($item['rota']) ?></span>
-                            </div>
-                            <div><span>Data: <?= escapar(date('d/m/Y', strtotime($item['data']))) ?></span>
-                                <span>Gerado em: <?= escapar(date('d/m/Y H:i', strtotime($item['gerado_em']))) ?></span>
-                            </div>
-                            <strong class="resumo-historico-relatorio">
-                                <?php if ($item['tipo'] === 'Status'): ?><?= (int) $item['total_falhas'] ?> falha(s)<?php elseif (!empty($item['manual']) && $item['valor_leitura'] !== null): ?><?= escapar(number_format((float) $item['valor_leitura'], 2, ',', '.')) ?> <?= $item['tipo'] === 'Velocidade' ? 'km/h' : '°C' ?><?php else: ?>-<?php endif; ?>
-                            </strong>
-                        </article>
-                    <?php endforeach; ?>
+                    <div class="campo-relatorios">
+                        <label for="sensor-relatorios">Sensor</label>
+                        <select name="sensor_relatorios" id="sensor-relatorios" required>
+                            <option value="">Selecione um sensor</option>
+
+                            <?php
+                            while ($sensor = mysqli_fetch_assoc($sensores)) {
+                                // Busca o trem para mostrar o nome dele ao lado do sensor.
+                                $idRota = (int) $sensor['id_rotas'];
+                                $sql = "SELECT id_trem FROM rotas WHERE id_rotas = $idRota";
+                                $resultado = mysqli_query($conn, $sql);
+                                $rotaDoSensor = mysqli_fetch_assoc($resultado);
+
+                                $idTrem = (int) $rotaDoSensor['id_trem'];
+                                $sql = "SELECT nome FROM trens WHERE id_trem = $idTrem";
+                                $resultado = mysqli_query($conn, $sql);
+                                $tremDoSensor = mysqli_fetch_assoc($resultado);
+                            ?>
+                                <option value="<?php echo $sensor['id_sensor']; ?>"
+                                    <?php if ($sensorSelecionado == $sensor['id_sensor']) { echo 'selected'; } ?>>
+                                    <?php echo escapar($sensor['nome_sensor']); ?>
+                                    - <?php echo escapar($tremDoSensor['nome']); ?>
+                                </option>
+                            <?php } ?>
+                        </select>
+                    </div>
+
+                    <div class="campo-relatorios">
+                        <label for="periodo-relatorios">Dia do relatório</label>
+                        <input type="date" name="periodo_relatorios" id="periodo-relatorios"
+                               value="<?php echo escapar($data); ?>" required>
+                    </div>
+
+                    <button type="submit" name="gerar" value="1" class="botao-relatorios"
+                        <?php if (mysqli_num_rows($sensores) === 0) { echo 'disabled'; } ?>>
+                        Gerar relatório
+                    </button>
+
+                    <?php if ($mensagem !== '') { ?>
+                        <p class="mensagem-relatorios" role="alert"><?php echo escapar($mensagem); ?></p>
+                    <?php } ?>
+
+                    <?php if (mysqli_num_rows($sensores) === 0) { ?>
+                        <p class="mensagem-relatorios">Cadastre um sensor antes de gerar o relatório.</p>
+                    <?php } ?>
+                </form>
+
+                <section class="resultado-relatorios">
+                    <?php if ($relatorioGerado) { ?>
+                        <div class="resumo-relatorio">
+                            <h2>Relatório gerado</h2>
+                            <p>Responsável: <strong><?php echo escapar($responsavel); ?></strong></p>
+                            <p>Sensor: <strong><?php echo escapar($sensorEscolhido['nome_sensor']); ?></strong>
+                                (<?php echo escapar($tipo); ?>)</p>
+                            <p>Trem: <strong><?php echo escapar($trem['nome']); ?></strong></p>
+                            <p>Rota: <strong><?php echo escapar($rota['nome']); ?></strong></p>
+                            <p>Data consultada: <strong><?php echo date('d/m/Y', $dataConvertida); ?></strong></p>
+
+                            <?php if ($tipo === 'Status') { ?>
+                                <p>Falhas registradas: <strong><?php echo count($falhas); ?></strong></p>
+                                <p>Resolvidas: <strong><?php echo $totalResolvidas; ?></strong>
+                                    · Em aberto: <strong><?php echo $totalAbertas; ?></strong></p>
+                            <?php } else { ?>
+                                <h3>Leituras de <?php echo escapar(strtolower($tipo)); ?></h3>
+
+                                <?php if (count($leituras) === 0) { ?>
+                                    <p>Nenhuma leitura registrada para este sensor na data selecionada.</p>
+                                <?php } ?>
+
+                                <?php foreach ($leituras as $leitura) { ?>
+                                    <p><strong><?php echo number_format($leitura['valor'], 2, ',', '.'); ?>
+                                            <?php echo $unidade; ?></strong></p>
+                                <?php } ?>
+                            <?php } ?>
+                        </div>
+
+                        <?php if ($tipo === 'Status' && count($falhas) > 0) { ?>
+                            <section class="lista-falhas-relatorio">
+                                <h3>Falhas do dia</h3>
+
+                                <?php foreach ($falhas as $falha) { ?>
+                                    <article class="relatorio-falha-linha">
+                                        <strong>Descrição da falha</strong>
+                                        <p><?php echo escapar($falha['descricao']); ?></p>
+                                        <div>
+                                            <span>Data: <?php echo date('d/m/Y', strtotime($falha['data_registro'])); ?></span>
+                                            <span>Situação: <?php echo escapar($falha['situacao']); ?></span>
+                                        </div>
+                                    </article>
+                                <?php } ?>
+                            </section>
+                        <?php } elseif ($tipo === 'Status') { ?>
+                            <p class="relatorio-sem-falhas">Nenhuma falha registrada para este sensor na data selecionada.</p>
+                        <?php } ?>
+                    <?php } else { ?>
+                        <div class="estado-vazio-relatorios">
+                            <h2>Relatório</h2>
+                            <p>Selecione um sensor e uma data para consultar o relatório.</p>
+                        </div>
+                    <?php } ?>
                 </section>
-            <?php endif; ?>
-        </section>
-    </main>
-</div>
-<script src="../../script/confirmar_logout.js?v=20261107"></script>
+
+                <?php if (count($relatoriosAnteriores) > 0) { ?>
+                    <section class="historico-relatorios">
+                        <h2>Histórico de relatórios</h2>
+
+                        <?php foreach ($relatoriosAnteriores as $item) { ?>
+                            <article class="item-historico-relatorio">
+                                <div>
+                                    <strong>Responsável: <?php echo escapar($item['responsavel']); ?></strong>
+                                    <span><?php echo escapar($item['sensor']); ?> - <?php echo escapar($item['tipo']); ?></span>
+                                    <span><?php echo escapar($item['trem']); ?> - <?php echo escapar($item['rota']); ?></span>
+                                </div>
+
+                                <div>
+                                    <span>Data: <?php echo date('d/m/Y', strtotime($item['data'])); ?></span>
+                                    <span>Gerado em: <?php echo date('d/m/Y H:i', strtotime($item['gerado_em'])); ?></span>
+                                </div>
+
+                                <strong class="resumo-historico-relatorio">
+                                    <?php if ($item['tipo'] === 'Status') { ?>
+                                        <?php echo $item['total_falhas']; ?> falha(s)
+                                    <?php } elseif (isset($item['valor_leitura'])) { ?>
+                                        <?php echo number_format($item['valor_leitura'], 2, ',', '.'); ?>
+                                        <?php
+                                        if ($item['tipo'] === 'Velocidade') {
+                                            echo 'km/h';
+                                        } else {
+                                            echo '°C';
+                                        }
+                                        ?>
+                                    <?php } else { ?>
+                                        -
+                                    <?php } ?>
+                                </strong>
+                            </article>
+                        <?php } ?>
+                    </section>
+                <?php } ?>
+            </section>
+        </main>
+    </div>
+
+<script src="../../script/validacao.js"></script>
 </body>
 </html>
