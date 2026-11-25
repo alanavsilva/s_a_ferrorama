@@ -43,6 +43,7 @@ if (mysqli_num_rows($trens) > 0 || mysqli_num_rows($falhas_operacionais) > 0) {
             exit();
         }
 
+        $_SESSION['sucesso_usuario'] = true;
         $mensagem = 'Usuário excluído com sucesso!';
     }
 }

@@ -49,7 +49,7 @@ $encontrou = false;
 
                 <?php if ($administrador) { ?>
                     <td class="acao_user acao_sensor">
-                        <a href="editar_s.php?id=<?php echo $sensor['id_sensor']; ?>" class="acao_icone editar_user" aria-label="Editar sensor"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
+                        <a href="cadastrar_sensores.php?editar=<?php echo $sensor['id_sensor']; ?>#cadastro" class="acao_icone editar_user" aria-label="Editar sensor"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
 
                         <form method="POST" action="excluir_s.php" class="confirmar_exclusao">
                             <input type="hidden" name="id" value="<?php echo $sensor['id_sensor']; ?>">

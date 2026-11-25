@@ -9,10 +9,15 @@ exigir_login();
 
 $administrador = $_SESSION['tipo'] === 'Administrador';
 $mensagem = $_SESSION['mensagem_trem'] ?? '';
-unset($_SESSION['mensagem_trem']);
+// A sessão guarda o recado até a página abrir. Depois, o recado é limpo.
+$sucesso = $_SESSION['sucesso_trem'] ?? false;
+unset($_SESSION['mensagem_trem'], $_SESSION['sucesso_trem']);
 
 // Cadastro. Recebe o formulário e faz o INSERT no banco.
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// O link Editar manda o ID pelo endereço da página.
+$editando = isset($_GET['editar']);
+
+if (!$editando && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exigir_administrador();
 
     $nome = trim($_POST['nome'] ?? '');
@@ -44,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($salvou) {
             $_SESSION['mensagem_trem'] = 'Trem cadastrado com sucesso!';
+            $_SESSION['sucesso_trem'] = true;
             header('Location: cadastrar_trens.php');
             exit();
         }
@@ -57,6 +63,12 @@ $busca = trim($_GET['buscar'] ?? '');
 $usuarios = mysqli_query($conn, "SELECT id_usuario, nome FROM usuarios ORDER BY nome");
 $trens = mysqli_query($conn, "SELECT * FROM trens ORDER BY nome");
 // Se o cadastro tiver erro, o formulário continua aberto para a pessoa ver o aviso.
+// Busca o registro para preencher o formulário ou salva as alterações antes do HTML.
+if ($editando) {
+    $sucesso = false;
+    require 'editar_t.php';
+}
+
 $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
 ?>
 
@@ -106,10 +118,51 @@ $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
             </div>
 
             <?php if ($mensagem !== '') { ?>
-                <p><?php echo escapar($mensagem); ?></p>
+                <?php if ($sucesso) { ?>
+                    <p class="mensagem_sucesso"><?php echo escapar($mensagem); ?></p>
+                <?php } else { ?>
+                    <p class="mensagem_erro" role="alert"><?php echo escapar($mensagem); ?></p>
+                <?php } ?>
             <?php } ?>
 
-            <?php if ($administrador) { ?>
+            <?php if ($editando) { ?>
+                <section id="cadastro" class="cadastro_usuario ativo">
+                    <h2>Editar trem</h2>
+                    <!-- Cada campo junta o rótulo e a caixa de entrada. O CSS usa esse grupo para colocar o rótulo em cima. -->
+                    <form method="POST" class="form_cadastro_user">
+                        <div class="campo_user">
+                            <label for="nome">Nome do trem</label>
+                            <input type="text" id="nome" name="nome" minlength="3" maxlength="100"
+                                   value="<?php echo escapar($nome); ?>" required>
+                        </div>
+
+                        <div class="campo_user">
+                            <label for="velocidade">Velocidade média em km/h</label>
+                            <input type="number" id="velocidade" name="velocidade"
+                                   step="any" value="<?php echo escapar($velocidade); ?>" required>
+                        </div>
+
+                        <div class="campo_user campo_responsavel_trem">
+                            <label for="id_usuario">Usuário responsável</label>
+                            <select id="id_usuario" name="id_usuario" required>
+                                <option value="">Selecione o responsável</option>
+
+                                <?php while ($usuario = mysqli_fetch_assoc($usuarios)) { ?>
+                                    <option value="<?php echo $usuario['id_usuario']; ?>"
+                                        <?php if ($usuario['id_usuario'] == $id_usuario) { echo 'selected'; } ?>>
+                                        <?php echo escapar($usuario['nome']); ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="acoes_form_edicao modo_edicao">
+                            <button type="submit" class="btn_cadastrar_form">Salvar alterações</button>
+                            <a class="btn_cancelar_form" href="cadastrar_trens.php">Cancelar</a>
+                        </div>
+                    </form>
+                </section>
+            <?php } elseif ($administrador) { ?>
                 <section id="cadastro" class="cadastro_usuario ativo"
                     <?php if (!$cadastro_aberto) { echo 'hidden'; } ?>>
                     
@@ -153,7 +206,7 @@ $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                     <button type="submit">Buscar</button>
                 </form>
 
-                <?php if ($administrador) { ?>
+                <?php if ($administrador && !$editando) { ?>
                     <button class="btn_cadastrar_user btn_cadastrar_user_compacto"
                             id="botao_abrir_cadastro" type="button" aria-controls="cadastro">
                         Cadastrar trem
@@ -176,6 +229,17 @@ $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
         </div>
     </dialog>
 
-<script src="../../script/validacao.js?v=simples-7"></script>
+    <!-- A janela só abre ao clicar na lixeira. Os botões usam o mesmo estilo da confirmação de saída. -->
+    <dialog class="modal_confirmacao" id="janela_exclusao" aria-labelledby="titulo_exclusao">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="titulo_exclusao">Excluir registro?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja excluir este registro?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_exclusao">Cancelar</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_exclusao">Excluir</button>
+        </div>
+    </dialog>
+
+<script src="../../script/validacao.js?v=simples-8"></script>
 </body>
 </html>

@@ -10,10 +10,15 @@ exigir_login();
 $administrador = $_SESSION['tipo'] === 'Administrador';
 $tipos = ['Velocidade', 'Temperatura', 'Status'];
 $mensagem = $_SESSION['mensagem_sensor'] ?? '';
-unset($_SESSION['mensagem_sensor']);
+// A sessão guarda o recado até a página abrir. Depois, o recado é limpo.
+$sucesso = $_SESSION['sucesso_sensor'] ?? false;
+unset($_SESSION['mensagem_sensor'], $_SESSION['sucesso_sensor']);
 
 // Cadastro. Recebe o formulário e faz o INSERT no banco.
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Quando o endereço tem "editar", o formulário vai mostrar o registro escolhido.
+$editando = isset($_GET['editar']);
+
+if (!$editando && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exigir_administrador();
 
     $nome = trim($_POST['nome_sensor'] ?? '');
@@ -42,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($salvou) {
             $_SESSION['mensagem_sensor'] = 'Sensor cadastrado com sucesso!';    
+            $_SESSION['sucesso_sensor'] = true;
             header('Location: cadastrar_sensores.php');    
             exit();
         }
@@ -55,6 +61,12 @@ $busca = trim($_GET['buscar'] ?? '');
 $rotas = mysqli_query($conn, "SELECT id_rotas, nome FROM rotas ORDER BY nome");
 $sensores = mysqli_query($conn, "SELECT * FROM sensores ORDER BY id_sensor");
 // Se o cadastro tiver erro, o formulário continua aberto para a pessoa ver o aviso.
+// Antes do HTML, busca o registro ou salva as alterações enviadas pelo formulário.
+if ($editando) {
+    $sucesso = false;
+    require 'editar_s.php';
+}
+
 $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
 ?>
 
@@ -104,10 +116,55 @@ $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
             </div>
 
             <?php if ($mensagem !== '') { ?>
-                <p><?php echo escapar($mensagem); ?></p>
+                <?php if ($sucesso) { ?>
+                    <p class="mensagem_sucesso"><?php echo escapar($mensagem); ?></p>
+                <?php } else { ?>
+                    <p class="mensagem_erro" role="alert"><?php echo escapar($mensagem); ?></p>
+                <?php } ?>
             <?php } ?>
 
-            <?php if ($administrador) { ?>
+            <?php if ($editando) { ?>
+                <section id="cadastro" class="cadastro_usuario ativo">
+                    <h2>Editar sensor</h2>
+                    <!-- Cada campo junta o rótulo e a caixa de entrada. O CSS usa esse grupo para colocar o rótulo em cima. -->
+                    <form method="POST" class="form_cadastro_user">
+                        <div class="campo_user">
+                            <label for="nome_sensor">Nome do sensor</label>
+                            <input type="text" id="nome_sensor" name="nome_sensor" minlength="3" maxlength="100"
+                                   value="<?php echo escapar($sensor['nome_sensor']); ?>" required>
+                        </div>
+
+                        <div class="campo_user">
+                            <label for="tipo_dado">Tipo de dado</label>
+                            <select id="tipo_dado" name="tipo_dado" required>
+                                <?php foreach ($tipos as $tipo) { ?>
+                                    <option value="<?php echo $tipo; ?>"
+                                        <?php if ($tipo === $sensor['tipo_dado']) { echo 'selected'; } ?>>
+                                        <?php echo $tipo; ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="campo_user campo_rota_sensor">
+                            <label for="id_rotas">Rota vinculada</label>
+                            <select id="id_rotas" name="id_rotas" required>
+                                <?php while ($rota = mysqli_fetch_assoc($rotas)) { ?>
+                                    <option value="<?php echo $rota['id_rotas']; ?>"
+                                        <?php if ($rota['id_rotas'] == $sensor['id_rotas']) { echo 'selected'; } ?>>
+                                        <?php echo escapar($rota['nome']); ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="acoes_form_edicao modo_edicao">
+                            <button type="submit" class="btn_cadastrar_form">Salvar alterações</button>
+                            <a class="btn_cancelar_form" href="cadastrar_sensores.php">Cancelar</a>
+                        </div>
+                    </form>
+                </section>
+            <?php } elseif ($administrador) { ?>
                 <section id="cadastro" class="cadastro_usuario ativo"
                     <?php if (!$cadastro_aberto) { echo 'hidden'; } ?>>
                     <h2>Cadastrar novo sensor</h2>
@@ -155,7 +212,7 @@ $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                     <button type="submit">Buscar</button>
                 </form>
 
-                <?php if ($administrador) { ?>
+                <?php if ($administrador && !$editando) { ?>
                     <button class="btn_cadastrar_user btn_cadastrar_user_compacto"
                             id="botao_abrir_cadastro" type="button" aria-controls="cadastro">
                         Cadastrar sensor
@@ -178,6 +235,17 @@ $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
         </div>
     </dialog>
 
-<script src="../../script/validacao.js?v=simples-7"></script>
+    <!-- A janela só abre ao clicar na lixeira. Os botões usam o mesmo estilo da confirmação de saída. -->
+    <dialog class="modal_confirmacao" id="janela_exclusao" aria-labelledby="titulo_exclusao">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="titulo_exclusao">Excluir registro?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja excluir este registro?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_exclusao">Cancelar</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_exclusao">Excluir</button>
+        </div>
+    </dialog>
+
+<script src="../../script/validacao.js?v=simples-8"></script>
 </body>
 </html>

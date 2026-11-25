@@ -8,8 +8,6 @@
   padding: 0;
 }
 
-html { scrollbar-gutter: stable; }
-
 a {
   text-decoration: none;
 }
@@ -367,12 +365,12 @@ body {
   background: #4f0c11;
 }
 
-.acao_icone[aria-label^="Editar"] { background: #927000; }
-.acao_icone[aria-label^="Editar"] img { filter: brightness(0) invert(1); }
-.acao_icone[aria-label^="Editar"]:hover { background: #765900; }
-.acao_icone[aria-label^="Excluir"] { background: #811724; }
-.acao_icone[aria-label^="Excluir"] img { filter: brightness(0) invert(1); }
-.acao_icone[aria-label^="Excluir"]:hover { background: #64101b; }
+.acao_icone.editar_user { background: #927000; }
+.acao_icone.editar_user img { filter: brightness(0) invert(1); }
+.acao_icone.editar_user:hover { background: #765900; }
+.acao_icone.excluir_user { background: #811724; }
+.acao_icone.excluir_user img { filter: brightness(0) invert(1); }
+.acao_icone.excluir_user:hover { background: #64101b; }
 
 .admin_badge_user {
   background: #fff;
@@ -601,7 +599,7 @@ body {
 
 .home_indicadores {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 0;
   margin: 22px 0;
   overflow: hidden;
@@ -642,7 +640,7 @@ body {
 
 .home_atalhos_lista {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 18px 8%;
   padding: 0 4%;
 }
@@ -733,6 +731,7 @@ body {
   cursor: pointer;
 }
 
+/* Duas colunas iguais. minmax permite que elas encolham quando falta espaço. */
 .home_cep_campos {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2503,7 +2502,8 @@ header {
   .admin_badge_user {
     margin-bottom: 18px;
     position: static;
-    width: min(224px, 100%);
+    width: 224px;
+    max-width: 100%;
     min-width: 0;
     margin: 0 0 20px auto;
   }
@@ -2545,7 +2545,8 @@ header {
     position: static;
     top: auto;
     right: auto;
-    width: min(224px, 100%);
+    width: 224px;
+    max-width: 100%;
     min-width: 0;
     margin: 0 0 20px auto;
   }
@@ -2630,8 +2631,8 @@ header {
   }
 
   .home_usuario {
-    max-width: 260px;
-    width: min(224px, 100%);
+    width: 224px;
+    max-width: 100%;
     margin-left: 0;
   }
 
@@ -2718,7 +2719,8 @@ header {
   }
   .content_user > .admin_badge_user {
     position: static;
-    width: min(224px, 100%);
+    width: 224px;
+    max-width: 100%;
     margin: 0 0 18px auto;
   }
 
@@ -3113,7 +3115,8 @@ header {
 @media (max-width: 900px) {
   .content_user .admin_badge_user {
     position: static !important;
-    width: min(224px, 100%);
+    width: 224px;
+    max-width: 100%;
     min-width: 0;
     margin: 0 0 20px auto !important;
   }

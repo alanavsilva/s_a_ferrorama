@@ -38,7 +38,7 @@ if (mysqli_num_rows($leituras_sensores) > 0 || mysqli_num_rows($falhas_operacion
     } elseif ($linhas === 0) {
         $mensagem = 'Sensor não encontrado.';
     } else {
-        $mensagem = 'Sensor excluído com sucesso!';
+        $_SESSION['sucesso_sensor'] = true;        $mensagem = 'Sensor excluído com sucesso!';
     }
 }
 

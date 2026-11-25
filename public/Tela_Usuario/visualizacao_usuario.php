@@ -27,7 +27,7 @@ if (!isset($usuarios)) {
 
             <?php if ($administrador) { ?>
                 <td class="acao_user">
-                    <a href="editar_u.php?id=<?php echo $usuario['id_usuario']; ?>" class="acao_icone editar_user" aria-label="Editar usuário"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
+                    <a href="cadastrar_usuario.php?editar=<?php echo $usuario['id_usuario']; ?>#cadastro" class="acao_icone editar_user" aria-label="Editar usuário"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
 
                     <form method="POST" action="excluir_u.php" class="confirmar_exclusao">
                         <input type="hidden" name="id" value="<?php echo $usuario['id_usuario']; ?>">

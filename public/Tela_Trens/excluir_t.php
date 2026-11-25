@@ -37,7 +37,7 @@ if (mysqli_num_rows($rotas) > 0) {
     } elseif ($linhas === 0) {
         $mensagem = 'Trem não encontrado.';
     } else {
-        $mensagem = 'Trem excluído com sucesso!';
+        $_SESSION['sucesso_trem'] = true;        $mensagem = 'Trem excluído com sucesso!';
     }
 }
 

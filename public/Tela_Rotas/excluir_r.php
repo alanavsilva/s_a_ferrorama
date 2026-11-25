@@ -37,7 +37,7 @@ if (mysqli_num_rows($sensores) > 0) {
     } elseif ($linhas === 0) {
         $mensagem = 'Rota não encontrada.';
     } else {
-        $mensagem = 'Rota excluída com sucesso!';
+        $_SESSION['sucesso_rota'] = true;        $mensagem = 'Rota excluída com sucesso!';
     }
 }
 

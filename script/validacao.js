@@ -116,15 +116,31 @@ if (trens && trens.children.length > 0) {
     setInterval(mostrar_velocidade, 3000);
 }
 
-// A pergunta aparece antes de o formulário pedir a exclusão ao PHP.
-// Os formulários de Usuários, Sensores, Rotas e Trens têm a mesma classe no HTML. Assim, todos recebem a mesma pergunta.
-const exclusoes = document.getElementsByClassName("confirmar_exclusao");
+// Cada lixeira tem um formulário com o ID do registro que pode ser excluído.
+const formularios_exclusao = document.getElementsByClassName("confirmar_exclusao");
+const janela_exclusao = document.getElementById("janela_exclusao");
 
-for (let i = 0; i < exclusoes.length; i = i + 1) {
-    // Ao enviar um formulário de exclusão, confirm pergunta se a pessoa quer continuar.
-    // Se ela clicar em Cancelar, confirm devolve false e o formulário não é enviado.
-    exclusoes[i].onsubmit = function () {
-        return confirm("Tem certeza de que deseja excluir este registro?");
+if (janela_exclusao) {
+    let formulario_escolhido;
+
+    for (let i = 0; i < formularios_exclusao.length; i = i + 1) {
+        formularios_exclusao[i].onsubmit = function (evento) {
+            // Segura o envio e guarda o formulário da lixeira que a pessoa clicou.
+            evento.preventDefault();
+            formulario_escolhido = formularios_exclusao[i];
+            janela_exclusao.showModal();
+        };
+    }
+
+    // Cancelar só fecha a janela. Nenhum pedido de exclusão é enviado.
+    document.getElementById("cancelar_exclusao").onclick = function () {
+        janela_exclusao.close();
+    };
+
+    // Só quando a pessoa confirma, o formulário envia o ID escolhido ao PHP.
+    document.getElementById("confirmar_exclusao").onclick = function () {
+        janela_exclusao.close();
+        formulario_escolhido.submit();
     };
 }
 

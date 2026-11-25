@@ -9,10 +9,15 @@ exigir_login();
 
 $administrador = $_SESSION['tipo'] === 'Administrador';
 $mensagem = $_SESSION['mensagem_usuario'] ?? '';
-unset($_SESSION['mensagem_usuario']);
+// A sessão guarda o recado até a página abrir. Depois, o recado é limpo.
+$sucesso = $_SESSION['sucesso_usuario'] ?? false;
+unset($_SESSION['mensagem_usuario'], $_SESSION['sucesso_usuario']);
 
 // Cadastro. Recebe o formulário e faz o INSERT no banco.
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// O link Editar manda o ID pelo endereço da página.
+$editando = isset($_GET['editar']);
+
+if (!$editando && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exigir_administrador();
 
     $nome = trim($_POST['nome'] ?? '');
@@ -47,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($salvou) {
             $_SESSION['mensagem_usuario'] = 'Usuário cadastrado com sucesso!';
+            $_SESSION['sucesso_usuario'] = true;
             header('Location: cadastrar_usuario.php');
             exit();
         }
@@ -71,6 +77,12 @@ mysqli_stmt_execute($stmt);
 $usuarios = mysqli_stmt_get_result($stmt);
 mysqli_stmt_close($stmt);
 // Se o cadastro tiver erro, o formulário continua aberto para a pessoa ver o aviso.
+// Busca o registro para preencher o formulário ou salva as alterações antes do HTML.
+if ($editando) {
+    $sucesso = false;
+    require 'editar_u.php';
+}
+
 $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
 ?>
 
@@ -121,10 +133,51 @@ $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
             </div>
 
             <?php if ($mensagem !== '') { ?>
-                <p><?php echo escapar($mensagem); ?></p>
+                <?php if ($sucesso) { ?>
+                    <p class="mensagem_sucesso"><?php echo escapar($mensagem); ?></p>
+                <?php } else { ?>
+                    <p class="mensagem_erro" role="alert"><?php echo escapar($mensagem); ?></p>
+                <?php } ?>
             <?php } ?>
 
-            <?php if ($administrador) { ?>
+            <?php if ($editando) { ?>
+                <section id="cadastro" class="cadastro_usuario ativo">
+                    <h2>Editar usuário</h2>
+                    <!-- Cada campo junta o rótulo e a caixa de entrada. O CSS usa esse grupo para colocar o rótulo em cima. -->
+                    <form method="POST" class="form_cadastro_user">
+                        <div class="campo_user">
+                            <label for="nome">Nome</label>
+                            <input type="text" id="nome" name="nome" maxlength="100"
+                                   value="<?php echo escapar($nome); ?>" required>
+                        </div>
+
+                        <div class="campo_user">
+                            <label for="email">E-mail</label>
+                            <input type="email" id="email" name="email" maxlength="100"
+                                   value="<?php echo escapar($email); ?>" required>
+                        </div>
+
+                        <div class="campo_user">
+                            <label for="senha">Nova senha</label>
+                            <input type="password" id="senha" name="senha"
+                                   placeholder="Deixe em branco para manter a senha">
+                        </div>
+
+                        <div class="campo_user">
+                            <label for="tipo">Tipo de usuário</label>
+                            <select id="tipo" name="tipo">
+                                <option <?php if ($tipo === 'Funcionário') { echo 'selected'; } ?>>Funcionário</option>
+                                <option <?php if ($tipo === 'Administrador') { echo 'selected'; } ?>>Administrador</option>
+                            </select>
+                        </div>
+
+                        <div class="acoes_form_edicao modo_edicao">
+                            <button class="btn_cadastrar_form" type="submit">Salvar</button>
+                            <a class="btn_cancelar_form" href="cadastrar_usuario.php">Cancelar</a>
+                        </div>
+                    </form>
+                </section>
+            <?php } elseif ($administrador) { ?>
                 <section id="cadastro" class="cadastro_usuario ativo"
                     <?php if (!$cadastro_aberto) { echo 'hidden'; } ?>>
                     <h2>Cadastrar novo usuário</h2>
@@ -165,7 +218,7 @@ $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                     <button type="submit">Buscar</button>
                 </form>
 
-                <?php if ($administrador) { ?>
+                <?php if ($administrador && !$editando) { ?>
                     <button class="btn_cadastrar_user btn_cadastrar_user_compacto"
                             id="botao_abrir_cadastro" type="button" aria-controls="cadastro">
                         Cadastrar usuário
@@ -194,6 +247,17 @@ $cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
         </div>
     </dialog>
 
-<script src="../../script/validacao.js?v=simples-7"></script>
+    <!-- A janela só abre ao clicar na lixeira. Os botões usam o mesmo estilo da confirmação de saída. -->
+    <dialog class="modal_confirmacao" id="janela_exclusao" aria-labelledby="titulo_exclusao">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="titulo_exclusao">Excluir registro?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja excluir este registro?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_exclusao">Cancelar</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_exclusao">Excluir</button>
+        </div>
+    </dialog>
+
+<script src="../../script/validacao.js?v=simples-8"></script>
 </body>
 </html>

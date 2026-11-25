@@ -336,7 +336,7 @@ $falhas = mysqli_query($conn, $sql);
                             Não resolvidas
                         </option>
                     </select>
-                    <button type="submit">Filtrar</button>
+                    <button type="submit" class="botao_resolver">Filtrar</button>
                 </form>
             </div>
 

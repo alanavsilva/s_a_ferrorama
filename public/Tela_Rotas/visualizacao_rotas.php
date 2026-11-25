@@ -52,7 +52,7 @@ $encontrou = false;
 
                 <?php if ($administrador) { ?>
                     <td class="acao_user">
-                        <a href="editar_r.php?id=<?php echo $rota['id_rotas']; ?>" class="acao_icone editar_user" aria-label="Editar rota"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
+                        <a href="cadastrar_rotas.php?editar=<?php echo $rota['id_rotas']; ?>#cadastro" class="acao_icone editar_user" aria-label="Editar rota"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
 
                         <form method="POST" action="excluir_r.php" class="confirmar_exclusao">
                             <input type="hidden" name="id" value="<?php echo $rota['id_rotas']; ?>">

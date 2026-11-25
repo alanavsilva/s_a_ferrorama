@@ -55,7 +55,7 @@ $encontrou = false;
 
                 <?php if ($administrador) { ?>
                     <td class="acao_user">
-                        <a href="editar_t.php?id=<?php echo $trem['id_trem']; ?>" class="acao_icone editar_user" aria-label="Editar trem"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
+                        <a href="cadastrar_trens.php?editar=<?php echo $trem['id_trem']; ?>#cadastro" class="acao_icone editar_user" aria-label="Editar trem"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
 
                         <form method="POST" action="excluir_t.php" class="confirmar_exclusao">
                             <input type="hidden" name="id" value="<?php echo $trem['id_trem']; ?>">
