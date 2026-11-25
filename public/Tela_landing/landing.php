@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Página pública. Apresenta o TremTech, mostra o percurso e tem o link para entrar no sistema. -->
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">

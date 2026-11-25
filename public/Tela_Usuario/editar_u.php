@@ -1,4 +1,6 @@
 <?php
+// EDITAR USUÁRIO. O link Editar manda o ID no endereço e o PHP busca o usuário no banco.
+// O formulário abre preenchido. Ao salvar, este mesmo arquivo recebe os campos e faz a atualização.
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
@@ -20,6 +22,7 @@ $email = $usuario['email'];
 $tipo = $usuario['tipo'];
 $mensagem = '';
 
+// Quando a página é só aberta, este bloco é pulado. Ele roda quando a pessoa clica em Salvar.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = trim($_POST['nome'] ?? '');
     $email = trim($_POST['email'] ?? '');
@@ -77,15 +80,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar usuário | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-direto-topo-1">
 </head>
 <body class="body_geral">
-    <div class="pagina">
-        <!-- Menu desta página. A classe ativo destaca a seção aberta. -->
-        <aside class="menu">
-            <img class="logo_trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
-            <p class="marca">SISTEMA TREMTECH</p>
+    <!-- A classe ativo destaca o link da tela aberta. -->
+    <nav class="menu_topo" aria-label="Navegação do TremTech">
+        <a class="menu_topo_marca" href="../Tela_Home/home.php">
+            <img src="https://img.icons8.com/ios/100/701015/train.png" alt="">
+            <span>SISTEMA TREMTECH</span>
+        </a>
 
+        <div class="menu_topo_links">
             <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
             <a class="ativo" href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
             <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
@@ -94,8 +99,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
             <a href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
             <a href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
-            <a class="logout" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
-        </aside>
+        </div>
+
+        <a class="menu_topo_sair" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+    </nav>
+    <div class="pagina">
         <main class="content_user">
         <h1>Editar usuário</h1>
 

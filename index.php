@@ -1,4 +1,6 @@
 <?php
+// LOGIN. Este arquivo mostra o formulário de entrada e também recebe o e-mail e a senha.
+// Se a senha estiver certa, ele guarda a conta na sessão e abre a Home.
 
 require_once 'infra/auth.php';
 

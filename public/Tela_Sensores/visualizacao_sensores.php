@@ -1,4 +1,6 @@
 <?php
+// TABELA. O arquivo de cadastro abre esta parte com o resultado da consulta.
+// O while percorre os registros e imprime uma linha para cada um. Editar e Excluir usam o ID dessa linha.
 // A página de cadastro já conferiu o login e fez a consulta.
 if (!isset($sensores)) {
     exit();

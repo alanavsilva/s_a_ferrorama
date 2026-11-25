@@ -1,4 +1,6 @@
 <?php
+// REGISTRAR LEITURA OU FALHA. O formulário recebe o sensor, a data e o valor ou a descrição.
+// Um sensor de Status gera uma falha. Os outros tipos gravam uma leitura com valor numérico.
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
 
@@ -8,31 +10,31 @@ exigir_administrador();
 $erro = '';
 $valor = '';
 $descricao = '';
-$idSensor = 0;
+$id_sensor = 0;
 $data = date('Y-m-d');
 
 // Recebe o formulário e valida o sensor e a data antes de salvar.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $idSensor = (int) ($_POST['id_sensor'] ?? 0);
+    $id_sensor = (int) ($_POST['id_sensor'] ?? 0);
     $valor = trim($_POST['valor'] ?? '');
     $descricao = trim($_POST['descricao_falha'] ?? '');
     $data = $_POST['data_leitura'] ?? '';
 
-    $sql = "SELECT tipo_dado FROM sensores WHERE id_sensor = $idSensor";
+    $sql = "SELECT tipo_dado FROM sensores WHERE id_sensor = $id_sensor";
     $resultado = mysqli_query($conn, $sql);
-    $sensorEscolhido = mysqli_fetch_assoc($resultado);
+    $sensor_escolhido = mysqli_fetch_assoc($resultado);
 
     // Converte e confere a data para rejeitar datas como 31 de fevereiro.
-    $dataConvertida = strtotime($data);
+    $data_convertida = strtotime($data);
     $stmt = null;
 
-    if (!$sensorEscolhido) {
+    if (!$sensor_escolhido) {
         $erro = 'Selecione um sensor cadastrado.';
-    } elseif ($dataConvertida === false || date('Y-m-d', $dataConvertida) !== $data) {
+    } elseif ($data_convertida === false || date('Y-m-d', $data_convertida) !== $data) {
         $erro = 'Informe uma data válida.';
     } else {
-        $dataSql = $data . ' 00:00:00';
-        $tipo = $sensorEscolhido['tipo_dado'];
+        $data_sql = $data . ' 00:00:00';
+        $tipo = $sensor_escolhido['tipo_dado'];
 
         // Status salva uma descrição na tabela de falhas.
         if ($tipo === 'Status') {
@@ -43,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         (id_sensor, descricao, data_registro, situacao)
                         VALUES (?, ?, ?, 'Não resolvida')";
                 $stmt = mysqli_prepare($conn, $sql);
-                mysqli_stmt_bind_param($stmt, 'iss', $idSensor, $descricao, $dataSql);
+                mysqli_stmt_bind_param($stmt, 'iss', $id_sensor, $descricao, $data_sql);
                 $mensagem = 'Falha registrada com sucesso!';
                 $destino = 'monitoramento.php#falhas';
             }
@@ -62,12 +64,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!is_numeric($valor) || $valor < 0 || $valor > $limite) {
                 $erro = 'Informe um valor entre 0 e ' . $limite . ' ' . $unidade . '.';
             } else {
-                $valorNumero = (float) $valor;
+                $valor_numero = (float) $valor;
                 $sql = "INSERT INTO leituras_sensores (id_sensor, valor, data_leitura) VALUES (?, ?, ?)";
                 $stmt = mysqli_prepare($conn, $sql);
-                mysqli_stmt_bind_param($stmt, 'ids', $idSensor, $valorNumero, $dataSql);
+                mysqli_stmt_bind_param($stmt, 'ids', $id_sensor, $valor_numero, $data_sql);
                 $mensagem = 'Leitura cadastrada com sucesso!';
-                $destino = 'monitoramento.php?' . $filtro . '=' . $idSensor;
+                $destino = 'monitoramento.php?' . $filtro . '=' . $id_sensor;
             }
         }
     }
@@ -97,16 +99,18 @@ $sensores = mysqli_query($conn, $sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de leituras | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-direto-topo-1">
 </head>
 
 <body class="body_geral">
-    <div class="pagina">
-        <!-- Menu desta página. A classe ativo destaca a seção aberta. -->
-        <aside class="menu">
-            <img class="logo_trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
-            <p class="marca">SISTEMA TREMTECH</p>
+    <!-- A classe ativo destaca o link da tela aberta. -->
+    <nav class="menu_topo" aria-label="Navegação do TremTech">
+        <a class="menu_topo_marca" href="../Tela_Home/home.php">
+            <img src="https://img.icons8.com/ios/100/701015/train.png" alt="">
+            <span>SISTEMA TREMTECH</span>
+        </a>
 
+        <div class="menu_topo_links">
             <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
             <a href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
             <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
@@ -115,8 +119,11 @@ $sensores = mysqli_query($conn, $sql);
             <a class="ativo" href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
             <a href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
             <a href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
-            <a class="logout" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
-        </aside>
+        </div>
+
+        <a class="menu_topo_sair" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+    </nav>
+    <div class="pagina">
 
 
         <main class="content_user">
@@ -150,7 +157,7 @@ $sensores = mysqli_query($conn, $sql);
                                     <!-- Cada opção guarda o tipo do sensor. O JavaScript lê esse tipo para mostrar o campo Valor ou Descrição. -->
                                     <option value="<?php echo $sensor['id_sensor']; ?>"
                                             data-tipo="<?php echo escapar($sensor['tipo_dado']); ?>"
-                                        <?php if ($idSensor == $sensor['id_sensor']) { echo 'selected'; } ?>>
+                                        <?php if ($id_sensor == $sensor['id_sensor']) { echo 'selected'; } ?>>
                                         <?php echo escapar($sensor['nome_sensor']); ?>
                                         (<?php echo escapar($sensor['tipo_dado']); ?>)
                                     </option>

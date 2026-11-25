@@ -1,11 +1,13 @@
 <?php
+// FALHAS. Funcionários consultam a lista. Administradores também registram, resolvem e reabrem falhas.
+// O formulário envia a ação ao PHP. Depois, a página busca os registros para montar a lista.
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
 // Funcionários podem consultar as falhas. Só administradores podem alterar os dados.
 exigir_login();
 
-$ehAdministrador = ($_SESSION['tipo'] === 'Administrador');
+$eh_administrador = ($_SESSION['tipo'] === 'Administrador');
 $mensagem = '';
 $filtro = 'todas';
 
@@ -21,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exigir_administrador();
 
     if (isset($_POST['resolver']) || isset($_POST['reabrir'])) {
-        $idFalha = (int) $_POST['id_falha'];
+        $id_falha = (int) $_POST['id_falha'];
 
         if (isset($_POST['resolver'])) {
             $situacao = 'Resolvida';
@@ -31,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $sql = "UPDATE falhas_operacionais SET situacao = ? WHERE id_falha = ?";
         $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, 'si', $situacao, $idFalha);
+        mysqli_stmt_bind_param($stmt, 'si', $situacao, $id_falha);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
 
@@ -40,13 +42,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $descricao = trim($_POST['descricao']);
-    $idSensor = (int) $_POST['id_sensor'];
+    $id_sensor = (int) $_POST['id_sensor'];
 
-    if ($descricao === '' || $idSensor < 1) {
+    if ($descricao === '' || $id_sensor < 1) {
         $mensagem = 'Preencha a descrição e selecione um sensor.';
     } else {
         $sql = "SELECT id_sensor FROM sensores
-                WHERE id_sensor = $idSensor AND tipo_dado = 'Status'";
+                WHERE id_sensor = $id_sensor AND tipo_dado = 'Status'";
         $resultado = mysqli_query($conn, $sql);
 
         if (mysqli_num_rows($resultado) === 0) {
@@ -56,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sql = "INSERT INTO falhas_operacionais (id_sensor, descricao, situacao)
                     VALUES (?, ?, 'Não resolvida')";
             $stmt = mysqli_prepare($conn, $sql);
-            mysqli_stmt_bind_param($stmt, 'is', $idSensor, $descricao);
+            mysqli_stmt_bind_param($stmt, 'is', $id_sensor, $descricao);
             mysqli_stmt_execute($stmt);
             mysqli_stmt_close($stmt);
 
@@ -73,11 +75,11 @@ $sensores = mysqli_query($conn, $sql);
 // mysqli_num_rows conta quantos registros a consulta encontrou.
 $sql = "SELECT id_falha FROM falhas_operacionais WHERE situacao = 'Resolvida'";
 $resultado = mysqli_query($conn, $sql);
-$totalResolvidas = mysqli_num_rows($resultado);
+$total_resolvidas = mysqli_num_rows($resultado);
 
 $sql = "SELECT id_falha FROM falhas_operacionais WHERE situacao = 'Não resolvida'";
 $resultado = mysqli_query($conn, $sql);
-$totalNaoResolvidas = mysqli_num_rows($resultado);
+$total_nao_resolvidas = mysqli_num_rows($resultado);
 
 $sql = "SELECT * FROM falhas_operacionais";
 
@@ -91,7 +93,7 @@ if ($filtro === 'resolvidas') {
 $sql .= " ORDER BY data_registro DESC";
 $falhas = mysqli_query($conn, $sql);
 // Se o cadastro tiver erro, o formulário continua aberto para a pessoa ver o aviso.
-$cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
+$cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
 ?>
 
 <!DOCTYPE html>
@@ -100,16 +102,18 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Falhas operacionais | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-direto-topo-1">
 </head>
 
 <body class="body_geral">
-    <div class="pagina">
-        <!-- Menu desta página. A classe ativo destaca a seção aberta. -->
-        <aside class="menu">
-            <img class="logo_trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
-            <p class="marca">SISTEMA TREMTECH</p>
+    <!-- A classe ativo destaca o link da tela aberta. -->
+    <nav class="menu_topo" aria-label="Navegação do TremTech">
+        <a class="menu_topo_marca" href="../Tela_Home/home.php">
+            <img src="https://img.icons8.com/ios/100/701015/train.png" alt="">
+            <span>SISTEMA TREMTECH</span>
+        </a>
 
+        <div class="menu_topo_links">
             <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
             <a href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
             <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
@@ -118,14 +122,17 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
             <a href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
             <a class="ativo" href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
             <a href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
-            <a class="logout" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
-        </aside>
+        </div>
+
+        <a class="menu_topo_sair" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+    </nav>
+    <div class="pagina">
 
 
         <main class="content_user">
             <p class="painel_user">PAINEL ADMINISTRATIVO</p>
             <h1>Controle de falhas operacionais</h1>
-            <?php if ($ehAdministrador) { ?>
+            <?php if ($eh_administrador) { ?>
                 <h2>Cadastro e acompanhamento</h2>
             <?php } else { ?>
                 <h2>Acompanhamento de falhas</h2>
@@ -139,9 +146,9 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                 </div>
             </div>
 
-            <?php if ($ehAdministrador) { ?>
+            <?php if ($eh_administrador) { ?>
                 <section id="cadastro" class="cadastro_usuario ativo"
-                    <?php if (!$cadastroAberto) { echo 'hidden'; } ?>>
+                    <?php if (!$cadastro_aberto) { echo 'hidden'; } ?>>
 
                     <?php if ($mensagem !== '') { ?>
                         <p><?php echo htmlspecialchars($mensagem); ?></p>
@@ -176,7 +183,7 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                 <div class="falhas_cabecalho">
                     <div class="falhas_cabecalho_acoes">
                         <h2 class="home_titulo_tabela">Falhas operacionais</h2>
-                        <?php if ($ehAdministrador) { ?>
+                        <?php if ($eh_administrador) { ?>
                             <button type="button" id="botao_abrir_cadastro"
                                     class="btn_cadastrar_user btn_cadastrar_user_compacto" aria-controls="cadastro">
                                 Cadastrar falha
@@ -202,11 +209,11 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
 
                 <div class="falhas_resumo">
                     <div class="falha_contador">
-                        <strong><?php echo $totalResolvidas; ?></strong>
+                        <strong><?php echo $total_resolvidas; ?></strong>
                         <span>Resolvidas</span>
                     </div>
                     <div class="falha_contador">
-                        <strong><?php echo $totalNaoResolvidas; ?></strong>
+                        <strong><?php echo $total_nao_resolvidas; ?></strong>
                         <span>Não resolvidas</span>
                     </div>
                 </div>
@@ -219,22 +226,22 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                     <?php
                     while ($falha = mysqli_fetch_assoc($falhas)) {
                         // A falha guarda o ID do sensor.
-                        $idSensor = (int) $falha['id_sensor'];
-                        $sqlSensor = "SELECT nome_sensor, id_rotas FROM sensores
-                                      WHERE id_sensor = $idSensor";
-                        $resultadoSensor = mysqli_query($conn, $sqlSensor);
-                        $sensorDaFalha = mysqli_fetch_assoc($resultadoSensor);
+                        $id_sensor = (int) $falha['id_sensor'];
+                        $sql_sensor = "SELECT nome_sensor, id_rotas FROM sensores
+                                      WHERE id_sensor = $id_sensor";
+                        $resultado_sensor = mysqli_query($conn, $sql_sensor);
+                        $sensor_da_falha = mysqli_fetch_assoc($resultado_sensor);
 
                         // O sensor guarda o ID da rota, e a rota guarda o ID do trem.
-                        $idRota = (int) $sensorDaFalha['id_rotas'];
-                        $sqlRota = "SELECT id_trem FROM rotas WHERE id_rotas = $idRota";
-                        $resultadoRota = mysqli_query($conn, $sqlRota);
-                        $rotaDaFalha = mysqli_fetch_assoc($resultadoRota);
+                        $id_rota = (int) $sensor_da_falha['id_rotas'];
+                        $sql_rota = "SELECT id_trem FROM rotas WHERE id_rotas = $id_rota";
+                        $resultado_rota = mysqli_query($conn, $sql_rota);
+                        $rota_da_falha = mysqli_fetch_assoc($resultado_rota);
 
-                        $idTrem = (int) $rotaDaFalha['id_trem'];
-                        $sqlTrem = "SELECT nome FROM trens WHERE id_trem = $idTrem";
-                        $resultadoTrem = mysqli_query($conn, $sqlTrem);
-                        $tremDaFalha = mysqli_fetch_assoc($resultadoTrem);
+                        $id_trem = (int) $rota_da_falha['id_trem'];
+                        $sql_trem = "SELECT nome FROM trens WHERE id_trem = $id_trem";
+                        $resultado_trem = mysqli_query($conn, $sql_trem);
+                        $trem_da_falha = mysqli_fetch_assoc($resultado_trem);
 
                         // Formata a data do banco como dia/mês/ano.
                         $data = date('d/m/Y', strtotime($falha['data_registro']));
@@ -242,10 +249,10 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                         <article class="falha_item">
                             <div class="falha_dados">
                                 <h3><?php echo htmlspecialchars($falha['descricao']); ?></h3>
-                                <p>Sensor: <?php echo htmlspecialchars($sensorDaFalha['nome_sensor']); ?> - Trem: <?php echo htmlspecialchars($tremDaFalha['nome']); ?> - <?php echo $data; ?></p>
+                                <p>Sensor: <?php echo htmlspecialchars($sensor_da_falha['nome_sensor']); ?> - Trem: <?php echo htmlspecialchars($trem_da_falha['nome']); ?> - <?php echo $data; ?></p>
                             </div>
 
-                            <?php if ($ehAdministrador) { ?>
+                            <?php if ($eh_administrador) { ?>
                                 <form method="POST" class="falha_acao">
                                     <!-- O campo fica escondido na tela, mas envia o número da falha que será resolvida ou reaberta. -->
                                     <input type="hidden" name="id_falha" value="<?php echo $falha['id_falha']; ?>">

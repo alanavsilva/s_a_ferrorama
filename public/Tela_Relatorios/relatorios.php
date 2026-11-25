@@ -1,20 +1,22 @@
 <?php
+// RELATÓRIOS. O usuário escolhe um sensor e um dia no formulário.
+// O PHP consulta falhas ou leituras conforme o tipo do sensor, mostra o resultado e guarda um resumo na sessão.
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
 // Os dois perfis podem consultar relatórios depois de entrar no sistema.
 exigir_login();
 
-$sensorSelecionado = (int) ($_GET['sensor_relatorios'] ?? 0);
+$sensor_selecionado = (int) ($_GET['sensor_relatorios'] ?? 0);
 $data = $_GET['periodo_relatorios'] ?? date('Y-m-d');
 $mensagem = '';
-$relatorioGerado = false;
+$relatorio_gerado = false;
 
 $registros = [];
-$totalResolvidas = 0;
-$totalFalhas = 0;
+$total_resolvidas = 0;
+$total_falhas = 0;
 $unidade = '';
-$chaveAtual = '';
+$chave_atual = '';
 
 $historico = $_SESSION['historico_relatorios'] ?? [];
 
@@ -23,35 +25,35 @@ $sensores = mysqli_query($conn, $sql);
 
 // Gera o relatório somente quando o formulário envia um sensor e uma data.
 if (isset($_GET['gerar'])) {
-    $sql = "SELECT * FROM sensores WHERE id_sensor = $sensorSelecionado";
+    $sql = "SELECT * FROM sensores WHERE id_sensor = $sensor_selecionado";
     $resultado = mysqli_query($conn, $sql);
-    $sensorEscolhido = mysqli_fetch_assoc($resultado);
+    $sensor_escolhido = mysqli_fetch_assoc($resultado);
 
     // Converte a data e compara com o texto original para rejeitar datas inválidas.
-    $dataConvertida = strtotime($data);
+    $data_convertida = strtotime($data);
 
-    if (!$sensorEscolhido) {
+    if (!$sensor_escolhido) {
         $mensagem = 'Selecione um sensor cadastrado.';
-    } elseif ($dataConvertida === false || date('Y-m-d', $dataConvertida) !== $data) {
+    } elseif ($data_convertida === false || date('Y-m-d', $data_convertida) !== $data) {
         $mensagem = 'Selecione uma data válida.';
         $data = date('Y-m-d');
     } else {
         // Busca a rota pelo ID que está no sensor. Depois busca o trem pelo ID que está na rota.
-        $idRota = (int) $sensorEscolhido['id_rotas'];
-        $sql = "SELECT * FROM rotas WHERE id_rotas = $idRota";
+        $id_rota = (int) $sensor_escolhido['id_rotas'];
+        $sql = "SELECT * FROM rotas WHERE id_rotas = $id_rota";
         $resultado = mysqli_query($conn, $sql);
         $rota = mysqli_fetch_assoc($resultado);
 
-        $idTrem = (int) $rota['id_trem'];
-        $sql = "SELECT * FROM trens WHERE id_trem = $idTrem";
+        $id_trem = (int) $rota['id_trem'];
+        $sql = "SELECT * FROM trens WHERE id_trem = $id_trem";
         $resultado = mysqli_query($conn, $sql);
         $trem = mysqli_fetch_assoc($resultado);
 
         $responsavel = 'Não definido';
 
         if (isset($trem['id_usuario'])) {
-            $idUsuario = (int) $trem['id_usuario'];
-            $sql = "SELECT nome FROM usuarios WHERE id_usuario = $idUsuario";
+            $id_usuario = (int) $trem['id_usuario'];
+            $sql = "SELECT nome FROM usuarios WHERE id_usuario = $id_usuario";
             $resultado = mysqli_query($conn, $sql);
             $usuario = mysqli_fetch_assoc($resultado);
 
@@ -60,17 +62,17 @@ if (isset($_GET['gerar'])) {
             }
         }
 
-        $tipo = $sensorEscolhido['tipo_dado'];
+        $tipo = $sensor_escolhido['tipo_dado'];
 
         // DATE() usa só o dia do registro, sem levar em conta a hora.
         if ($tipo === 'Status') {
             $sql = "SELECT descricao, data_registro, situacao
                     FROM falhas_operacionais
-                    WHERE id_sensor = $sensorSelecionado AND DATE(data_registro) = ?
+                    WHERE id_sensor = $sensor_selecionado AND DATE(data_registro) = ?
                     ORDER BY data_registro DESC";
         } else {
             $sql = "SELECT valor, data_leitura FROM leituras_sensores
-                    WHERE id_sensor = $sensorSelecionado AND DATE(data_leitura) = ?
+                    WHERE id_sensor = $sensor_selecionado AND DATE(data_leitura) = ?
                     ORDER BY data_leitura DESC, id_leitura DESC";
 
             if ($tipo === 'Velocidade') {
@@ -89,38 +91,39 @@ if (isset($_GET['gerar'])) {
         while ($linha = mysqli_fetch_assoc($resultado)) {
             $registros[] = $linha;
             if ($tipo === 'Status' && $linha['situacao'] === 'Resolvida') {
-                $totalResolvidas++;
+                $total_resolvidas++;
             }
         }
         mysqli_stmt_close($stmt);
 
         if ($tipo === 'Status') {
-            $totalFalhas = count($registros);
+            $total_falhas = count($registros);
         }
-        $relatorioGerado = true;
+        $relatorio_gerado = true;
 
         // Junta o sensor e o dia para reconhecer se a última consulta do histórico é a mesma.
-        $chaveAtual = $sensorSelecionado . '|' . $data;
-        $ultimaChave = $historico[0]['chave'] ?? '';
+        $chave_atual = $sensor_selecionado . '|' . $data;
+        $ultima_chave = $historico[0]['chave'] ?? '';
 
-        if ($chaveAtual !== $ultimaChave) {
+        if ($chave_atual !== $ultima_chave) {
             // A primeira leitura é a mais recente. Um relatório de falhas não tem esse valor.
-            $valorLeitura = $registros[0]['valor'] ?? null;
+            $valor_leitura = $registros[0]['valor'] ?? null;
 
             $item = [
-                'chave' => $chaveAtual,
-                'sensor' => $sensorEscolhido['nome_sensor'],
+                'chave' => $chave_atual,
+                'sensor' => $sensor_escolhido['nome_sensor'],
                 'tipo' => $tipo,
                 'trem' => $trem['nome'],
                 'rota' => $rota['nome'],
                 'responsavel' => $responsavel,
                 'data' => $data,
                 'gerado_em' => date('Y-m-d H:i:s'),
-                'valor_leitura' => $valorLeitura,
-                'total_falhas' => $totalFalhas
+                'valor_leitura' => $valor_leitura,
+                'total_falhas' => $total_falhas
             ];
 
-            // Coloca o relatório novo no começo e guarda só os 20 mais recentes.
+            // array_unshift coloca o relatório novo no começo da lista.
+            // array_slice guarda os primeiros 20, que são os mais recentes.
             array_unshift($historico, $item);
             $historico = array_slice($historico, 0, 20);
             $_SESSION['historico_relatorios'] = $historico;
@@ -129,11 +132,11 @@ if (isset($_GET['gerar'])) {
 }
 
 // Prepara a lista do histórico sem mostrar de novo o relatório que já está aberto acima.
-$relatoriosAnteriores = [];
+$relatorios_anteriores = [];
 
 foreach ($historico as $item) {
-    if ($chaveAtual === '' || ($item['chave'] ?? '') !== $chaveAtual) {
-        $relatoriosAnteriores[] = $item;
+    if ($chave_atual === '' || ($item['chave'] ?? '') !== $chave_atual) {
+        $relatorios_anteriores[] = $item;
     }
 }
 ?>
@@ -144,16 +147,18 @@ foreach ($historico as $item) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatórios - TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-direto-topo-1">
 </head>
 
 <body class="pagina_relatorios">
-    <div class="pagina">
-        <!-- Menu desta página. A classe ativo destaca a seção aberta. -->
-        <aside class="menu">
-            <img class="logo_trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
-            <p class="marca">SISTEMA TREMTECH</p>
+    <!-- A classe ativo destaca o link da tela aberta. -->
+    <nav class="menu_topo" aria-label="Navegação do TremTech">
+        <a class="menu_topo_marca" href="../Tela_Home/home.php">
+            <img src="https://img.icons8.com/ios/100/701015/train.png" alt="">
+            <span>SISTEMA TREMTECH</span>
+        </a>
 
+        <div class="menu_topo_links">
             <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
             <a href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
             <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
@@ -162,8 +167,11 @@ foreach ($historico as $item) {
             <a href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
             <a href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
             <a class="ativo" href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
-            <a class="logout" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
-        </aside>
+        </div>
+
+        <a class="menu_topo_sair" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+    </nav>
+    <div class="pagina">
 
 
         <main class="content_user conteudo_relatorios">
@@ -194,20 +202,20 @@ foreach ($historico as $item) {
                             <?php
                             while ($sensor = mysqli_fetch_assoc($sensores)) {
                                 // Busca o trem para mostrar o nome dele ao lado do sensor.
-                                $idRota = (int) $sensor['id_rotas'];
-                                $sql = "SELECT id_trem FROM rotas WHERE id_rotas = $idRota";
+                                $id_rota = (int) $sensor['id_rotas'];
+                                $sql = "SELECT id_trem FROM rotas WHERE id_rotas = $id_rota";
                                 $resultado = mysqli_query($conn, $sql);
-                                $rotaDoSensor = mysqli_fetch_assoc($resultado);
+                                $rota_do_sensor = mysqli_fetch_assoc($resultado);
 
-                                $idTrem = (int) $rotaDoSensor['id_trem'];
-                                $sql = "SELECT nome FROM trens WHERE id_trem = $idTrem";
+                                $id_trem = (int) $rota_do_sensor['id_trem'];
+                                $sql = "SELECT nome FROM trens WHERE id_trem = $id_trem";
                                 $resultado = mysqli_query($conn, $sql);
-                                $tremDoSensor = mysqli_fetch_assoc($resultado);
+                                $trem_do_sensor = mysqli_fetch_assoc($resultado);
                             ?>
                                 <option value="<?php echo $sensor['id_sensor']; ?>"
-                                    <?php if ($sensorSelecionado == $sensor['id_sensor']) { echo 'selected'; } ?>>
+                                    <?php if ($sensor_selecionado == $sensor['id_sensor']) { echo 'selected'; } ?>>
                                     <?php echo escapar($sensor['nome_sensor']); ?>
-                                    - <?php echo escapar($tremDoSensor['nome']); ?>
+                                    - <?php echo escapar($trem_do_sensor['nome']); ?>
                                 </option>
                             <?php } ?>
                         </select>
@@ -234,20 +242,20 @@ foreach ($historico as $item) {
                 </form>
 
                 <section class="resultado_relatorios">
-                    <?php if ($relatorioGerado) { ?>
+                    <?php if ($relatorio_gerado) { ?>
                         <div class="resumo_relatorio">
                             <h2>Relatório gerado</h2>
                             <p>Responsável: <strong><?php echo escapar($responsavel); ?></strong></p>
-                            <p>Sensor: <strong><?php echo escapar($sensorEscolhido['nome_sensor']); ?></strong>
+                            <p>Sensor: <strong><?php echo escapar($sensor_escolhido['nome_sensor']); ?></strong>
                                 (<?php echo escapar($tipo); ?>)</p>
                             <p>Trem: <strong><?php echo escapar($trem['nome']); ?></strong></p>
                             <p>Rota: <strong><?php echo escapar($rota['nome']); ?></strong></p>
-                            <p>Data consultada: <strong><?php echo date('d/m/Y', $dataConvertida); ?></strong></p>
+                            <p>Data consultada: <strong><?php echo date('d/m/Y', $data_convertida); ?></strong></p>
 
                             <?php if ($tipo === 'Status') { ?>
-                                <p>Falhas registradas: <strong><?php echo $totalFalhas; ?></strong></p>
-                                <p>Resolvidas: <strong><?php echo $totalResolvidas; ?></strong>
-                                    · Em aberto: <strong><?php echo $totalFalhas - $totalResolvidas; ?></strong></p>
+                                <p>Falhas registradas: <strong><?php echo $total_falhas; ?></strong></p>
+                                <p>Resolvidas: <strong><?php echo $total_resolvidas; ?></strong>
+                                    · Em aberto: <strong><?php echo $total_falhas - $total_resolvidas; ?></strong></p>
                             <?php } else { ?>
                                 <h3>Leituras de <?php echo escapar(strtolower($tipo)); ?></h3>
 
@@ -262,7 +270,7 @@ foreach ($historico as $item) {
                             <?php } ?>
                         </div>
 
-                        <?php if ($tipo === 'Status' && $totalFalhas > 0) { ?>
+                        <?php if ($tipo === 'Status' && $total_falhas > 0) { ?>
                             <section class="lista_falhas_relatorio">
                                 <h3>Falhas do dia</h3>
 
@@ -288,11 +296,11 @@ foreach ($historico as $item) {
                     <?php } ?>
                 </section>
 
-                <?php if (count($relatoriosAnteriores) > 0) { ?>
+                <?php if (count($relatorios_anteriores) > 0) { ?>
                     <section class="historico_relatorios">
                         <h2>Histórico de relatórios</h2>
 
-                        <?php foreach ($relatoriosAnteriores as $item) { ?>
+                        <?php foreach ($relatorios_anteriores as $item) { ?>
                             <article class="item_historico_relatorio">
                                 <div>
                                     <strong>Responsável: <?php echo escapar($item['responsavel']); ?></strong>

@@ -1,4 +1,6 @@
 <?php
+// CLIMA. A Home chama consultarClima para pedir os dados de Joinville ao Open-Meteo.
+// A função devolve os valores para os cartões ou uma mensagem de erro.
 
 // Previsão do tempo. Busca o clima de Joinville no Open-Meteo e entrega os dados para a Home.
 function consultarClima()

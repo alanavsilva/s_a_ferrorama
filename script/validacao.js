@@ -1,3 +1,5 @@
+// AÇÕES DAS TELAS. Este arquivo é carregado no fim das páginas.
+// Cada parte procura o elemento que precisa usar. Por exemplo, o bloco do CEP só roda na Home, onde existe o formulário de CEP.
 // O HTML dá um nome (ID) ao botão e outro ao formulário. getElementById encontra cada um pelo seu nome.
 const botao_cadastro = document.getElementById("botao_abrir_cadastro");
 const cadastro = document.getElementById("cadastro");
@@ -172,28 +174,30 @@ if (sensor && campo_valor) {
 function mostrar_campo_leitura() {
     // Cada opção guarda no HTML o tipo do sensor. dataset.tipo lê esse texto quando a pessoa escolhe um sensor.
     const tipo = sensor.options[sensor.selectedIndex].dataset.tipo;
-    // falha vale true quando o sensor é de Status. Para Velocidade e Temperatura, vale false.
-    const falha = tipo === "Status";
     const valor = document.getElementById("valor");
     const unidade = document.getElementById("unidade");
     const descricao = document.getElementById("descricao_falha");
     const botao = document.getElementById("botao_salvar_informacao");
 
-    // Só o campo que aparece na tela precisa ser preenchido.
-    campo_valor.hidden = falha;
-    // Se for uma falha, disabled desliga o campo Valor. O formulário envia só a descrição.
-    valor.disabled = falha;
-    // required diz para o navegador qual campo deve estar preenchido antes de enviar o formulário.
-    valor.required = !falha;
-    // O ! inverte o valor de falha. Por isso, a descrição aparece para Status e fica escondida nos outros casos.
-    document.getElementById("campo_descricao_status").hidden = !falha;
-    descricao.required = falha;
+    const campo_descricao = document.getElementById("campo_descricao_status");
 
-    if (falha) {
+    if (tipo === "Status") {
+        // Para uma falha, esconde o número e pede uma descrição.
+        campo_valor.hidden = true;
+        valor.disabled = true;
+        valor.required = false;
+        campo_descricao.hidden = false;
+        descricao.required = true;
         botao.innerText = "CADASTRAR FALHA";
         return;
     }
 
+    // Para uma leitura, mostra o número e esconde a descrição.
+    campo_valor.hidden = false;
+    valor.disabled = false;
+    valor.required = true;
+    campo_descricao.hidden = true;
+    descricao.required = false;
     botao.innerText = "SALVAR LEITURA";
 
     // O texto ao lado de Valor mostra a unidade: km/h para velocidade ou °C para temperatura.

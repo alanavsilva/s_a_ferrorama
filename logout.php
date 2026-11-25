@@ -1,4 +1,6 @@
 <?php
+// SAIR. Este arquivo roda só depois que a pessoa confirma que quer sair.
+// Ele apaga o login que estava aberto e volta para a tela de entrada.
 
 // Quando você clica em Sair, este arquivo abre a mesma sessão usada no login.
 session_start();

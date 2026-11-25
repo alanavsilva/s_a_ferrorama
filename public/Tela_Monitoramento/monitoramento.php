@@ -1,16 +1,18 @@
 <?php
+// MONITORAMENTO. Os filtros indicam os sensores e a rota que a pessoa está consultando.
+// O PHP mostra a última leitura dos sensores escolhidos. Mais abaixo ficam o mapa e a lista de falhas.
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
 
 exigir_login();
 
-$ehAdministrador = ($_SESSION['tipo'] === 'Administrador');
+$eh_administrador = ($_SESSION['tipo'] === 'Administrador');
 $mensagem = $_SESSION['mensagem_leitura'] ?? '';
 unset($_SESSION['mensagem_leitura']);
 
-$idVelocidade = (int) ($_GET['velocidade'] ?? 0);
-$idTemperatura = (int) ($_GET['temperatura'] ?? 0);
-$idRota = (int) ($_GET['rota'] ?? 0);
+$id_velocidade = (int) ($_GET['velocidade'] ?? 0);
+$id_temperatura = (int) ($_GET['temperatura'] ?? 0);
+$id_rota = (int) ($_GET['rota'] ?? 0);
 $filtro = 'Todas';
 
 if (isset($_GET['status'])) {
@@ -24,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exigir_administrador();
 
     if (isset($_POST['resolver']) || isset($_POST['reabrir'])) {
-        $idFalha = (int) $_POST['id_falha'];
+        $id_falha = (int) $_POST['id_falha'];
 
         if (isset($_POST['resolver'])) {
             $situacao = 'Resolvida';
@@ -34,20 +36,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $sql = "UPDATE falhas_operacionais SET situacao = ? WHERE id_falha = ?";
         $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, 'si', $situacao, $idFalha);
+        mysqli_stmt_bind_param($stmt, 'si', $situacao, $id_falha);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
     }
 
     // urlencode prepara o texto da situação para ir na URL.
-    header('Location: monitoramento.php?velocidade=' . $idVelocidade
-        . '&temperatura=' . $idTemperatura . '&rota=' . $idRota
+    header('Location: monitoramento.php?velocidade=' . $id_velocidade
+        . '&temperatura=' . $id_temperatura . '&rota=' . $id_rota
         . '&status=' . urlencode($filtro) . '#falhas');
     exit();
 }
 
 // Procura o sensor selecionado. Se a pessoa ainda não escolheu um, usa o primeiro sensor daquele tipo.
-function buscarSensor($conn, $tipo, $id)
+function buscar_sensor($conn, $tipo, $id)
 {
     $sql = "SELECT * FROM sensores WHERE tipo_dado = '$tipo' AND id_sensor = $id";
     $resultado = mysqli_query($conn, $sql);
@@ -64,9 +66,9 @@ function buscarSensor($conn, $tipo, $id)
 }
 
 // A rota guarda o ID do trem. Usamos esse ID para buscar o nome dele.
-function buscarTremDaRota($conn, $idRota)
+function buscar_trem_da_rota($conn, $id_rota)
 {
-    $sql = "SELECT id_trem FROM rotas WHERE id_rotas = $idRota";
+    $sql = "SELECT id_trem FROM rotas WHERE id_rotas = $id_rota";
     $resultado = mysqli_query($conn, $sql);
     $rota = mysqli_fetch_assoc($resultado);
 
@@ -74,8 +76,8 @@ function buscarTremDaRota($conn, $idRota)
         return 'Trem não definido';
     }
 
-    $idTrem = (int) $rota['id_trem'];
-    $sql = "SELECT nome FROM trens WHERE id_trem = $idTrem";
+    $id_trem = (int) $rota['id_trem'];
+    $sql = "SELECT nome FROM trens WHERE id_trem = $id_trem";
     $resultado = mysqli_query($conn, $sql);
     $trem = mysqli_fetch_assoc($resultado);
 
@@ -87,27 +89,27 @@ function buscarTremDaRota($conn, $idRota)
 }
 
 // Preenche o cartão com o valor e a data da última leitura do sensor.
-function mostrarLeitura($conn, $sensor, $unidade, $casasDecimais)
+function mostrar_leitura($conn, $sensor, $unidade, $casas_decimais)
 {
     $nome = '-';
     $valor = '- ' . $unidade;
     $data = '-';
 
     if ($sensor) {
-        $idSensor = (int) $sensor['id_sensor'];
-        $idRota = (int) $sensor['id_rotas'];
-        $nome = $sensor['nome_sensor'] . ' - ' . buscarTremDaRota($conn, $idRota);
+        $id_sensor = (int) $sensor['id_sensor'];
+        $id_rota = (int) $sensor['id_rotas'];
+        $nome = $sensor['nome_sensor'] . ' - ' . buscar_trem_da_rota($conn, $id_rota);
 
         // A consulta põe as leituras mais novas no começo e pega apenas a primeira.
         // Se duas leituras têm a mesma data, mostra a que foi cadastrada por último.
         $sql = "SELECT valor, data_leitura FROM leituras_sensores
-                WHERE id_sensor = $idSensor
+                WHERE id_sensor = $id_sensor
                 ORDER BY data_leitura DESC, id_leitura DESC LIMIT 1";
         $resultado = mysqli_query($conn, $sql);
         $leitura = mysqli_fetch_assoc($resultado);
 
         if ($leitura) {
-            $valor = number_format($leitura['valor'], $casasDecimais, '.', '') . ' ' . $unidade;
+            $valor = number_format($leitura['valor'], $casas_decimais, '.', '') . ' ' . $unidade;
             $data = 'Leitura cadastrada em ' . date('d/m/Y', strtotime($leitura['data_leitura']));
         }
     }
@@ -118,48 +120,48 @@ function mostrarLeitura($conn, $sensor, $unidade, $casasDecimais)
     <?php
 }
 
-$sensorVelocidade = buscarSensor($conn, 'Velocidade', $idVelocidade);
-$sensorTemperatura = buscarSensor($conn, 'Temperatura', $idTemperatura);
+$sensor_velocidade = buscar_sensor($conn, 'Velocidade', $id_velocidade);
+$sensor_temperatura = buscar_sensor($conn, 'Temperatura', $id_temperatura);
 
-if ($sensorVelocidade) {
-    $idVelocidade = (int) $sensorVelocidade['id_sensor'];
+if ($sensor_velocidade) {
+    $id_velocidade = (int) $sensor_velocidade['id_sensor'];
 }
 
-if ($sensorTemperatura) {
-    $idTemperatura = (int) $sensorTemperatura['id_sensor'];
+if ($sensor_temperatura) {
+    $id_temperatura = (int) $sensor_temperatura['id_sensor'];
 }
 
 $sql = "SELECT id_sensor, nome_sensor FROM sensores
         WHERE tipo_dado = 'Velocidade' ORDER BY nome_sensor";
-$sensoresVelocidade = mysqli_query($conn, $sql);
+$sensores_velocidade = mysqli_query($conn, $sql);
 
 $sql = "SELECT id_sensor, nome_sensor FROM sensores
         WHERE tipo_dado = 'Temperatura' ORDER BY nome_sensor";
-$sensoresTemperatura = mysqli_query($conn, $sql);
+$sensores_temperatura = mysqli_query($conn, $sql);
 
-$sql = "SELECT id_rotas, nome FROM rotas WHERE id_rotas = $idRota";
+$sql = "SELECT id_rotas, nome FROM rotas WHERE id_rotas = $id_rota";
 $resultado = mysqli_query($conn, $sql);
-$rotaEscolhida = mysqli_fetch_assoc($resultado);
+$rota_escolhida = mysqli_fetch_assoc($resultado);
 
-if (!$rotaEscolhida) {
+if (!$rota_escolhida) {
     $resultado = mysqli_query($conn, "SELECT id_rotas, nome FROM rotas ORDER BY nome LIMIT 1");
-    $rotaEscolhida = mysqli_fetch_assoc($resultado);
+    $rota_escolhida = mysqli_fetch_assoc($resultado);
 }
 
-$nomeRota = 'Nenhuma rota cadastrada';
+$nome_rota = 'Nenhuma rota cadastrada';
 
-if ($rotaEscolhida) {
-    $idRota = (int) $rotaEscolhida['id_rotas'];
-    $nomeRota = $rotaEscolhida['nome'] . ' - ' . buscarTremDaRota($conn, $idRota);
+if ($rota_escolhida) {
+    $id_rota = (int) $rota_escolhida['id_rotas'];
+    $nome_rota = $rota_escolhida['nome'] . ' - ' . buscar_trem_da_rota($conn, $id_rota);
 }
 
 $rotas = mysqli_query($conn, "SELECT id_rotas, nome FROM rotas ORDER BY nome");
 
 $sql = "SELECT id_falha FROM falhas_operacionais WHERE situacao = 'Resolvida'";
-$totalResolvidas = mysqli_num_rows(mysqli_query($conn, $sql));
+$total_resolvidas = mysqli_num_rows(mysqli_query($conn, $sql));
 
 $sql = "SELECT id_falha FROM falhas_operacionais WHERE situacao = 'Não resolvida'";
-$totalNaoResolvidas = mysqli_num_rows(mysqli_query($conn, $sql));
+$total_nao_resolvidas = mysqli_num_rows(mysqli_query($conn, $sql));
 
 $sql = "SELECT * FROM falhas_operacionais";
 
@@ -179,16 +181,18 @@ $falhas = mysqli_query($conn, $sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoramento | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-direto-topo-1">
 </head>
 
 <body class="body_geral">
-    <div class="pagina">
-        <!-- Menu desta página. A classe ativo destaca a seção aberta. -->
-        <aside class="menu">
-            <img class="logo_trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
-            <p class="marca">SISTEMA TREMTECH</p>
+    <!-- A classe ativo destaca o link da tela aberta. -->
+    <nav class="menu_topo" aria-label="Navegação do TremTech">
+        <a class="menu_topo_marca" href="../Tela_Home/home.php">
+            <img src="https://img.icons8.com/ios/100/701015/train.png" alt="">
+            <span>SISTEMA TREMTECH</span>
+        </a>
 
+        <div class="menu_topo_links">
             <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
             <a href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
             <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
@@ -197,8 +201,11 @@ $falhas = mysqli_query($conn, $sql);
             <a class="ativo" href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
             <a href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
             <a href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
-            <a class="logout" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
-        </aside>
+        </div>
+
+        <a class="menu_topo_sair" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+    </nav>
+    <div class="pagina">
 
 
         <main class="content_user">
@@ -225,13 +232,13 @@ $falhas = mysqli_query($conn, $sql);
                     <div class="monitoramento_filtro">
                         <label for="velocidade">Sensor de velocidade</label>
                         <select id="velocidade" name="velocidade" form="filtros_monitoramento">
-                            <?php if (mysqli_num_rows($sensoresVelocidade) === 0) { ?>
+                            <?php if (mysqli_num_rows($sensores_velocidade) === 0) { ?>
                                 <option value="0">Nenhum sensor de velocidade cadastrado</option>
                             <?php } ?>
 
-                            <?php while ($sensor = mysqli_fetch_assoc($sensoresVelocidade)) { ?>
+                            <?php while ($sensor = mysqli_fetch_assoc($sensores_velocidade)) { ?>
                                 <option value="<?php echo $sensor['id_sensor']; ?>"
-                                    <?php if ($idVelocidade == $sensor['id_sensor']) { echo 'selected'; } ?>>
+                                    <?php if ($id_velocidade == $sensor['id_sensor']) { echo 'selected'; } ?>>
                                     <?php echo escapar($sensor['nome_sensor']); ?>
                                 </option>
                             <?php } ?>
@@ -240,7 +247,7 @@ $falhas = mysqli_query($conn, $sql);
 
                     <article class="monitoramento_cartao">
                         <h2>Velocidade atual</h2>
-                        <?php mostrarLeitura($conn, $sensorVelocidade, 'km/h', 0); ?>
+                        <?php mostrar_leitura($conn, $sensor_velocidade, 'km/h', 0); ?>
                     </article>
                 </div>
 
@@ -248,13 +255,13 @@ $falhas = mysqli_query($conn, $sql);
                     <div class="monitoramento_filtro">
                         <label for="temperatura">Sensor de temperatura</label>
                         <select id="temperatura" name="temperatura" form="filtros_monitoramento">
-                            <?php if (mysqli_num_rows($sensoresTemperatura) === 0) { ?>
+                            <?php if (mysqli_num_rows($sensores_temperatura) === 0) { ?>
                                 <option value="0">Nenhum sensor de temperatura cadastrado</option>
                             <?php } ?>
 
-                            <?php while ($sensor = mysqli_fetch_assoc($sensoresTemperatura)) { ?>
+                            <?php while ($sensor = mysqli_fetch_assoc($sensores_temperatura)) { ?>
                                 <option value="<?php echo $sensor['id_sensor']; ?>"
-                                    <?php if ($idTemperatura == $sensor['id_sensor']) { echo 'selected'; } ?>>
+                                    <?php if ($id_temperatura == $sensor['id_sensor']) { echo 'selected'; } ?>>
                                     <?php echo escapar($sensor['nome_sensor']); ?>
                                 </option>
                             <?php } ?>
@@ -263,7 +270,7 @@ $falhas = mysqli_query($conn, $sql);
 
                     <article class="monitoramento_cartao">
                         <h2>Temperatura atual</h2>
-                        <?php mostrarLeitura($conn, $sensorTemperatura, '°C', 1); ?>
+                        <?php mostrar_leitura($conn, $sensor_temperatura, '°C', 1); ?>
                     </article>
                 </div>
             </section>
@@ -280,14 +287,14 @@ $falhas = mysqli_query($conn, $sql);
 
                         <?php while ($rota = mysqli_fetch_assoc($rotas)) { ?>
                             <option value="<?php echo $rota['id_rotas']; ?>"
-                                <?php if ($idRota == $rota['id_rotas']) { echo 'selected'; } ?>>
+                                <?php if ($id_rota == $rota['id_rotas']) { echo 'selected'; } ?>>
                                 <?php echo escapar($rota['nome']); ?>
                             </option>
                         <?php } ?>
                     </select>
                 </div>
 
-                <p id="nomeRota"><?php echo escapar($nomeRota); ?></p>
+                <p id="nomeRota"><?php echo escapar($nome_rota); ?></p>
 
                 <svg class="mapa_trilhos" viewBox="0 0 760 330"
                      role="img" aria-label="Trajeto ferroviário com ponte e desvios">
@@ -333,11 +340,11 @@ $falhas = mysqli_query($conn, $sql);
 
                 <div class="falhas_resumo">
                     <div class="falha_contador">
-                        <strong><?php echo $totalResolvidas; ?></strong>
+                        <strong><?php echo $total_resolvidas; ?></strong>
                         <span>Resolvidas</span>
                     </div>
                     <div class="falha_contador">
-                        <strong><?php echo $totalNaoResolvidas; ?></strong>
+                        <strong><?php echo $total_nao_resolvidas; ?></strong>
                         <span>Não resolvidas</span>
                     </div>
                 </div>
@@ -349,23 +356,23 @@ $falhas = mysqli_query($conn, $sql);
 
                     <?php
                     while ($falha = mysqli_fetch_assoc($falhas)) {
-                        $idSensor = (int) $falha['id_sensor'];
-                        $sql = "SELECT nome_sensor, id_rotas FROM sensores WHERE id_sensor = $idSensor";
+                        $id_sensor = (int) $falha['id_sensor'];
+                        $sql = "SELECT nome_sensor, id_rotas FROM sensores WHERE id_sensor = $id_sensor";
                         $resultado = mysqli_query($conn, $sql);
                         $sensor = mysqli_fetch_assoc($resultado);
-                        $nomeTrem = buscarTremDaRota($conn, (int) $sensor['id_rotas']);
+                        $nome_trem = buscar_trem_da_rota($conn, (int) $sensor['id_rotas']);
                     ?>
                         <article class="falha_item">
                             <div class="falha_dados">
                                 <h3><?php echo escapar($falha['descricao']); ?></h3>
                                 <p>
                                     Sensor: <?php echo escapar($sensor['nome_sensor']); ?>
-                                    - Trem: <?php echo escapar($nomeTrem); ?>
+                                    - Trem: <?php echo escapar($nome_trem); ?>
                                     - <?php echo date('d/m/Y', strtotime($falha['data_registro'])); ?>
                                 </p>
                             </div>
 
-                            <?php if ($ehAdministrador) { ?>
+                            <?php if ($eh_administrador) { ?>
                                 <form method="POST" class="falha_acao">
                                     <input type="hidden" name="id_falha" value="<?php echo $falha['id_falha']; ?>">
 
@@ -381,7 +388,7 @@ $falhas = mysqli_query($conn, $sql);
                 </div>
             </section>
 
-            <?php if ($ehAdministrador) { ?>
+            <?php if ($eh_administrador) { ?>
                 <div class="acao_leitura_monitoramento">
                     <a class="botao_leitura_monitoramento" href="registrar_leitura.php">
                         Registrar leitura ou falha

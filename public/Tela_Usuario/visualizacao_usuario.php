@@ -1,4 +1,6 @@
 <?php
+// TABELA. O arquivo de cadastro abre esta parte com o resultado da consulta.
+// O while percorre os registros e imprime uma linha para cada um. Editar e Excluir usam o ID dessa linha.
 // A consulta está no cadastro. Aqui, o while só monta as linhas.
 if (!isset($usuarios)) {
     exit();
