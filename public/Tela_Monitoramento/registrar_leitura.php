@@ -11,19 +11,20 @@ $descricao = '';
 $idSensor = 0;
 $data = date('Y-m-d');
 
-// Recebe o sensor e a data. O tipo do sensor define se salva um número ou uma descrição de falha.
+// Recebe o formulário e valida o sensor e a data antes de salvar.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $idSensor = (int) $_POST['id_sensor'];
+    $idSensor = (int) ($_POST['id_sensor'] ?? 0);
     $valor = trim($_POST['valor'] ?? '');
     $descricao = trim($_POST['descricao_falha'] ?? '');
-    $data = $_POST['data_leitura'];
+    $data = $_POST['data_leitura'] ?? '';
 
     $sql = "SELECT tipo_dado FROM sensores WHERE id_sensor = $idSensor";
     $resultado = mysqli_query($conn, $sql);
     $sensorEscolhido = mysqli_fetch_assoc($resultado);
 
-    // strtotime converte a data. A comparação rejeita datas como 31 de fevereiro.
+    // Converte e confere a data para rejeitar datas como 31 de fevereiro.
     $dataConvertida = strtotime($data);
+    $stmt = null;
 
     if (!$sensorEscolhido) {
         $erro = 'Selecione um sensor cadastrado.';
@@ -33,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $dataSql = $data . ' 00:00:00';
         $tipo = $sensorEscolhido['tipo_dado'];
 
-        // Sensor de Status gera uma falha. Velocidade e Temperatura geram leituras numéricas.
+        // Status salva uma descrição na tabela de falhas.
         if ($tipo === 'Status') {
             if (mb_strlen($descricao) < 5 || mb_strlen($descricao) > 200) {
                 $erro = 'A descrição deve ter de 5 a 200 caracteres.';
@@ -43,50 +44,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         VALUES (?, ?, ?, 'Não resolvida')";
                 $stmt = mysqli_prepare($conn, $sql);
                 mysqli_stmt_bind_param($stmt, 'iss', $idSensor, $descricao, $dataSql);
-
-                $salvou = mysqli_stmt_execute($stmt);
-                mysqli_stmt_close($stmt);
-
-                if ($salvou) {
-                    $_SESSION['mensagem_leitura'] = 'Falha registrada com sucesso!';
-                    header('Location: monitoramento.php#falhas');
-                    exit();
-                }
-
-                $erro = 'Não foi possível registrar a falha.';
+                $mensagem = 'Falha registrada com sucesso!';
+                $destino = 'monitoramento.php#falhas';
             }
         } else {
+            // Velocidade e Temperatura têm unidades e limites diferentes.
             if ($tipo === 'Velocidade') {
                 $limite = 600;
-                $filtro = 'velocidade';
                 $unidade = 'km/h';
+                $filtro = 'velocidade';
             } else {
                 $limite = 150;
-                $filtro = 'temperatura';
                 $unidade = '°C';
+                $filtro = 'temperatura';
             }
 
             if (!is_numeric($valor) || $valor < 0 || $valor > $limite) {
                 $erro = 'Informe um valor entre 0 e ' . $limite . ' ' . $unidade . '.';
             } else {
                 $valorNumero = (float) $valor;
-                $sql = "INSERT INTO leituras_sensores (id_sensor, valor, data_leitura)
-                        VALUES (?, ?, ?)";
+                $sql = "INSERT INTO leituras_sensores (id_sensor, valor, data_leitura) VALUES (?, ?, ?)";
                 $stmt = mysqli_prepare($conn, $sql);
                 mysqli_stmt_bind_param($stmt, 'ids', $idSensor, $valorNumero, $dataSql);
-
-                $salvou = mysqli_stmt_execute($stmt);
-                mysqli_stmt_close($stmt);
-
-                if ($salvou) {
-                    $_SESSION['mensagem_leitura'] = 'Leitura cadastrada com sucesso!';
-                    header('Location: monitoramento.php?' . $filtro . '=' . $idSensor);
-                    exit();
-                }
-
-                $erro = 'Não foi possível salvar a leitura.';
+                $mensagem = 'Leitura cadastrada com sucesso!';
+                $destino = 'monitoramento.php?' . $filtro . '=' . $idSensor;
             }
         }
+    }
+
+    // Se uma consulta foi preparada, salva e volta para o Monitoramento.
+    if ($stmt) {
+        $salvou = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+
+        if ($salvou) {
+            $_SESSION['mensagem_leitura'] = $mensagem;
+            header('Location: ' . $destino);
+            exit();
+        }
+
+        $erro = 'Não foi possível salvar. Confira os dados e tente novamente.';
     }
 }
 
@@ -100,20 +97,35 @@ $sensores = mysqli_query($conn, $sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de leituras | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-topo-2">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
 </head>
 
 <body class="body_geral">
-    <?php include __DIR__ . '/../menu.php'; ?>
     <div class="pagina">
+        <!-- Menu desta página. A classe ativo destaca a seção aberta. -->
+        <aside class="menu">
+            <img class="logo_trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
+            <p class="marca">SISTEMA TREMTECH</p>
 
-        <main class="content-user">
-            <p class="painel-user">PAINEL DE MONITORAMENTO</p>
+            <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
+            <a href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
+            <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
+            <a href="../Tela_Trens/cadastrar_trens.php"><img src="https://img.icons8.com/ios-filled/18/701015/train.png" alt=""> Trens</a>
+            <a href="../Tela_Rotas/cadastrar_rotas.php"><img src="https://img.icons8.com/ios-filled/18/701015/map.png" alt=""> Rotas</a>
+            <a class="ativo" href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
+            <a href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
+            <a href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
+            <a class="logout" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+        </aside>
+
+
+        <main class="content_user">
+            <p class="painel_user">PAINEL DE MONITORAMENTO</p>
             <h1>Registrar leitura ou falha</h1>
             <h2>Informações dos sensores</h2>
 
-            <div class="admin-badge-user">
-                <div class="avatar-user"></div>
+            <div class="admin_badge_user">
+                <div class="avatar_user"></div>
                 <div>
                     <strong>Administrador</strong>
                     <span><?php echo escapar($_SESSION['nome']); ?></span>
@@ -121,21 +133,21 @@ $sensores = mysqli_query($conn, $sql);
             </div>
 
             <?php if ($erro !== '') { ?>
-                <p class="leitura-mensagem-erro" role="alert"><?php echo escapar($erro); ?></p>
+                <p class="leitura_mensagem_erro" role="alert"><?php echo escapar($erro); ?></p>
             <?php } ?>
 
-            <section class="cadastro-usuario ativo">
+            <section class="cadastro_usuario ativo">
                 <h2>Nova leitura ou falha</h2>
 
                 <?php if (mysqli_num_rows($sensores) > 0) { ?>
-                    <form class="form-cadastro-user" method="POST">
-                        <div class="campo-user">
+                    <form class="form_cadastro_user" method="POST">
+                        <div class="campo_user">
                             <label for="id_sensor">Sensor vinculado</label>
                             <select id="id_sensor" name="id_sensor" required>
                                 <option value="">Selecione um sensor</option>
 
                                 <?php while ($sensor = mysqli_fetch_assoc($sensores)) { ?>
-                                    <!-- data-tipo informa ao JavaScript qual campo deve aparecer. -->
+                                    <!-- Cada opção guarda o tipo do sensor. O JavaScript lê esse tipo para mostrar o campo Valor ou Descrição. -->
                                     <option value="<?php echo $sensor['id_sensor']; ?>"
                                             data-tipo="<?php echo escapar($sensor['tipo_dado']); ?>"
                                         <?php if ($idSensor == $sensor['id_sensor']) { echo 'selected'; } ?>>
@@ -146,25 +158,25 @@ $sensores = mysqli_query($conn, $sql);
                             </select>
                         </div>
 
-                        <div class="campo-user" id="campo-valor">
+                        <div class="campo_user" id="campo_valor">
                             <label for="valor">Valor <span id="unidade"></span></label>
                             <input type="number" id="valor" name="valor" min="0" step="0.01"
                                    value="<?php echo escapar($valor); ?>" required>
                         </div>
 
-                        <div class="campo-user campo-descricao-status" id="campo-descricao-status" hidden>
+                        <div class="campo_user campo_descricao_status" id="campo_descricao_status" hidden>
                             <label for="descricao_falha">Descrição da falha</label>
                             <input type="text" id="descricao_falha" name="descricao_falha"
                                    minlength="5" maxlength="200" value="<?php echo escapar($descricao); ?>">
                         </div>
 
-                        <div class="campo-user campo-responsavel-trem">
+                        <div class="campo_user campo_responsavel_trem">
                             <label for="data_leitura">Data da leitura ou ocorrência</label>
                             <input type="date" id="data_leitura" name="data_leitura"
                                    value="<?php echo escapar($data); ?>" required>
                         </div>
 
-                        <button class="btn-cadastrar-form" id="botao-salvar-informacao" type="submit">
+                        <button class="btn_cadastrar_form" id="botao_salvar_informacao" type="submit">
                             SALVAR LEITURA
                         </button>
                     </form>
@@ -175,6 +187,17 @@ $sensores = mysqli_query($conn, $sql);
         </main>
     </div>
 
-<script src="../../script/validacao.js"></script>
+    <!-- A janela fica fechada até a pessoa clicar em Sair. -->
+    <dialog class="modal_confirmacao" id="janela_saida" aria-labelledby="tituloConfirmarSaida">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="tituloConfirmarSaida">Sair do sistema?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja sair da sua conta?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_saida">Continuar no sistema</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_saida">Sair</button>
+        </div>
+    </dialog>
+
+<script src="../../script/validacao.js?v=simples-7"></script>
 </body>
 </html>

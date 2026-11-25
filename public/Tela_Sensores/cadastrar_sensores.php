@@ -2,49 +2,58 @@
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
-// Usuários logados podem consultar a lista. O cadastro exige perfil de administrador.
+// Quem fez login pode ver a tabela. Somente administradores podem enviar o cadastro.
 exigir_login();
 
-$ehAdministrador = $_SESSION['tipo'] === 'Administrador';
+$administrador = $_SESSION['tipo'] === 'Administrador';
 $tipos = ['Velocidade', 'Temperatura', 'Status'];
 $mensagem = $_SESSION['mensagem_sensor'] ?? '';
 unset($_SESSION['mensagem_sensor']);
 
-// Recebe os dados do formulário, confere os campos e cadastra o registro.
+// Cadastro. Recebe o formulário e faz o INSERT no banco.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exigir_administrador();
 
-    $nome = trim($_POST['nome_sensor']);
-    $tipo = $_POST['tipo_dado'];
-    $idRota = (int) $_POST['id_rotas'];
+    $nome = trim($_POST['nome_sensor'] ?? '');
+    $tipo = $_POST['tipo_dado'] ?? '';
+    $id_rota = (int) ($_POST['id_rotas'] ?? 0);
 
-    $sql = "SELECT id_rotas FROM rotas WHERE id_rotas = $idRota";
-    $rotaEncontrada = mysqli_query($conn, $sql);
+    $sql = "SELECT id_rotas FROM rotas WHERE id_rotas = $id_rota";
+    $rota_encontrada = mysqli_query($conn, $sql);
 
     // in_array confere se o tipo enviado está na lista de tipos do banco.
     if (mb_strlen($nome) < 3 || mb_strlen($nome) > 100 || !in_array($tipo, $tipos)) {
         $mensagem = 'Informe um nome válido e selecione o tipo do sensor.';
-    } elseif (mysqli_num_rows($rotaEncontrada) === 0) {
+    } elseif (mysqli_num_rows($rota_encontrada) === 0) {
         $mensagem = 'Selecione uma rota cadastrada.';
     } else {
         $sql = "INSERT INTO sensores (nome_sensor, tipo_dado, id_rotas) VALUES (?, ?, ?)";
         $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, 'ssi', $nome, $tipo, $idRota);
-        mysqli_stmt_execute($stmt);
+        mysqli_stmt_bind_param($stmt, 'ssi', $nome, $tipo, $id_rota);
+        // Se o banco não conseguir gravar, mostra a mensagem abaixo do formulário.
+        try {
+            $salvou = mysqli_stmt_execute($stmt);
+        } catch (mysqli_sql_exception $erro) {
+            $salvou = false;
+        }
         mysqli_stmt_close($stmt);
 
-        $_SESSION['mensagem_sensor'] = 'Sensor cadastrado com sucesso!';
-        header('Location: cadastrar_sensores.php');
-        exit();
+        if ($salvou) {
+            $_SESSION['mensagem_sensor'] = 'Sensor cadastrado com sucesso!';    
+            header('Location: cadastrar_sensores.php');    
+            exit();
+        }
+
+        $mensagem = "Não foi possível concluir o cadastro.";
     }
 }
 
-// Lê o texto digitado na busca antes de mostrar a tabela.
+// Listagem. Busca os dados para a tabela.
 $busca = trim($_GET['buscar'] ?? '');
 $rotas = mysqli_query($conn, "SELECT id_rotas, nome FROM rotas ORDER BY nome");
 $sensores = mysqli_query($conn, "SELECT * FROM sensores ORDER BY id_sensor");
-// Mantém o formulário aberto para mostrar um erro de cadastro.
-$cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
+// Se o cadastro tiver erro, o formulário continua aberto para a pessoa ver o aviso.
+$cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
 ?>
 
 <!DOCTYPE html>
@@ -53,19 +62,34 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sensores | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=cadastro-3">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
 </head>
 <body class="body_geral">
-    <?php include __DIR__ . '/../menu.php'; ?>
     <div class="pagina">
+        <!-- Menu desta página. A classe ativo destaca a seção aberta. -->
+        <aside class="menu">
+            <img class="logo_trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
+            <p class="marca">SISTEMA TREMTECH</p>
 
-        <main class="content-user">
-            <p class="painel-user">PAINEL ADMINISTRATIVO</p>
+            <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
+            <a href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
+            <a class="ativo" href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
+            <a href="../Tela_Trens/cadastrar_trens.php"><img src="https://img.icons8.com/ios-filled/18/701015/train.png" alt=""> Trens</a>
+            <a href="../Tela_Rotas/cadastrar_rotas.php"><img src="https://img.icons8.com/ios-filled/18/701015/map.png" alt=""> Rotas</a>
+            <a href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
+            <a href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
+            <a href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
+            <a class="logout" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+        </aside>
+
+
+        <main class="content_user">
+            <p class="painel_user">PAINEL ADMINISTRATIVO</p>
             <h1>Controle de sensores cadastrados</h1>
             <h2>Sensores do sistema</h2>
 
-            <div class="admin-badge-user card-recuado">
-                <div class="avatar-user"></div>
+            <div class="admin_badge_user card_recuado">
+                <div class="avatar_user"></div>
                 <div>
                     <strong><?php echo escapar($_SESSION['tipo']); ?></strong>
                     <span><?php echo escapar($_SESSION['nome']); ?></span>
@@ -76,19 +100,19 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                 <p><?php echo escapar($mensagem); ?></p>
             <?php } ?>
 
-            <?php if ($ehAdministrador) { ?>
-                <section id="cadastro" class="cadastro-usuario<?php if ($cadastroAberto) { echo ' ativo'; } ?>"
-                    <?php if (!$cadastroAberto) { echo 'hidden'; } ?>>
+            <?php if ($administrador) { ?>
+                <section id="cadastro" class="cadastro_usuario ativo"
+                    <?php if (!$cadastro_aberto) { echo 'hidden'; } ?>>
                     <h2>Cadastrar novo sensor</h2>
 
-                    <form method="POST" class="form-cadastro-user">
-                        <div class="campo-user">
+                    <form method="POST" class="form_cadastro_user">
+                        <div class="campo_user">
                             <label for="nome_sensor">Nome do sensor</label>
                             <input placeholder="Nome do sensor" type="text" id="nome_sensor" name="nome_sensor"
                                    minlength="3" maxlength="100" required>
                         </div>
 
-                        <div class="campo-user">
+                        <div class="campo_user">
                             <label for="tipo_dado">Tipo de dado coletado</label>
                             <select id="tipo_dado" name="tipo_dado" required>
                                 <option value="">Selecione</option>
@@ -98,7 +122,7 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                             </select>
                         </div>
 
-                        <div class="campo-user campo-rota-sensor">
+                        <div class="campo_user campo_rota_sensor">
                             <label for="id_rotas">Rota vinculada</label>
                             <select id="id_rotas" name="id_rotas" required>
                                 <option value="">Selecione uma rota</option>
@@ -110,13 +134,13 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                             </select>
                         </div>
 
-                        <button type="submit" class="btn-cadastrar-form">CADASTRAR NOVO SENSOR</button>
+                        <button type="submit" class="btn_cadastrar_form">CADASTRAR NOVO SENSOR</button>
                     </form>
                 </section>
             <?php } ?>
 
-            <!-- Área de busca e botão para abrir o formulário de cadastro. -->
-            <section class="buscar-box-user buscar-usuarios-linha">
+            <!-- Nesta área, Buscar filtra a lista e o botão Cadastrar abre o formulário. -->
+            <section class="buscar_box_user buscar_usuarios_linha">
                 <form method="GET">
                     <label for="buscar">Buscar</label>
                     <input type="search" id="buscar" name="buscar" placeholder="Nome, tipo ou rota"
@@ -124,9 +148,9 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                     <button type="submit">Buscar</button>
                 </form>
 
-                <?php if ($ehAdministrador) { ?>
-                    <button class="btn-cadastrar-user btn-cadastrar-user-compacto"
-                            id="btnAbrirCadastro" type="button" aria-controls="cadastro" aria-expanded="<?php echo $cadastroAberto ? 'true' : 'false'; ?>">
+                <?php if ($administrador) { ?>
+                    <button class="btn_cadastrar_user btn_cadastrar_user_compacto"
+                            id="botao_abrir_cadastro" type="button" aria-controls="cadastro">
                         Cadastrar sensor
                     </button>
                 <?php } ?>
@@ -136,6 +160,17 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
         </main>
     </div>
 
-<script src="../../script/validacao.js?v=cadastro-3"></script>
+    <!-- A janela fica fechada até a pessoa clicar em Sair. -->
+    <dialog class="modal_confirmacao" id="janela_saida" aria-labelledby="tituloConfirmarSaida">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="tituloConfirmarSaida">Sair do sistema?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja sair da sua conta?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_saida">Continuar no sistema</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_saida">Sair</button>
+        </div>
+    </dialog>
+
+<script src="../../script/validacao.js?v=simples-7"></script>
 </body>
 </html>

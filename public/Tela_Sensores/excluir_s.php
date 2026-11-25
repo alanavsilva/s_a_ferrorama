@@ -2,7 +2,6 @@
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
-// Confere a permissão no PHP, mesmo se alguém tentar chamar este arquivo direto.
 exigir_administrador();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id'])) {
@@ -10,34 +9,37 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id'])) {
     exit();
 }
 
-// O formulário envia o ID do registro escolhido na tabela.
+// O formulário envia o ID. Uma ligação já basta para bloquear a exclusão.
 $id = (int) $_POST['id'];
+$leituras_sensores = mysqli_query($conn, "SELECT id_leitura FROM leituras_sensores WHERE id_sensor = $id LIMIT 1");
+$falhas_operacionais = mysqli_query($conn, "SELECT id_falha FROM falhas_operacionais WHERE id_sensor = $id LIMIT 1");
 
-// Basta uma leitura ou uma falha vinculada para bloquear a exclusão.
-$sql = "SELECT id_leitura FROM leituras_sensores WHERE id_sensor = $id LIMIT 1";
-$leituras = mysqli_query($conn, $sql);
-
-$sql = "SELECT id_falha FROM falhas_operacionais WHERE id_sensor = $id LIMIT 1";
-$falhas = mysqli_query($conn, $sql);
-
-if (mysqli_num_rows($leituras) > 0 || mysqli_num_rows($falhas) > 0) {
-    $_SESSION['mensagem_sensor'] = 'Este sensor tem leituras ou falhas vinculadas e não pode ser excluído.';
+if (mysqli_num_rows($leituras_sensores) > 0 || mysqli_num_rows($falhas_operacionais) > 0) {
+    $mensagem = 'Este sensor tem leituras ou falhas vinculadas.';
 } else {
-    // O catch mostra uma mensagem caso o banco bloqueie a exclusão.
-    try {
-        $excluiu = mysqli_query($conn, "DELETE FROM sensores WHERE id_sensor = $id");
+    // O ? recebe o ID que veio do formulário. O tipo i indica um número inteiro.
+    $sql = "DELETE FROM sensores WHERE id_sensor = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, 'i', $id);
 
-        if ($excluiu && mysqli_affected_rows($conn) > 0) {
-            $_SESSION['mensagem_sensor'] = 'Sensor excluído com sucesso!';
-        } elseif ($excluiu) {
-            $_SESSION['mensagem_sensor'] = 'Sensor não encontrado.';
-        } else {
-            $_SESSION['mensagem_sensor'] = 'Não foi possível excluir o sensor.';
-        }
+    try {
+        $excluiu = mysqli_stmt_execute($stmt);
     } catch (mysqli_sql_exception $erro) {
-        $_SESSION['mensagem_sensor'] = 'Não foi possível excluir o sensor.';
+        $excluiu = false;
+    }
+
+    $linhas = mysqli_stmt_affected_rows($stmt);
+    mysqli_stmt_close($stmt);
+
+    if (!$excluiu) {
+        $mensagem = 'Não foi possível excluir o sensor.';
+    } elseif ($linhas === 0) {
+        $mensagem = 'Sensor não encontrado.';
+    } else {
+        $mensagem = 'Sensor excluído com sucesso!';
     }
 }
 
+$_SESSION['mensagem_sensor'] = $mensagem;
 header('Location: cadastrar_sensores.php');
 exit();

@@ -7,14 +7,14 @@ if (!isset($trens)) {
 $encontrou = false;
 ?>
 
-<!-- Mostra os registros na tabela e libera as ações para administradores. -->
-<table class="tabela-usuarios tabela-trens">
+<!-- O while monta uma linha por registro. Editar e Excluir aparecem apenas para administradores. -->
+<table class="tabela_usuarios tabela_trens">
     <thead>
         <tr>
             <th>Nome</th>
             <th>Velocidade média</th>
             <th>Usuário responsável</th>
-            <?php if ($ehAdministrador) { ?>
+            <?php if ($administrador) { ?>
                 <th>Ação</th>
             <?php } ?>
         </tr>
@@ -23,46 +23,46 @@ $encontrou = false;
     <tbody>
         <?php
         while ($trem = mysqli_fetch_assoc($trens)) {
-            $nomeResponsavel = '-';
+            $nome_responsavel = '-';
 
             // O trem guarda o ID do responsável. O SELECT busca o nome dele.
             if (isset($trem['id_usuario'])) {
-                $idUsuario = (int) $trem['id_usuario'];
-                $sql = "SELECT nome FROM usuarios WHERE id_usuario = $idUsuario";
+                $id_usuario = (int) $trem['id_usuario'];
+                $sql = "SELECT nome FROM usuarios WHERE id_usuario = $id_usuario";
                 $resultado = mysqli_query($conn, $sql);
                 $usuario = mysqli_fetch_assoc($resultado);
 
                 if ($usuario) {
-                    $nomeResponsavel = $usuario['nome'];
+                    $nome_responsavel = $usuario['nome'];
                 }
             }
 
-            // stripos procura o texto ignorando maiúsculas e minúsculas.
-            if ($busca === ''
-                || stripos($trem['nome'], $busca) !== false
-                || stripos($nomeResponsavel, $busca) !== false) {
-                $encontrou = true;
-        ?>
-                <tr>
-                    <td><?php echo escapar($trem['nome']); ?></td>
-                    <td><?php echo $trem['velocidade_media']; ?> km/h</td>
-                    <td><?php echo escapar($nomeResponsavel); ?></td>
-
-                    <?php if ($ehAdministrador) { ?>
-                        <td class="acao_user">
-                            <a href="editar_t.php?id=<?php echo $trem['id_trem']; ?>" class="acao-icone editar-user" aria-label="Editar trem"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
-
-                            <form method="POST" action="excluir_t.php" class="excluir-trem">
-                                <input type="hidden" name="id" value="<?php echo $trem['id_trem']; ?>">
-                                <button type="submit" class="acao-icone excluir-user" aria-label="Excluir trem"><img src="https://img.icons8.com/ios-filled/18/701015/trash.png" alt=""></button>
-                            </form>
-                        </td>
-                    <?php } ?>
-                </tr>
-        <?php
+            // Se não encontrou o texto em nenhum campo, pula esta linha.
+            if ($busca !== ''
+                && stripos($trem['nome'], $busca) === false
+                && stripos($nome_responsavel, $busca) === false
+            ) {
+                continue;
             }
-        }
+            $encontrou = true;
         ?>
+            <tr>
+                <td><?php echo escapar($trem['nome']); ?></td>
+                <td><?php echo $trem['velocidade_media']; ?> km/h</td>
+                <td><?php echo escapar($nome_responsavel); ?></td>
+
+                <?php if ($administrador) { ?>
+                    <td class="acao_user">
+                        <a href="editar_t.php?id=<?php echo $trem['id_trem']; ?>" class="acao_icone editar_user" aria-label="Editar trem"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
+
+                        <form method="POST" action="excluir_t.php" class="confirmar_exclusao">
+                            <input type="hidden" name="id" value="<?php echo $trem['id_trem']; ?>">
+                            <button type="submit" class="acao_icone excluir_user" aria-label="Excluir trem"><img src="https://img.icons8.com/ios-filled/18/701015/trash.png" alt=""></button>
+                        </form>
+                    </td>
+                <?php } ?>
+                </tr>
+        <?php } ?>
     </tbody>
 </table>
 

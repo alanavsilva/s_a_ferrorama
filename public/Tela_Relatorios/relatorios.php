@@ -10,10 +10,9 @@ $data = $_GET['periodo_relatorios'] ?? date('Y-m-d');
 $mensagem = '';
 $relatorioGerado = false;
 
-$leituras = [];
-$falhas = [];
+$registros = [];
 $totalResolvidas = 0;
-$totalAbertas = 0;
+$totalFalhas = 0;
 $unidade = '';
 $chaveAtual = '';
 
@@ -37,7 +36,7 @@ if (isset($_GET['gerar'])) {
         $mensagem = 'Selecione uma data válida.';
         $data = date('Y-m-d');
     } else {
-        // O sensor aponta para a rota, e a rota aponta para o trem.
+        // Busca a rota pelo ID que está no sensor. Depois busca o trem pelo ID que está na rota.
         $idRota = (int) $sensorEscolhido['id_rotas'];
         $sql = "SELECT * FROM rotas WHERE id_rotas = $idRota";
         $resultado = mysqli_query($conn, $sql);
@@ -86,33 +85,27 @@ if (isset($_GET['gerar'])) {
         mysqli_stmt_execute($stmt);
         $resultado = mysqli_stmt_get_result($stmt);
 
+        // A consulta traz leituras OU falhas. Guardamos o resultado em uma lista só.
         while ($linha = mysqli_fetch_assoc($resultado)) {
-            if ($tipo === 'Status') {
-                $falhas[] = $linha;
-
-                if ($linha['situacao'] === 'Resolvida') {
-                    $totalResolvidas++;
-                } else {
-                    $totalAbertas++;
-                }
-            } else {
-                $leituras[] = $linha;
+            $registros[] = $linha;
+            if ($tipo === 'Status' && $linha['situacao'] === 'Resolvida') {
+                $totalResolvidas++;
             }
         }
-
         mysqli_stmt_close($stmt);
+
+        if ($tipo === 'Status') {
+            $totalFalhas = count($registros);
+        }
         $relatorioGerado = true;
 
-        // O ID do sensor e a data identificam a consulta no histórico.
+        // Junta o sensor e o dia para reconhecer se a última consulta do histórico é a mesma.
         $chaveAtual = $sensorSelecionado . '|' . $data;
         $ultimaChave = $historico[0]['chave'] ?? '';
 
         if ($chaveAtual !== $ultimaChave) {
-            $valorLeitura = null;
-
-            if (isset($leituras[0])) {
-                $valorLeitura = $leituras[0]['valor'];
-            }
+            // A primeira leitura é a mais recente. Um relatório de falhas não tem esse valor.
+            $valorLeitura = $registros[0]['valor'] ?? null;
 
             $item = [
                 'chave' => $chaveAtual,
@@ -124,7 +117,7 @@ if (isset($_GET['gerar'])) {
                 'data' => $data,
                 'gerado_em' => date('Y-m-d H:i:s'),
                 'valor_leitura' => $valorLeitura,
-                'total_falhas' => count($falhas)
+                'total_falhas' => $totalFalhas
             ];
 
             // Coloca o relatório novo no começo e guarda só os 20 mais recentes.
@@ -135,7 +128,7 @@ if (isset($_GET['gerar'])) {
     }
 }
 
-// Separa os itens que vão aparecer abaixo do relatório aberto.
+// Prepara a lista do histórico sem mostrar de novo o relatório que já está aberto acima.
 $relatoriosAnteriores = [];
 
 foreach ($historico as $item) {
@@ -151,22 +144,37 @@ foreach ($historico as $item) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatórios - TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-topo-2">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
 </head>
 
-<body class="pagina-relatorios">
-    <?php include __DIR__ . '/../menu.php'; ?>
+<body class="pagina_relatorios">
     <div class="pagina">
+        <!-- Menu desta página. A classe ativo destaca a seção aberta. -->
+        <aside class="menu">
+            <img class="logo_trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
+            <p class="marca">SISTEMA TREMTECH</p>
 
-        <main class="content-user conteudo-relatorios">
-            <header class="cabecalho-relatorios">
-                <div class="titulo-area-relatorios">
-                    <p class="sobretitulo-relatorios">PAINEL DE RELATÓRIOS</p>
+            <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
+            <a href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
+            <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
+            <a href="../Tela_Trens/cadastrar_trens.php"><img src="https://img.icons8.com/ios-filled/18/701015/train.png" alt=""> Trens</a>
+            <a href="../Tela_Rotas/cadastrar_rotas.php"><img src="https://img.icons8.com/ios-filled/18/701015/map.png" alt=""> Rotas</a>
+            <a href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
+            <a href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
+            <a class="ativo" href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
+            <a class="logout" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+        </aside>
+
+
+        <main class="content_user conteudo_relatorios">
+            <header class="cabecalho_relatorios">
+                <div class="titulo_area_relatorios">
+                    <p class="sobretitulo_relatorios">PAINEL DE RELATÓRIOS</p>
                     <h1>Relatórios do sistema</h1>
                 </div>
 
-                <div class="admin-badge-user card-recuado">
-                    <div class="avatar-user"></div>
+                <div class="admin_badge_user card_recuado">
+                    <div class="avatar_user"></div>
                     <div>
                         <strong><?php echo escapar($_SESSION['tipo']); ?></strong>
                         <span><?php echo escapar($_SESSION['nome']); ?></span>
@@ -174,13 +182,13 @@ foreach ($historico as $item) {
                 </div>
             </header>
 
-            <section class="area-relatorios">
-                <form class="formulario-relatorios" method="GET">
+            <section class="area_relatorios">
+                <form class="formulario_relatorios" method="GET">
                     <h2>Gerar relatório</h2>
 
-                    <div class="campo-relatorios">
-                        <label for="sensor-relatorios">Sensor</label>
-                        <select name="sensor_relatorios" id="sensor-relatorios" required>
+                    <div class="campo_relatorios">
+                        <label for="sensor_relatorios">Sensor</label>
+                        <select name="sensor_relatorios" id="sensor_relatorios" required>
                             <option value="">Selecione um sensor</option>
 
                             <?php
@@ -205,29 +213,29 @@ foreach ($historico as $item) {
                         </select>
                     </div>
 
-                    <div class="campo-relatorios">
-                        <label for="periodo-relatorios">Dia do relatório</label>
-                        <input type="date" name="periodo_relatorios" id="periodo-relatorios"
+                    <div class="campo_relatorios">
+                        <label for="periodo_relatorios">Dia do relatório</label>
+                        <input type="date" name="periodo_relatorios" id="periodo_relatorios"
                                value="<?php echo escapar($data); ?>" required>
                     </div>
 
-                    <button type="submit" name="gerar" value="1" class="botao-relatorios"
+                    <button type="submit" name="gerar" value="1" class="botao_relatorios"
                         <?php if (mysqli_num_rows($sensores) === 0) { echo 'disabled'; } ?>>
                         Gerar relatório
                     </button>
 
                     <?php if ($mensagem !== '') { ?>
-                        <p class="mensagem-relatorios" role="alert"><?php echo escapar($mensagem); ?></p>
+                        <p class="mensagem_relatorios" role="alert"><?php echo escapar($mensagem); ?></p>
                     <?php } ?>
 
                     <?php if (mysqli_num_rows($sensores) === 0) { ?>
-                        <p class="mensagem-relatorios">Cadastre um sensor antes de gerar o relatório.</p>
+                        <p class="mensagem_relatorios">Cadastre um sensor antes de gerar o relatório.</p>
                     <?php } ?>
                 </form>
 
-                <section class="resultado-relatorios">
+                <section class="resultado_relatorios">
                     <?php if ($relatorioGerado) { ?>
-                        <div class="resumo-relatorio">
+                        <div class="resumo_relatorio">
                             <h2>Relatório gerado</h2>
                             <p>Responsável: <strong><?php echo escapar($responsavel); ?></strong></p>
                             <p>Sensor: <strong><?php echo escapar($sensorEscolhido['nome_sensor']); ?></strong>
@@ -237,29 +245,29 @@ foreach ($historico as $item) {
                             <p>Data consultada: <strong><?php echo date('d/m/Y', $dataConvertida); ?></strong></p>
 
                             <?php if ($tipo === 'Status') { ?>
-                                <p>Falhas registradas: <strong><?php echo count($falhas); ?></strong></p>
+                                <p>Falhas registradas: <strong><?php echo $totalFalhas; ?></strong></p>
                                 <p>Resolvidas: <strong><?php echo $totalResolvidas; ?></strong>
-                                    · Em aberto: <strong><?php echo $totalAbertas; ?></strong></p>
+                                    · Em aberto: <strong><?php echo $totalFalhas - $totalResolvidas; ?></strong></p>
                             <?php } else { ?>
                                 <h3>Leituras de <?php echo escapar(strtolower($tipo)); ?></h3>
 
-                                <?php if (count($leituras) === 0) { ?>
+                                <?php if (count($registros) === 0) { ?>
                                     <p>Nenhuma leitura registrada para este sensor na data selecionada.</p>
                                 <?php } ?>
 
-                                <?php foreach ($leituras as $leitura) { ?>
+                                <?php foreach ($registros as $leitura) { ?>
                                     <p><strong><?php echo number_format($leitura['valor'], 2, ',', '.'); ?>
                                             <?php echo $unidade; ?></strong></p>
                                 <?php } ?>
                             <?php } ?>
                         </div>
 
-                        <?php if ($tipo === 'Status' && count($falhas) > 0) { ?>
-                            <section class="lista-falhas-relatorio">
+                        <?php if ($tipo === 'Status' && $totalFalhas > 0) { ?>
+                            <section class="lista_falhas_relatorio">
                                 <h3>Falhas do dia</h3>
 
-                                <?php foreach ($falhas as $falha) { ?>
-                                    <article class="relatorio-falha-linha">
+                                <?php foreach ($registros as $falha) { ?>
+                                    <article class="relatorio_falha_linha">
                                         <strong>Descrição da falha</strong>
                                         <p><?php echo escapar($falha['descricao']); ?></p>
                                         <div>
@@ -270,10 +278,10 @@ foreach ($historico as $item) {
                                 <?php } ?>
                             </section>
                         <?php } elseif ($tipo === 'Status') { ?>
-                            <p class="relatorio-sem-falhas">Nenhuma falha registrada para este sensor na data selecionada.</p>
+                            <p class="relatorio_sem_falhas">Nenhuma falha registrada para este sensor na data selecionada.</p>
                         <?php } ?>
                     <?php } else { ?>
-                        <div class="estado-vazio-relatorios">
+                        <div class="estado_vazio_relatorios">
                             <h2>Relatório</h2>
                             <p>Selecione um sensor e uma data para consultar o relatório.</p>
                         </div>
@@ -281,11 +289,11 @@ foreach ($historico as $item) {
                 </section>
 
                 <?php if (count($relatoriosAnteriores) > 0) { ?>
-                    <section class="historico-relatorios">
+                    <section class="historico_relatorios">
                         <h2>Histórico de relatórios</h2>
 
                         <?php foreach ($relatoriosAnteriores as $item) { ?>
-                            <article class="item-historico-relatorio">
+                            <article class="item_historico_relatorio">
                                 <div>
                                     <strong>Responsável: <?php echo escapar($item['responsavel']); ?></strong>
                                     <span><?php echo escapar($item['sensor']); ?> - <?php echo escapar($item['tipo']); ?></span>
@@ -297,7 +305,7 @@ foreach ($historico as $item) {
                                     <span>Gerado em: <?php echo date('d/m/Y H:i', strtotime($item['gerado_em'])); ?></span>
                                 </div>
 
-                                <strong class="resumo-historico-relatorio">
+                                <strong class="resumo_historico_relatorio">
                                     <?php if ($item['tipo'] === 'Status') { ?>
                                         <?php echo $item['total_falhas']; ?> falha(s)
                                     <?php } elseif (isset($item['valor_leitura'])) { ?>
@@ -321,6 +329,17 @@ foreach ($historico as $item) {
         </main>
     </div>
 
-<script src="../../script/validacao.js"></script>
+    <!-- A janela fica fechada até a pessoa clicar em Sair. -->
+    <dialog class="modal_confirmacao" id="janela_saida" aria-labelledby="tituloConfirmarSaida">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="tituloConfirmarSaida">Sair do sistema?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja sair da sua conta?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_saida">Continuar no sistema</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_saida">Sair</button>
+        </div>
+    </dialog>
+
+<script src="../../script/validacao.js?v=simples-7"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-// Protege as páginas internas. A pessoa volta ao login se a sessão não for válida.
+// Verifica se a pessoa fez login. Sem uma sessão válida, a página volta para a tela de entrada.
 function exigir_login()
 {
     if (!isset($_SESSION['id_usuario'], $_SESSION['tipo'])) {
@@ -11,7 +11,7 @@ function exigir_login()
         exit();
     }
 
-    // Confere se a conta ainda existe e qual é o perfil atual dela.
+    // Busca a conta pelo ID guardado na sessão. Se ela foi excluída, encerra o login.
     global $conn;
     if (!isset($conn)) {
         require __DIR__ . '/conexao.php';
@@ -31,7 +31,7 @@ function exigir_login()
     $_SESSION['tipo'] = $usuario['tipo'];
 }
 
-// Confere o perfil no servidor antes de permitir uma alteração.
+// Confere se a pessoa é administradora antes de deixar cadastrar, editar ou excluir.
 function exigir_administrador()
 {
     exigir_login();
@@ -42,40 +42,9 @@ function exigir_administrador()
     }
 }
 
-// Faz o navegador mostrar o valor como texto, mesmo se ele contiver HTML.
+// Exibe nomes e descrições como texto. Se alguém digitar uma tag de HTML, ela aparece escrita na tela.
 function escapar($texto)
 {
     return htmlspecialchars($texto);
 }
 
-// Confere a ação e, em uma edição, se o registro existe.
-function validar_acao_crud($conn, $acao, $tabela, $coluna, $campo)
-{
-    // Cada tabela tem seu próprio campo de ID.
-    $ids = [
-        'trens' => 'id_trem',
-        'rotas' => 'id_rotas',
-        'sensores' => 'id_sensor',
-        'usuarios' => 'id_usuario'
-    ];
-
-    if (!isset($ids[$tabela]) || $ids[$tabela] !== $coluna) {
-        exit('Tabela inválida.');
-    }
-
-    if ($acao === 'criar') {
-        return;
-    }
-
-    if ($acao !== 'editar' || !isset($_POST[$campo])) {
-        exit('Ação inválida.');
-    }
-
-    $id = (int) $_POST[$campo];
-    $sql = "SELECT $coluna FROM $tabela WHERE $coluna = $id";
-    $resultado = mysqli_query($conn, $sql);
-
-    if (mysqli_num_rows($resultado) === 0) {
-        exit('Registro não encontrado.');
-    }
-}

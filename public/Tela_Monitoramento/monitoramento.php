@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-// Busca o sensor escolhido. Se ele não existir, usa o primeiro do tipo.
+// Procura o sensor selecionado. Se a pessoa ainda não escolheu um, usa o primeiro sensor daquele tipo.
 function buscarSensor($conn, $tipo, $id)
 {
     $sql = "SELECT * FROM sensores WHERE tipo_dado = '$tipo' AND id_sensor = $id";
@@ -98,8 +98,8 @@ function mostrarLeitura($conn, $sensor, $unidade, $casasDecimais)
         $idRota = (int) $sensor['id_rotas'];
         $nome = $sensor['nome_sensor'] . ' - ' . buscarTremDaRota($conn, $idRota);
 
-        // DESC e LIMIT 1 pegam só a leitura mais recente.
-        // Se duas leituras tiverem a mesma data, vale o maior ID.
+        // A consulta põe as leituras mais novas no começo e pega apenas a primeira.
+        // Se duas leituras têm a mesma data, mostra a que foi cadastrada por último.
         $sql = "SELECT valor, data_leitura FROM leituras_sensores
                 WHERE id_sensor = $idSensor
                 ORDER BY data_leitura DESC, id_leitura DESC LIMIT 1";
@@ -179,19 +179,34 @@ $falhas = mysqli_query($conn, $sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoramento | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-topo-2">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
 </head>
 
 <body class="body_geral">
-    <?php include __DIR__ . '/../menu.php'; ?>
     <div class="pagina">
+        <!-- Menu desta página. A classe ativo destaca a seção aberta. -->
+        <aside class="menu">
+            <img class="logo_trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
+            <p class="marca">SISTEMA TREMTECH</p>
 
-        <main class="content-user">
-            <p class="painel-user">PAINEL DE MONITORAMENTO</p>
+            <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
+            <a href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
+            <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
+            <a href="../Tela_Trens/cadastrar_trens.php"><img src="https://img.icons8.com/ios-filled/18/701015/train.png" alt=""> Trens</a>
+            <a href="../Tela_Rotas/cadastrar_rotas.php"><img src="https://img.icons8.com/ios-filled/18/701015/map.png" alt=""> Rotas</a>
+            <a class="ativo" href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
+            <a href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
+            <a href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
+            <a class="logout" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+        </aside>
+
+
+        <main class="content_user">
+            <p class="painel_user">PAINEL DE MONITORAMENTO</p>
             <h1>Monitoramento ferroviário</h1>
 
-            <div class="admin-badge-user">
-                <div class="avatar-user"></div>
+            <div class="admin_badge_user">
+                <div class="avatar_user"></div>
                 <div>
                     <strong><?php echo escapar($_SESSION['tipo']); ?></strong>
                     <span><?php echo escapar($_SESSION['nome']); ?></span>
@@ -199,17 +214,17 @@ $falhas = mysqli_query($conn, $sql);
             </div>
 
             <?php if ($mensagem !== '') { ?>
-                <p class="mensagem-sucesso" role="status"><?php echo escapar($mensagem); ?></p>
+                <p class="mensagem_sucesso" role="status"><?php echo escapar($mensagem); ?></p>
             <?php } ?>
 
-            <!-- Os campos usam o mesmo formulário mesmo quando estão em cartões separados. -->
-            <form method="GET" id="filtros-monitoramento"></form>
+            <!-- Velocidade, temperatura, rota e situação enviam os valores juntos, mesmo aparecendo em lugares diferentes da tela. -->
+            <form method="GET" id="filtros_monitoramento"></form>
 
-            <section class="monitoramento-cartoes">
-                <div class="monitoramento-grupo-cartao">
-                    <div class="monitoramento-filtro">
+            <section class="monitoramento_cartoes">
+                <div class="monitoramento_grupo_cartao">
+                    <div class="monitoramento_filtro">
                         <label for="velocidade">Sensor de velocidade</label>
-                        <select id="velocidade" name="velocidade" form="filtros-monitoramento">
+                        <select id="velocidade" name="velocidade" form="filtros_monitoramento">
                             <?php if (mysqli_num_rows($sensoresVelocidade) === 0) { ?>
                                 <option value="0">Nenhum sensor de velocidade cadastrado</option>
                             <?php } ?>
@@ -223,16 +238,16 @@ $falhas = mysqli_query($conn, $sql);
                         </select>
                     </div>
 
-                    <article class="monitoramento-cartao">
+                    <article class="monitoramento_cartao">
                         <h2>Velocidade atual</h2>
                         <?php mostrarLeitura($conn, $sensorVelocidade, 'km/h', 0); ?>
                     </article>
                 </div>
 
-                <div class="monitoramento-grupo-cartao">
-                    <div class="monitoramento-filtro">
+                <div class="monitoramento_grupo_cartao">
+                    <div class="monitoramento_filtro">
                         <label for="temperatura">Sensor de temperatura</label>
-                        <select id="temperatura" name="temperatura" form="filtros-monitoramento">
+                        <select id="temperatura" name="temperatura" form="filtros_monitoramento">
                             <?php if (mysqli_num_rows($sensoresTemperatura) === 0) { ?>
                                 <option value="0">Nenhum sensor de temperatura cadastrado</option>
                             <?php } ?>
@@ -246,19 +261,19 @@ $falhas = mysqli_query($conn, $sql);
                         </select>
                     </div>
 
-                    <article class="monitoramento-cartao">
+                    <article class="monitoramento_cartao">
                         <h2>Temperatura atual</h2>
                         <?php mostrarLeitura($conn, $sensorTemperatura, '°C', 1); ?>
                     </article>
                 </div>
             </section>
 
-            <section class="monitoramento-localizacao">
+            <section class="monitoramento_localizacao">
                 <h2>Localização</h2>
 
-                <div class="monitoramento-filtro monitoramento-filtro-rota">
+                <div class="monitoramento_filtro monitoramento_filtro_rota">
                     <label for="rota">Rota</label>
-                    <select id="rota" name="rota" form="filtros-monitoramento">
+                    <select id="rota" name="rota" form="filtros_monitoramento">
                         <?php if (mysqli_num_rows($rotas) === 0) { ?>
                             <option value="0">Nenhuma rota cadastrada</option>
                         <?php } ?>
@@ -274,9 +289,7 @@ $falhas = mysqli_query($conn, $sql);
 
                 <p id="nomeRota"><?php echo escapar($nomeRota); ?></p>
 
-                <!-- As linhas do SVG desenham o percurso e os desvios do mapa. -->
-                <!-- Desenho do percurso que o JavaScript usa para mover o marcador. -->
-                <svg class="mapa-trilhos" viewBox="0 0 760 330"
+                <svg class="mapa_trilhos" viewBox="0 0 760 330"
                      role="img" aria-label="Trajeto ferroviário com ponte e desvios">
                     <defs>
                         <pattern id="gradeMapa" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -290,12 +303,14 @@ $falhas = mysqli_query($conn, $sql);
                     <polyline class="trilho" points="250,165 270,235 320,285"/>
                     <polyline class="trilho" points="360,160 420,130 480,130 580,120"/>
                     <polyline class="trilho" points="545,200 580,235 640,265"/>
-                    <polyline class="trilho-ponte" points="250,60 360,65"/>
-                    <text x="275" y="45" class="rotulo-ponte">Ponte</text>
+                    <polyline class="trilho_ponte" points="250,60 360,65"/>
+                    <text x="275" y="45" class="rotulo_ponte">Ponte</text>
 
-                    <g id="marcadorTrem" transform="translate(70 175)">
-                        <circle r="12" class="marcador-trem"/>
-                        <circle r="4" class="marcador-centro"/>
+                    <g id="marcadorTrem">
+                        <!-- O SVG move o marcador pelo caminho, sem cálculo no JavaScript. -->
+                        <animateMotion dur="46.25s" repeatCount="indefinite" path="M 70 175 L 80 115 150 75 250 60 360 65 470 90 580 120 670 165 690 220 640 265 540 290 420 300 300 290 190 260 100 225 70 175 140 185 250 165 360 160 470 175 545 200 580 235 545 200 470 175 360 160 420 130 480 130 580 120 480 130 420 130 360 160 270 235 320 285 270 235 360 160 250 165 140 185 70 175"/>
+                        <circle r="12" class="marcador_trem"/>
+                        <circle r="4" class="marcador_centro"/>
                     </g>
                 </svg>
             </section>
@@ -306,7 +321,7 @@ $falhas = mysqli_query($conn, $sql);
 
                     <div class="falhas_filtro">
                         <label for="status">Status</label>
-                        <select id="status" name="status" form="filtros-monitoramento">
+                        <select id="status" name="status" form="filtros_monitoramento">
                             <option value="Todas">Todas</option>
                             <option value="Resolvida"
                                 <?php if ($filtro === 'Resolvida') { echo 'selected'; } ?>>Resolvidas</option>
@@ -367,8 +382,8 @@ $falhas = mysqli_query($conn, $sql);
             </section>
 
             <?php if ($ehAdministrador) { ?>
-                <div class="acao-leitura-monitoramento">
-                    <a class="botao-leitura-monitoramento" href="registrar_leitura.php">
+                <div class="acao_leitura_monitoramento">
+                    <a class="botao_leitura_monitoramento" href="registrar_leitura.php">
                         Registrar leitura ou falha
                     </a>
                 </div>
@@ -376,6 +391,17 @@ $falhas = mysqli_query($conn, $sql);
         </main>
     </div>
 
-<script src="../../script/validacao.js"></script>
+    <!-- A janela fica fechada até a pessoa clicar em Sair. -->
+    <dialog class="modal_confirmacao" id="janela_saida" aria-labelledby="tituloConfirmarSaida">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="tituloConfirmarSaida">Sair do sistema?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja sair da sua conta?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_saida">Continuar no sistema</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_saida">Sair</button>
+        </div>
+    </dialog>
+
+<script src="../../script/validacao.js?v=simples-7"></script>
 </body>
 </html>

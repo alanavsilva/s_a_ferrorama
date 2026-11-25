@@ -1,12 +1,12 @@
 <?php
-// A consulta vem do cadastrar_usuario.php.
+// A consulta está no cadastro. Aqui, o while só monta as linhas.
 if (!isset($usuarios)) {
     exit();
 }
 ?>
 
-<!-- Mostra os registros na tabela e libera as ações para administradores. -->
-<table class="tabela-usuarios">
+<!-- O while monta uma linha por registro. Editar e Excluir aparecem apenas para administradores. -->
+<table class="tabela_usuarios">
     <tr>
         <th>Usuário</th>
         <th>Email</th>
@@ -25,11 +25,11 @@ if (!isset($usuarios)) {
 
             <?php if ($administrador) { ?>
                 <td class="acao_user">
-                    <a href="editar_u.php?id=<?php echo $usuario['id_usuario']; ?>" class="acao-icone editar-user" aria-label="Editar usuário"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
+                    <a href="editar_u.php?id=<?php echo $usuario['id_usuario']; ?>" class="acao_icone editar_user" aria-label="Editar usuário"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
 
-                    <form method="POST" action="excluir_u.php" class="excluir-usuario">
+                    <form method="POST" action="excluir_u.php" class="confirmar_exclusao">
                         <input type="hidden" name="id" value="<?php echo $usuario['id_usuario']; ?>">
-                        <button type="submit" class="acao-icone excluir-user" aria-label="Excluir usuário"><img src="https://img.icons8.com/ios-filled/18/701015/trash.png" alt=""></button>
+                        <button type="submit" class="acao_icone excluir_user" aria-label="Excluir usuário"><img src="https://img.icons8.com/ios-filled/18/701015/trash.png" alt=""></button>
                     </form>
                 </td>
             <?php } ?>

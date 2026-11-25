@@ -16,7 +16,7 @@ if (isset($_GET['status'])) {
     }
 }
 
-// Recebe os botões de resolver ou reabrir falhas exibidos na Home.
+// Quando um administrador clica em Resolver ou Reabrir na Home, este trecho salva a nova situação da falha.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exigir_administrador();
 
@@ -117,18 +117,34 @@ $falhas = mysqli_query($conn, $sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=home-conta-1">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
 </head>
 
 <body>
-    <?php include __DIR__ . '/../menu.php'; ?>
+    <!-- Menu no topo da Home. -->
+    <nav class="home_barra" aria-label="Navegação do TremTech">
+        <a class="home_logo" href="home.php">
+            <img class="home_imagem_trem" src="https://img.icons8.com/ios/50/701015/train.png" alt="">
+            SISTEMA TREMTECH
+        </a>
+
+        <a class="home_link" href="../Tela_Home/home.php">Home</a>
+        <a class="home_link" href="../Tela_Usuario/cadastrar_usuario.php">Usuários</a>
+        <a class="home_link" href="../Tela_Sensores/cadastrar_sensores.php">Sensores</a>
+        <a class="home_link" href="../Tela_Trens/cadastrar_trens.php">Trens</a>
+        <a class="home_link" href="../Tela_Rotas/cadastrar_rotas.php">Rotas</a>
+        <a class="home_link" href="../Tela_Monitoramento/monitoramento.php">Monitoramento</a>
+        <a class="home_link" href="../Tela_Falhas/cadastrar_falha.php">Falhas</a>
+        <a class="home_link" href="../Tela_Relatorios/relatorios.php">Relatórios</a>
+        <a class="home_logout_link" href="../../logout.php" id="link_sair">Sair</a>
+    </nav>
 
     <main class="home_conteudo">
         <section class="home_boas_vindas">
             <div>
                 <p>Bem-vindo de volta!</p>
                 <h1>Monitore usuários, rotas e operações em um só lugar.</h1>
-                <div class="home_usuario home-conta">
+                <div class="home_usuario home_conta">
                     <div class="home_bolinha"></div>
                     <div class="home_nome_usuario">
                         <strong><?php echo escapar($nome); ?></strong><br>
@@ -138,12 +154,12 @@ $falhas = mysqli_query($conn, $sql);
             </div>
 
             <div class="home_status">
-                <div class="home_status_titulo" id="velocidade-titulo">Velocidade média</div>
-                <div class="home_status_valor" id="velocidade-valor">Nenhum trem cadastrado</div>
+                <div class="home_status_titulo" id="velocidade_titulo">Velocidade média</div>
+                <div class="home_status_valor" id="velocidade_valor">Nenhum trem cadastrado</div>
             </div>
 
-            <!-- A lista escondida passa os nomes e as velocidades para o JavaScript. -->
-            <ul id="velocidades-trens" hidden>
+            <!-- O PHP coloca os nomes e as velocidades nesta lista escondida. O JavaScript lê a lista para trocar o trem do cartão. -->
+            <ul id="velocidades_trens" hidden>
                 <?php while ($trem = mysqli_fetch_assoc($trens)) { ?>
                     <li>
                         <span><?php echo escapar($trem['nome']); ?></span>
@@ -165,7 +181,7 @@ $falhas = mysqli_query($conn, $sql);
         <!-- Totais dos cadastros consultados no banco no começo do arquivo. -->
         <section class="home_indicadores">
             <div class="home_indicador">
-                <span class="home_indicador-icone"><img src="https://img.icons8.com/ios-filled/50/701015/user.png" alt=""></span>
+                <span class="home_indicador_icone"><img src="https://img.icons8.com/ios-filled/50/701015/user.png" alt=""></span>
                 <div>
                     <div class="home_indicador_nome">Usuários cadastrados</div>
                     <div class="home_indicador_numero"><?php echo $totalUsuarios; ?></div>
@@ -173,7 +189,7 @@ $falhas = mysqli_query($conn, $sql);
             </div>
 
             <div class="home_indicador">
-                <span class="home_indicador-icone"><img src="https://img.icons8.com/ios-filled/50/701015/map.png" alt=""></span>
+                <span class="home_indicador_icone"><img src="https://img.icons8.com/ios-filled/50/701015/map.png" alt=""></span>
                 <div>
                     <div class="home_indicador_nome">Rotas cadastradas</div>
                     <div class="home_indicador_numero"><?php echo $totalRotas; ?></div>
@@ -181,7 +197,7 @@ $falhas = mysqli_query($conn, $sql);
             </div>
 
             <div class="home_indicador">
-                <span class="home_indicador-icone"><img src="https://img.icons8.com/ios-filled/50/701015/radio-waves.png" alt=""></span>
+                <span class="home_indicador_icone"><img src="https://img.icons8.com/ios-filled/50/701015/radio-waves.png" alt=""></span>
                 <div>
                     <div class="home_indicador_nome">Sensores cadastrados</div>
                     <div class="home_indicador_numero"><?php echo $totalSensores; ?></div>
@@ -189,7 +205,7 @@ $falhas = mysqli_query($conn, $sql);
             </div>
 
             <div class="home_indicador">
-                <span class="home_indicador-icone"><img src="https://img.icons8.com/ios-filled/50/701015/train.png" alt=""></span>
+                <span class="home_indicador_icone"><img src="https://img.icons8.com/ios-filled/50/701015/train.png" alt=""></span>
                 <div>
                     <div class="home_indicador_nome">Trens cadastrados</div>
                     <div class="home_indicador_numero"><?php echo $totalTrens; ?></div>
@@ -199,7 +215,7 @@ $falhas = mysqli_query($conn, $sql);
 
         <section class="home_atalhos">
             <h2>Acesso rápido</h2>
-            <p class="home_atalhos-descricao">Escolha uma área para consultar ou gerenciar as informações do sistema.</p>
+            <p class="home_atalhos_descricao">Escolha uma área para consultar ou gerenciar as informações do sistema.</p>
 
             <div class="home_atalhos_lista">
                 <?php if ($ehAdministrador) { ?>
@@ -217,7 +233,7 @@ $falhas = mysqli_query($conn, $sql);
                 <?php } ?>
 
                 <a class="home_atalho" href="../Tela_Monitoramento/monitoramento.php"><strong>Monitoramento</strong><span>Acompanhe informações dos trens</span></a>
-                <a class="home_atalho home_atalho-destaque" href="../Tela_Relatorios/relatorios.php"><strong>Relatórios</strong><span>Consulte falhas por sensor e período</span></a>
+                <a class="home_atalho home_atalho_destaque" href="../Tela_Relatorios/relatorios.php"><strong>Relatórios</strong><span>Consulte falhas por sensor e período</span></a>
             </div>
         </section>
 
@@ -225,37 +241,37 @@ $falhas = mysqli_query($conn, $sql);
             <h2>Clima em Joinville - SC</h2>
 
             <?php if (isset($dadosClima['erro'])) { ?>
-                <p class="clima-erro" role="alert"><?php echo escapar($dadosClima['erro']); ?></p>
+                <p class="clima_erro" role="alert"><?php echo escapar($dadosClima['erro']); ?></p>
             <?php } else { ?>
-                <div class="clima-resumo">
-                    <div class="clima-icone" aria-hidden="true"><?php echo $iconeClima; ?></div>
-                    <div class="clima-resumo-texto">
+                <div class="clima_resumo">
+                    <div class="clima_icone" aria-hidden="true"><?php echo $iconeClima; ?></div>
+                    <div class="clima_resumo_texto">
                         <span><?php echo escapar($dadosClima['condicao']); ?></span>
                         <strong><?php echo escapar($dadosClima['temperatura']); ?>°C</strong>
                         <small>Temperatura atual</small>
                     </div>
                 </div>
 
-                <div class="clima-detalhes">
-                    <div class="clima-dado">
+                <div class="clima_detalhes">
+                    <div class="clima_dado">
                         <span>Sensação térmica</span>
                         <strong><?php echo escapar($dadosClima['sensacao']); ?>°C</strong>
                     </div>
-                    <div class="clima-dado">
+                    <div class="clima_dado">
                         <span>Umidade</span>
                         <strong><?php echo escapar($dadosClima['umidade']); ?>%</strong>
                     </div>
-                    <div class="clima-dado">
+                    <div class="clima_dado">
                         <span>Vento</span>
                         <strong><?php echo escapar($dadosClima['vento']); ?> km/h</strong>
                     </div>
-                    <div class="clima-dado">
+                    <div class="clima_dado">
                         <span>Precipitação</span>
                         <strong><?php echo escapar($dadosClima['precipitacao']); ?> mm</strong>
                     </div>
                 </div>
 
-                <p class="clima-atualizado">
+                <p class="clima_atualizado">
                     Atualizado: <?php echo escapar($dadosClima['atualizado']); ?>
                 </p>
             <?php } ?>
@@ -267,29 +283,29 @@ $falhas = mysqli_query($conn, $sql);
         <section class="home_caixa_cep">
             <h2>Consultar endereço por CEP</h2>
 
-            <form id="form_cep" class="home-cep-form">
+            <form id="form_cep" class="home_cep_form">
                 <label for="cep">CEP brasileiro</label>
-                <input type="text" id="cep" name="cep" placeholder="Ex.: 89201-000"
-                       maxlength="9" inputmode="numeric" required>
+                <input type="text" id="cep" name="cep" placeholder="Ex.: 89201000"
+                       maxlength="8" inputmode="numeric" required>
                 <button type="submit">Consultar CEP</button>
             </form>
 
             <p id="mensagem_cep" role="status"></p>
 
-            <div class="home-cep-campos">
-                <div class="home-cep-campo">
+            <div class="home_cep_campos">
+                <div class="home_cep_campo">
                     <label for="logradouro">Logradouro</label>
                     <input type="text" id="logradouro" readonly>
                 </div>
-                <div class="home-cep-campo">
+                <div class="home_cep_campo">
                     <label for="bairro">Bairro</label>
                     <input type="text" id="bairro" readonly>
                 </div>
-                <div class="home-cep-campo">
+                <div class="home_cep_campo">
                     <label for="cidade">Cidade</label>
                     <input type="text" id="cidade" readonly>
                 </div>
-                <div class="home-cep-campo">
+                <div class="home_cep_campo">
                     <label for="uf">Estado (UF)</label>
                     <input type="text" id="uf" readonly>
                 </div>
@@ -337,7 +353,7 @@ $falhas = mysqli_query($conn, $sql);
 
                 <?php
                 while ($falha = mysqli_fetch_assoc($falhas)) {
-                    // Cada consulta usa o ID encontrado na consulta anterior.
+                    // A falha tem o ID do sensor. Com ele encontramos a rota e, pela rota, chegamos ao trem.
                     $idSensor = (int) $falha['id_sensor'];
                     $sqlSensor = "SELECT nome_sensor, id_rotas FROM sensores WHERE id_sensor = $idSensor";
                     $resultadoSensor = mysqli_query($conn, $sqlSensor);
@@ -455,6 +471,17 @@ $falhas = mysqli_query($conn, $sql);
         <p>2026 TremTech</p>
     </footer>
 
-<script src="../../script/validacao.js"></script>
+    <!-- A janela fica fechada até a pessoa clicar em Sair. -->
+    <dialog class="modal_confirmacao" id="janela_saida" aria-labelledby="tituloConfirmarSaida">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="tituloConfirmarSaida">Sair do sistema?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja sair da sua conta?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_saida">Continuar no sistema</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_saida">Sair</button>
+        </div>
+    </dialog>
+
+<script src="../../script/validacao.js?v=simples-8"></script>
 </body>
 </html>

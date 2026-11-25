@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (mysqli_num_rows($resultado) === 0) {
             $mensagem = 'Selecione um sensor do tipo Status.';
         } else {
-            // O banco preenche a data e a origem com os valores padrão.
+            // O INSERT manda sensor, descrição e situação. O banco põe a data atual e a origem sensor.
             $sql = "INSERT INTO falhas_operacionais (id_sensor, descricao, situacao)
                     VALUES (?, ?, 'Não resolvida')";
             $stmt = mysqli_prepare($conn, $sql);
@@ -90,7 +90,7 @@ if ($filtro === 'resolvidas') {
 // DESC coloca as falhas mais recentes primeiro.
 $sql .= " ORDER BY data_registro DESC";
 $falhas = mysqli_query($conn, $sql);
-// Mantém o formulário aberto para mostrar um erro de cadastro.
+// Se o cadastro tiver erro, o formulário continua aberto para a pessoa ver o aviso.
 $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
 ?>
 
@@ -100,15 +100,30 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Falhas operacionais | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=cadastro-3">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
 </head>
 
 <body class="body_geral">
-    <?php include __DIR__ . '/../menu.php'; ?>
     <div class="pagina">
+        <!-- Menu desta página. A classe ativo destaca a seção aberta. -->
+        <aside class="menu">
+            <img class="logo_trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
+            <p class="marca">SISTEMA TREMTECH</p>
 
-        <main class="content-user">
-            <p class="painel-user">PAINEL ADMINISTRATIVO</p>
+            <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
+            <a href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
+            <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
+            <a href="../Tela_Trens/cadastrar_trens.php"><img src="https://img.icons8.com/ios-filled/18/701015/train.png" alt=""> Trens</a>
+            <a href="../Tela_Rotas/cadastrar_rotas.php"><img src="https://img.icons8.com/ios-filled/18/701015/map.png" alt=""> Rotas</a>
+            <a href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
+            <a class="ativo" href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
+            <a href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
+            <a class="logout" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+        </aside>
+
+
+        <main class="content_user">
+            <p class="painel_user">PAINEL ADMINISTRATIVO</p>
             <h1>Controle de falhas operacionais</h1>
             <?php if ($ehAdministrador) { ?>
                 <h2>Cadastro e acompanhamento</h2>
@@ -116,8 +131,8 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                 <h2>Acompanhamento de falhas</h2>
             <?php } ?>
 
-            <div class="admin-badge-user card-recuado">
-                <div class="avatar-user"></div>
+            <div class="admin_badge_user card_recuado">
+                <div class="avatar_user"></div>
                 <div>
                     <strong><?php echo escapar($_SESSION['tipo']); ?></strong>
                     <span><?php echo escapar($_SESSION['nome']); ?></span>
@@ -125,15 +140,15 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
             </div>
 
             <?php if ($ehAdministrador) { ?>
-                <section id="cadastro" class="cadastro-usuario<?php if ($cadastroAberto) { echo ' ativo'; } ?>"
+                <section id="cadastro" class="cadastro_usuario ativo"
                     <?php if (!$cadastroAberto) { echo 'hidden'; } ?>>
 
                     <?php if ($mensagem !== '') { ?>
                         <p><?php echo htmlspecialchars($mensagem); ?></p>
                     <?php } ?>
 
-                    <form method="POST" class="form-cadastro-user">
-                        <div class="campo-user">
+                    <form method="POST" class="form_cadastro_user">
+                        <div class="campo_user">
                             <label for="id_sensor">Sensor de status relacionado</label>
                             <select name="id_sensor" id="id_sensor" required>
                                 <option value="">Selecione um sensor</option>
@@ -146,12 +161,12 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
                             </select>
                         </div>
 
-                        <div class="campo-user">
+                        <div class="campo_user">
                             <label for="descricao">Descrição da falha</label>
                             <input type="text" name="descricao" id="descricao" placeholder="Descreva a falha observada" maxlength="200" required>
                         </div>
 
-                        <button type="submit" class="btn-cadastrar-form">CADASTRAR FALHA</button>
+                        <button type="submit" class="btn_cadastrar_form">CADASTRAR FALHA</button>
                     </form>
                 </section>
             <?php } ?>
@@ -159,19 +174,19 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
             <!-- Lista de falhas com filtro, contadores e botões de mudança de situação. -->
             <section class="home_caixa_falhas" id="falhas">
                 <div class="falhas_cabecalho">
-                    <div class="falhas-cabecalho-acoes">
+                    <div class="falhas_cabecalho_acoes">
                         <h2 class="home_titulo_tabela">Falhas operacionais</h2>
                         <?php if ($ehAdministrador) { ?>
-                            <button type="button" id="btnAbrirCadastro"
-                                    class="btn-cadastrar-user btn-cadastrar-user-compacto" aria-controls="cadastro" aria-expanded="<?php echo $cadastroAberto ? 'true' : 'false'; ?>">
+                            <button type="button" id="botao_abrir_cadastro"
+                                    class="btn_cadastrar_user btn_cadastrar_user_compacto" aria-controls="cadastro">
                                 Cadastrar falha
                             </button>
                         <?php } ?>
                     </div>
 
-                <form method="GET" class="falhas_filtro">
+                <form method="GET" id="filtro_falhas" class="falhas_filtro">
                     <label for="status">Status</label>
-                    <select name="status" id="status" data-filtrar-falhas>
+                    <select name="status" id="status">
                         <option value="todas">Todas</option>
                         <option value="resolvidas"
                             <?php if ($filtro === 'resolvidas') { echo 'selected'; } ?>>
@@ -232,7 +247,7 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
 
                             <?php if ($ehAdministrador) { ?>
                                 <form method="POST" class="falha_acao">
-                                    <!-- Este campo envia o ID da falha escolhida ao PHP. -->
+                                    <!-- O campo fica escondido na tela, mas envia o número da falha que será resolvida ou reaberta. -->
                                     <input type="hidden" name="id_falha" value="<?php echo $falha['id_falha']; ?>">
 
                                     <?php if ($falha['situacao'] === 'Resolvida') { ?>
@@ -253,6 +268,17 @@ $cadastroAberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
         </main>
     </div>
 
-<script src="../../script/validacao.js?v=cadastro-3"></script>
+    <!-- A janela fica fechada até a pessoa clicar em Sair. -->
+    <dialog class="modal_confirmacao" id="janela_saida" aria-labelledby="tituloConfirmarSaida">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="tituloConfirmarSaida">Sair do sistema?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja sair da sua conta?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_saida">Continuar no sistema</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_saida">Sair</button>
+        </div>
+    </dialog>
+
+<script src="../../script/validacao.js?v=simples-7"></script>
 </body>
 </html>

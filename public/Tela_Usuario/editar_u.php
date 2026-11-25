@@ -2,12 +2,12 @@
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
-// A edição só pode ser feita por um administrador.
+// Antes de abrir a edição, o PHP verifica se a pessoa logada é administradora.
 exigir_administrador();
 
-// O ID da URL indica qual registro deve aparecer preenchido no formulário.
+// Busca pelo ID do link Editar e preenche o formulário.
 $id = (int) ($_GET['id'] ?? 0);
-$sql = "SELECT nome, email, tipo, senha FROM usuarios WHERE id_usuario = $id";
+$sql = "SELECT nome, email, tipo FROM usuarios WHERE id_usuario = $id";
 $resultado = mysqli_query($conn, $sql);
 $usuario = mysqli_fetch_assoc($resultado);
 
@@ -33,17 +33,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($tipo !== 'Administrador' && $tipo !== 'Funcionário') {
         $mensagem = 'Selecione um tipo de usuário válido.';
     } else {
-        // Campo vazio mantém o hash atual. Se digitar uma senha, cria outro hash.
-        $senhaHash = $usuario['senha'];
-
-        if ($senha !== '') {
-            $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+        // Só atualiza a senha se a pessoa preencher o campo Nova senha.
+        if ($senha === '') {
+            $sql = "UPDATE usuarios SET nome = ?, email = ?, tipo = ? WHERE id_usuario = ?";
+            $stmt = mysqli_prepare($conn, $sql);
+            mysqli_stmt_bind_param($stmt, 'sssi', $nome, $email, $tipo, $id);
+        } else {
+            $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+            $sql = "UPDATE usuarios SET nome = ?, email = ?, tipo = ?, senha = ? WHERE id_usuario = ?";
+            $stmt = mysqli_prepare($conn, $sql);
+            mysqli_stmt_bind_param($stmt, 'ssssi', $nome, $email, $tipo, $senha_hash, $id);
         }
-
-        $sql = "UPDATE usuarios SET nome = ?, email = ?, tipo = ?, senha = ?
-                WHERE id_usuario = ?";
-        $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, 'ssssi', $nome, $email, $tipo, $senhaHash, $id);
 
         try {
             $salvou = mysqli_stmt_execute($stmt);
@@ -77,19 +77,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar usuário | TremTech</title>
-    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-topo-2">
+    <link rel="stylesheet" href="../../assets/style/style.css?v=nomes-underscore-1">
 </head>
 <body class="body_geral">
-    <?php include __DIR__ . '/../menu.php'; ?>
-    <main class="content-user">
+    <div class="pagina">
+        <!-- Menu desta página. A classe ativo destaca a seção aberta. -->
+        <aside class="menu">
+            <img class="logo_trem" src="https://img.icons8.com/ios/100/701015/train.png" alt="Logo TremTech">
+            <p class="marca">SISTEMA TREMTECH</p>
+
+            <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
+            <a class="ativo" href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
+            <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
+            <a href="../Tela_Trens/cadastrar_trens.php"><img src="https://img.icons8.com/ios-filled/18/701015/train.png" alt=""> Trens</a>
+            <a href="../Tela_Rotas/cadastrar_rotas.php"><img src="https://img.icons8.com/ios-filled/18/701015/map.png" alt=""> Rotas</a>
+            <a href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
+            <a href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
+            <a href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
+            <a class="logout" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+        </aside>
+        <main class="content_user">
         <h1>Editar usuário</h1>
 
         <?php if ($mensagem !== '') { ?>
             <p><?php echo escapar($mensagem); ?></p>
         <?php } ?>
 
-        <section class="cadastro-usuario ativo">
-            <form method="POST" class="form-cadastro-user">
+        <section class="cadastro_usuario ativo">
+            <form method="POST" class="form_cadastro_user">
                 <label for="nome">Nome</label>
                 <input type="text" id="nome" name="nome" maxlength="100"
                        value="<?php echo escapar($nome); ?>" required>
@@ -108,11 +123,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <option <?php if ($tipo === 'Administrador') { echo 'selected'; } ?>>Administrador</option>
                 </select>
 
-                <button class="btn-cadastrar-form" type="submit">Salvar</button>
+                <button class="btn_cadastrar_form" type="submit">Salvar</button>
                 <a href="cadastrar_usuario.php">Cancelar</a>
             </form>
         </section>
-    </main>
-    <script src="../../script/validacao.js"></script>
+        </main>
+    </div>
+    <!-- A janela fica fechada até a pessoa clicar em Sair. -->
+    <dialog class="modal_confirmacao" id="janela_saida" aria-labelledby="tituloConfirmarSaida">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="tituloConfirmarSaida">Sair do sistema?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja sair da sua conta?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_saida">Continuar no sistema</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_saida">Sair</button>
+        </div>
+    </dialog>
+
+    <script src="../../script/validacao.js?v=simples-7"></script>
 </body>
 </html>

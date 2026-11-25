@@ -1,6 +1,6 @@
 <?php
 
-// Consulta o Open-Meteo e devolve os campos que a Home usa.
+// Previsão do tempo. Busca o clima de Joinville no Open-Meteo e entrega os dados para a Home.
 function consultarClima()
 {
     // A latitude e a longitude indicam Joinville.
@@ -22,7 +22,7 @@ function consultarClima()
         return ['erro' => 'Não foi possível consultar o clima.'];
     }
 
-    // A resposta vem em JSON. O true faz o PHP ler os dados como array.
+    // A API manda texto em formato JSON. json_decode transforma esse texto em uma lista que o PHP consegue ler.
     $dados = json_decode($resposta, true);
 
     if (!isset($dados['current'])) {
@@ -31,8 +31,7 @@ function consultarClima()
 
     $clima = $dados['current'];
 
-    // Cada número que a API envia tem um significado.
-    // A API manda um código numérico. Esta lista converte cada código em um texto.
+    // A API manda um número para o tipo de tempo. Por exemplo, 0 aparece na Home como Céu limpo.
     $condicoes = [
         0 => 'Céu limpo',
         1 => 'Predominantemente limpo',
@@ -64,8 +63,8 @@ function consultarClima()
         }
     }
 
-    // Os nomes da esquerda são os que a Home usa.
-    // O ?? usa um texto vazio quando aquele valor não vem na resposta.
+    // Troca os nomes em inglês da API pelos nomes que a Home usa, como temperatura e umidade.
+    // Se a API não mandar um campo, ?? usa um texto vazio no lugar dele.
     return [
         'temperatura' => $clima['temperature_2m'] ?? '',
         'sensacao' => $clima['apparent_temperature'] ?? '',
