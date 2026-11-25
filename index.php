@@ -1,6 +1,5 @@
 <?php
-// LOGIN. Este arquivo mostra o formulário de entrada e também recebe o e-mail e a senha.
-// Se a senha estiver certa, ele guarda a conta na sessão e abre a Home.
+// O login confere e-mail e senha, guarda a conta na sessão e abre a Home.
 
 require_once 'infra/auth.php';
 
@@ -12,10 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $senha = $_POST['senha'] ?? '';
 
-    // A consulta procura um usuário pelo e-mail digitado no formulário.
-    // prepare deixa a consulta pronta, ainda com o ? no lugar do e-mail.
-    // bind_param liga $email ao ?. O 's' indica que o e-mail é texto.
-    // execute manda o banco fazer a busca usando esse e-mail.
+    // prepare monta a busca, bind_param põe o e-mail no ? como texto (s) e execute consulta o banco.
     $sql = "SELECT id_usuario, nome, email, tipo, senha FROM usuarios WHERE email = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param('s', $email);
@@ -76,9 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
 
                     <?php
-                    // Na primeira vez que a tela abre, $erro ainda não existe.
-                    // Se o e-mail ou a senha estiver errado, o PHP guarda o aviso em $erro.
-                    // isset confere se esse aviso existe. Se existir, echo escreve o aviso na tela.
+                    // isset verifica se $erro existe e echo mostra o aviso de e-mail ou senha inválidos.
                     ?>
                     <?php if (isset($erro)) { ?>
                         <p role="alert"><?php echo $erro; ?></p>

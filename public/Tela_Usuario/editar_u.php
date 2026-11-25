@@ -1,6 +1,5 @@
 <?php
-// EDITAR USUÁRIO. O link Editar manda o ID no endereço e o PHP busca o usuário no banco.
-// A página de cadastro usa este arquivo para buscar o registro e salvar a edição.
+// O PHP usa o ID do endereço para preencher o formulário e salvar a edição.
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 

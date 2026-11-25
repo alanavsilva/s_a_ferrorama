@@ -1,9 +1,5 @@
 <?php
-// PROTEÇÃO DAS TELAS. As páginas internas usam as funções deste arquivo.
-// exigir_login verifica a conta. exigir_administrador também verifica o perfil.
-// session_status informa se o PHP já abriu uma sessão nesta página.
-// PHP_SESSION_ACTIVE é o nome que o PHP usa para dizer: a sessão já está aberta.
-// O !== significa diferente de. Só chamamos session_start quando ainda não há sessão ativa.
+// session_status indica se a sessão está ativa (PHP_SESSION_ACTIVE) para o PHP abrir só quando precisar.
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
@@ -16,12 +12,10 @@ function exigir_login()
         exit();
     }
 
-    // Busca a conta pelo ID guardado na sessão. Se ela foi excluída, encerra o login.
-    // global deixa a função usar a variável $conn que a página já criou para falar com o banco.
+    // global permite usar a conexão $conn para buscar a conta da sessão e sair se ela foi excluída.
     global $conn;
     if (!isset($conn)) {
-        // __DIR__ é a pasta onde este arquivo está, neste caso infra. O nome tem dois underlines de cada lado.
-        // O ponto junta o caminho de infra com /conexao.php para abrir o arquivo certo.
+        // __DIR__ dá a pasta deste arquivo e o ponto junta esse caminho com /conexao.php.
         require __DIR__ . '/conexao.php';
     }
 

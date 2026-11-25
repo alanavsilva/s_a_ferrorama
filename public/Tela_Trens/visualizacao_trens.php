@@ -1,7 +1,5 @@
 <?php
-// TABELA. O arquivo de cadastro abre esta parte com o resultado da consulta.
-// O while percorre os registros e imprime uma linha para cada um. Editar e Excluir usam o ID dessa linha.
-// Esta tabela recebe os dados da página de cadastro.
+// O while mostra cada registro em uma linha e usa seu ID nos botões Editar e Excluir.
 if (!isset($trens)) {
     exit();
 }

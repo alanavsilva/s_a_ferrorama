@@ -1,6 +1,5 @@
 <?php
-// HOME. As primeiras consultas pegam os dados dos cartões, do clima e das listas.
-// Mais abaixo, o HTML mostra esses dados. O JavaScript cuida do CEP e da troca de trens no cartão de velocidade.
+// O PHP carrega os dados da Home e o JavaScript controla a consulta de CEP e o cartão de velocidade.
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
 

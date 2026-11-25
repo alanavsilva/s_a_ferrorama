@@ -1,6 +1,5 @@
 <?php
-// EXCLUIR USUÁRIO. Recebe o ID enviado pelo botão Excluir da tabela.
-// Antes de apagar, procura trens ou falhas ligados à conta. Depois volta para a lista e mostra o resultado.
+// Procura trens ou falhas ligados à conta antes de excluir o registro e voltar à lista com o aviso.
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 

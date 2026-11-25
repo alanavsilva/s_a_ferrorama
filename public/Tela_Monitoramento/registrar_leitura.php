@@ -1,6 +1,5 @@
 <?php
-// REGISTRAR LEITURA OU FALHA. O formulário recebe o sensor, a data e o valor ou a descrição.
-// Um sensor de Status gera uma falha. Os outros tipos gravam uma leitura com valor numérico.
+// O formulário grava uma falha para sensores de Status ou uma leitura numérica para os demais.
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
 

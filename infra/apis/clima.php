@@ -1,12 +1,10 @@
 <?php
-// CLIMA. A Home chama consultarClima para pedir os dados de Joinville ao Open-Meteo.
-// A função devolve os valores para os cartões ou uma mensagem de erro.
+// consultarClima pede o clima de Joinville ao Open-Meteo e devolve os dados ou um erro.
 
 // Previsão do tempo. Busca o clima de Joinville no Open-Meteo e entrega os dados para a Home.
 function consultarClima()
 {
-    // A latitude e a longitude indicam Joinville.
-    // current pede os dados atuais, e timezone define o fuso do horário.
+    // As coordenadas indicam Joinville, current pede o clima atual e timezone escolhe o fuso.
     $url = 'https://api.open-meteo.com/v1/forecast'
         . '?latitude=-26.3044&longitude=-48.8456'
         . '&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m'
@@ -65,8 +63,7 @@ function consultarClima()
         }
     }
 
-    // Troca os nomes em inglês da API pelos nomes que a Home usa, como temperatura e umidade.
-    // Se a API não mandar um campo, ?? usa um texto vazio no lugar dele.
+    // Traduz as chaves da API e usa ?? para preencher campos que vierem vazios.
     return [
         'temperatura' => $clima['temperature_2m'] ?? '',
         'sensacao' => $clima['apparent_temperature'] ?? '',

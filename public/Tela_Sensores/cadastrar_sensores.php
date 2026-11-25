@@ -1,6 +1,5 @@
 <?php
-// CADASTRAR SENSOR. O formulário envia os dados pelo método POST.
-// O PHP valida e salva. A consulta da lista vai para o arquivo visualizacao_sensores.php.
+// O PHP valida e salva o formulário, e a tabela mostra os registros do banco.
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
@@ -14,8 +13,7 @@ $mensagem = $_SESSION['mensagem_sensor'] ?? '';
 $sucesso = $_SESSION['sucesso_sensor'] ?? false;
 unset($_SESSION['mensagem_sensor'], $_SESSION['sucesso_sensor']);
 
-// Cadastro. Recebe o formulário e faz o INSERT no banco.
-// Quando o endereço tem "editar", o formulário vai mostrar o registro escolhido.
+// O ID no endereço indica que o formulário está em modo de edição.
 $editando = isset($_GET['editar']);
 
 if (!$editando && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -60,8 +58,7 @@ if (!$editando && $_SERVER['REQUEST_METHOD'] === 'POST') {
 $busca = trim($_GET['buscar'] ?? '');
 $rotas = mysqli_query($conn, "SELECT id_rotas, nome FROM rotas ORDER BY nome");
 $sensores = mysqli_query($conn, "SELECT * FROM sensores ORDER BY id_sensor");
-// Se o cadastro tiver erro, o formulário continua aberto para a pessoa ver o aviso.
-// Antes do HTML, busca o registro ou salva as alterações enviadas pelo formulário.
+// O PHP carrega ou salva a edição e mantém o formulário aberto se houver erro.
 if ($editando) {
     $sucesso = false;
     require 'editar_s.php';

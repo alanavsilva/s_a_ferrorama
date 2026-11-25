@@ -1,14 +1,11 @@
-// AÇÕES DAS TELAS. Este arquivo é carregado no fim das páginas.
-// Cada parte procura o elemento que precisa usar. Por exemplo, o bloco do CEP só roda na Home, onde existe o formulário de CEP.
-// O HTML dá um nome (ID) ao botão e outro ao formulário. getElementById encontra cada um pelo seu nome.
+// Cada bloco usa getElementById para encontrar o elemento que controla na tela.
 const botao_cadastro = document.getElementById("botao_abrir_cadastro");
 const cadastro = document.getElementById("cadastro");
 
 // Este arquivo é usado em várias telas. Só prepara o clique se encontrou o botão e o formulário nesta página.
 if (botao_cadastro && cadastro) {
     botao_cadastro.onclick = function () {
-        // Ao clicar em Cadastrar, olha se o formulário está escondido.
-        // false faz aparecer. true faz sumir.
+        // Cadastrar alterna hidden: false mostra o formulário e true esconde.
         if (cadastro.hidden) {
             cadastro.hidden = false;
         } else {
@@ -46,9 +43,7 @@ if (form_cep) {
             return;
         }
 
-        // O for olha um caractere por vez. Se achar uma letra ou um hífen,
-        // mostra o mesmo aviso e para antes de consultar o ViaCEP.
-        // Por exemplo, 89201ABC tem oito caracteres, mas não é um CEP válido. O for encontra a letra e interrompe a busca.
+        // O for verifica cada caractere do CEP e para a busca se encontrar algo que não seja número.
         for (let i = 0; i < cep.length; i = i + 1) {
             if (cep[i] < "0" || cep[i] > "9") {
                 mensagem.innerText = "Digite um CEP com 8 números.";
@@ -58,8 +53,7 @@ if (form_cep) {
 
         mensagem.innerText = "Consultando CEP...";
 
-        // fetch manda o CEP para o serviço ViaCEP pela internet.
-        // Para 89201000, o endereço da consulta termina em /ws/89201000/json/. O navegador envia esse pedido ao ViaCEP.
+        // fetch consulta o ViaCEP usando o CEP digitado no endereço da busca.
         return fetch("https://viacep.com.br/ws/" + cep + "/json/")
             // O primeiro then recebe a resposta do ViaCEP quando ela chegar.
             .then(function (resposta) {
@@ -94,8 +88,7 @@ const trens = document.getElementById("velocidades_trens");
 let indice = 0;
 
 function mostrar_velocidade() {
-    // A Home tem uma lista escondida com os trens. indice indica qual deles será mostrado agora.
-    // Dentro de cada item, a primeira parte tem o nome e a segunda tem a velocidade.
+    // O índice escolhe um trem da lista da Home para mostrar seu nome e sua velocidade.
     const trem_atual = trens.children[indice];
     const campos = trem_atual.children;
     // textContent lê o nome e a velocidade mesmo com a lista escondida.
@@ -216,8 +209,7 @@ function mostrar_campo_leitura() {
     descricao.required = false;
     botao.innerText = "SALVAR LEITURA";
 
-    // O texto ao lado de Valor mostra a unidade: km/h para velocidade ou °C para temperatura.
-    // max é o maior valor aceito pelo campo. O PHP também confere o valor quando recebe o formulário.
+    // O campo mostra km/h ou °C e max define o limite, que o PHP também confere.
     if (tipo === "Velocidade") {
         unidade.innerText = "(km/h)";
         valor.max = 600;

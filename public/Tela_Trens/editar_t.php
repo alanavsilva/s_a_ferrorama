@@ -1,6 +1,5 @@
 <?php
-// EDITAR TREM. O link Editar manda o ID no endereço e o PHP busca o trem no banco.
-// A página de cadastro usa este arquivo para buscar o registro e salvar a edição.
+// O PHP usa o ID do endereço para preencher o formulário e salvar a edição.
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
@@ -29,8 +28,7 @@ $velocidade = $trem['velocidade_media'];
 $id_usuario = $trem['id_usuario'];
 $mensagem = '';
 
-// Ao enviar o formulário, este mesmo arquivo salva o trem indicado na URL.
-// Quando a página é só aberta, este bloco é pulado. Ele roda quando a pessoa clica em Salvar.
+// Este bloco atualiza o registro no banco quando a pessoa clica em Salvar.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = trim($_POST['nome'] ?? '');
     $velocidade = $_POST['velocidade'] ?? '';

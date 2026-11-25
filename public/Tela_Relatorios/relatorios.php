@@ -1,6 +1,5 @@
 <?php
-// RELATÓRIOS. O usuário escolhe um sensor e um dia no formulário.
-// O PHP consulta falhas ou leituras conforme o tipo do sensor, mostra o resultado e guarda um resumo na sessão.
+// O PHP busca os dados do sensor no dia escolhido e guarda um resumo do relatório na sessão.
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
@@ -122,8 +121,7 @@ if (isset($_GET['gerar'])) {
                 'total_falhas' => $total_falhas
             ];
 
-            // array_unshift coloca o relatório novo no começo da lista.
-            // array_slice guarda os primeiros 20, que são os mais recentes.
+            // array_unshift põe o relatório no início e array_slice mantém só os 20 mais recentes.
             array_unshift($historico, $item);
             $historico = array_slice($historico, 0, 20);
             $_SESSION['historico_relatorios'] = $historico;

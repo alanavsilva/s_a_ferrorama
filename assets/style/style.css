@@ -1,5 +1,5 @@
-/* APARÊNCIA DO SITE. Os nomes com ponto, como .menu_topo, são classes do HTML. */
-/* As regras do fim do arquivo ajustam a aparência quando a tela fica menor. */
+/* Estilos do TremTech */
+/* Telas menores têm ajustes no fim */
 /* Fonte, fundo e espaçamento padrão da página */
 
 * {
@@ -27,7 +27,7 @@ body {
 }
 
 
-/* Espaçamento e aparência da área principal e das classes do menu lateral */
+/* Área principal e menu lateral */
 
 .pagina {
   width: 100%;
@@ -417,7 +417,7 @@ body {
 }
 
 
-/* Tela de entrada com a apresentação de um lado e o formulário do outro */
+/* Apresentação e formulário de login */
 
 .body_login {
   font-family: Arial, Helvetica, sans-serif;
@@ -731,7 +731,7 @@ body {
   cursor: pointer;
 }
 
-/* Duas colunas iguais. minmax permite que elas encolham quando falta espaço. */
+/* Duas colunas que podem encolher */
 .home_cep_campos {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -782,7 +782,7 @@ body {
   background: #fff;
 }
 
-/* Cartões que mostram o total de falhas resolvidas e não resolvidas. */
+/* Totais de falhas por situação */
 .falhas_resumo {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1297,7 +1297,7 @@ body {
   font-size: 22px;
 }
 
-/* No computador, os campos ficam em duas colunas. As regras de tela pequena ajustam esse layout. */
+/* Campos lado a lado no computador */
 .form_cadastro_user {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1681,7 +1681,7 @@ body {
   background: #fff;
 }
 
-/* Cor e espessura das linhas do trilho. A ponte tem a própria cor. */
+/* Linhas do trilho e da ponte */
 .trilho {
   fill: none;
   stroke: #454545;
@@ -2768,7 +2768,7 @@ header {
 }
 
 
-/* Cartões da página pública que abrem ao clicar no título */
+/* Cartões que abrem ao clicar no título */
 .landing_perfis {
   margin: 28px 0;
   padding: clamp(22px, 4vw, 38px);
@@ -2941,7 +2941,7 @@ header {
 @media (max-width: 560px) {
   .landing_recursos { padding: 22px 18px; }
 }
-/* Trilho pequeno e animação do trem na página pública */
+/* Trilho e animação do trem */
 .landing_mini_stage {
   position: relative;
   flex: 0 0 340px;
@@ -3048,7 +3048,7 @@ header {
   .home_indicador:not(:last-child) { border-bottom: 1px solid #eadede; }
 }
 
-/* Seção que explica para que serve o TremTech */
+/* Sobre o TremTech */
 .landing_objetivo {
   display: grid;
   grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.4fr);
@@ -3124,7 +3124,7 @@ header {
 
 
 
-/* Menu superior. position: sticky deixa a barra visível enquanto a pessoa rola a página. */
+/* Menu fica no topo ao rolar */
 .menu_topo {
   position: sticky;
   top: 0;
@@ -3189,7 +3189,7 @@ header {
   color: #701015;
 }
 
-/* Identificação do usuário dentro das boas-vindas da Home. */
+/* Cartão da conta na Home */
 .home_boas_vindas .home_conta {
   width: fit-content;
   max-width: 100%;
@@ -3209,7 +3209,7 @@ header {
   height: 28px;
 }
 
-/* Em telas estreitas, os links vão para baixo e podem rolar para os lados. */
+/* Links rolam para os lados em telas pequenas */
 @media (max-width: 900px) {
   .menu_topo {
     flex-wrap: wrap;
@@ -3223,13 +3223,13 @@ header {
   }
 }
 
-/* No computador, o cartão da conta fica abaixo do menu superior. */
+/* Cartão da conta abaixo do menu */
 @media (min-width: 901px) {
   .content_user .admin_badge_user {
     position: absolute !important;
   }
 }
-/* Deixa espaço para a barra quando a pessoa clica num link da página pública. */
+/* Espaço para o menu ao abrir uma seção */
 .landing_main[id],
 .landing_main section[id] {
   scroll-margin-top: 72px;

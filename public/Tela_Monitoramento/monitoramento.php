@@ -1,6 +1,5 @@
 <?php
-// MONITORAMENTO. Os filtros indicam os sensores e a rota que a pessoa está consultando.
-// O PHP mostra a última leitura dos sensores escolhidos. Mais abaixo ficam o mapa e a lista de falhas.
+// Os filtros escolhem as últimas leituras e a rota exibida com o mapa e a lista de falhas.
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
 
@@ -100,8 +99,7 @@ function mostrar_leitura($conn, $sensor, $unidade, $casas_decimais)
         $id_rota = (int) $sensor['id_rotas'];
         $nome = $sensor['nome_sensor'] . ' - ' . buscar_trem_da_rota($conn, $id_rota);
 
-        // A consulta põe as leituras mais novas no começo e pega apenas a primeira.
-        // Se duas leituras têm a mesma data, mostra a que foi cadastrada por último.
+        // O PHP busca a leitura mais recente e, se as datas forem iguais, pega a última cadastrada.
         $sql = "SELECT valor, data_leitura FROM leituras_sensores
                 WHERE id_sensor = $id_sensor
                 ORDER BY data_leitura DESC, id_leitura DESC LIMIT 1";

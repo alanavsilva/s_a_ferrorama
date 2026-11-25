@@ -1,6 +1,5 @@
 <?php
-// EXCLUIR SENSOR. Recebe o ID enviado pelo botão Excluir da tabela.
-// Antes de apagar, procura leituras ou falhas ligadas ao sensor. Depois volta para a lista e mostra o resultado.
+// Procura leituras ou falhas ligadas ao sensor antes de excluir o registro e voltar à lista com o aviso.
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 

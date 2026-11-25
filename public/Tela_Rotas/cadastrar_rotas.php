@@ -1,6 +1,5 @@
 <?php
-// CADASTRAR ROTA. O formulário envia os dados pelo método POST.
-// O PHP valida e salva. A consulta da lista vai para o arquivo visualizacao_rotas.php.
+// O PHP valida e salva o formulário, e a tabela mostra os registros do banco.
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
@@ -13,8 +12,7 @@ $mensagem = $_SESSION['mensagem_rota'] ?? '';
 $sucesso = $_SESSION['sucesso_rota'] ?? false;
 unset($_SESSION['mensagem_rota'], $_SESSION['sucesso_rota']);
 
-// Cadastro. Recebe o formulário e faz o INSERT no banco.
-// O link Editar manda o ID pelo endereço da página.
+// O ID no endereço indica que o formulário está em modo de edição.
 $editando = isset($_GET['editar']);
 
 if (!$editando && $_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -62,8 +60,7 @@ $busca = trim($_GET['buscar'] ?? '');
 
 $trens = mysqli_query($conn, "SELECT id_trem, nome FROM trens ORDER BY nome");
 $rotas = mysqli_query($conn, "SELECT * FROM rotas ORDER BY nome");
-// Se o cadastro tiver erro, o formulário continua aberto para a pessoa ver o aviso.
-// Busca o registro para preencher o formulário ou salva as alterações antes do HTML.
+// O PHP carrega ou salva a edição e mantém o formulário aberto se houver erro.
 if ($editando) {
     $sucesso = false;
     require 'editar_r.php';

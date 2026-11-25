@@ -1,6 +1,5 @@
 <?php
-// FALHAS. Funcionários consultam a lista. Administradores também registram, resolvem e reabrem falhas.
-// O formulário envia a ação ao PHP. Depois, a página busca os registros para montar a lista.
+// Funcionários consultam falhas e administradores também podem registrar, resolver e reabrir.
 require_once '../../infra/conexao.php';
 require_once '../../infra/auth.php';
 
