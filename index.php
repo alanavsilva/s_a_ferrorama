@@ -31,6 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['email'] = $usuario['email'];
                 $_SESSION['tipo'] = $usuario['tipo'];
                 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+                // wow pra que isso
+
                 $stmt->close();
                 header('Location: public/Tela_Home/home.php');
                 exit;

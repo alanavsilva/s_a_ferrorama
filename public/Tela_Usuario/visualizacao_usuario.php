@@ -103,6 +103,9 @@ if ($resultado->num_rows === 0) {
     </div>
 </dialog>
 <script>
+
+
+//nao pode ter script dentro do arquivo! 
 (() => {
     const modal = document.querySelector('.modal-confirmacao');
     if (!modal) return;

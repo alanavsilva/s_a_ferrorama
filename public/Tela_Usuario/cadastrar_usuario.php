@@ -77,6 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($nome === '' || $email === '' || mb_strlen($nome) > 100 || mb_strlen($email) > 100) {
                 $mensagem = 'Preencha os campos obrigatórios. Nome e e-mail devem ter até 100 caracteres.';
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                // 🛑
                 $mensagem = 'Informe um email válido.';
             } elseif ($senha !== '' && strlen($senha) < 8) {
                 $mensagem = 'A senha deve ter pelo menos 8 caracteres.';
@@ -103,6 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         exit;
                     }
                 } catch (mysqli_sql_exception $e) {
+                    // 🛑
                     if ((int) $e->getCode() === 1062) {
                         $mensagem = 'Este email já está cadastrado.';
                     } else {
@@ -156,6 +158,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 } catch (mysqli_sql_exception $e) {
 
                     if ((int) $e->getCode() === 1062) {
+                        // 🛑
                         $mensagem = 'Este email já está cadastrado.';
 
                     } else {

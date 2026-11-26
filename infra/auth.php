@@ -56,6 +56,8 @@ function token_csrf(): string
     return $_SESSION['csrf_token'];
 }
 
+// nao da pra me explicar
+
 function verificar_csrf(): void
 {
     $token = $_POST['csrf_token'] ?? '';
@@ -72,6 +74,8 @@ function verificar_csrf(): void
         exit('Requisição inválida.');
     }
 }
+
+/// muito dificil
 
 function escapar(string $valor): string
 {
