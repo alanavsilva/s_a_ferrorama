@@ -22,25 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuario = $resultado->fetch_assoc();
     $stmt->close();
 
-<<<<<<< HEAD
-            if ($usuario && password_verify($senha, $usuario['senha'])) {
-                session_regenerate_id(true);
-                $_SESSION['id_usuario'] = $usuario['id_usuario'];
-                $_SESSION['nome'] = $usuario['nome'];
-                $_SESSION['email'] = $usuario['email'];
-                $_SESSION['tipo'] = $usuario['tipo'];
-                $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-
-                // wow pra que isso
-
-                $stmt->close();
-                header('Location: public/Tela_Home/home.php');
-                exit;
-            }
-=======
     // Se a conta existir, password_verify compara a senha digitada com o hash salvo no banco.
     if ($usuario && password_verify($senha, $usuario['senha'])) {
->>>>>>> 07c1ccd5fd9c6f91271b3eb143ea406d761d17e0
 
         // Guarda quem entrou e o perfil da conta para as telas internas.
         $_SESSION['id_usuario'] = $usuario['id_usuario'];

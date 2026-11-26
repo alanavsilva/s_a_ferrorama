@@ -45,9 +45,11 @@ if (!$editando && $_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_stmt_close($stmt);
 
         if ($salvou) {
-            $_SESSION['mensagem_rota'] = 'Rota cadastrada com sucesso!';    
+            $_SESSION['mensagem_rota'] = 'Rota cadastrada com sucesso!';
+    
             $_SESSION['sucesso_rota'] = true;
-            header('Location: cadastrar_rotas.php');    
+            header('Location: cadastrar_rotas.php');
+    
             exit();
         }
 

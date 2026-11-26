@@ -44,9 +44,11 @@ if (!$editando && $_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_stmt_close($stmt);
 
         if ($salvou) {
-            $_SESSION['mensagem_sensor'] = 'Sensor cadastrado com sucesso!';    
+            $_SESSION['mensagem_sensor'] = 'Sensor cadastrado com sucesso!';
+    
             $_SESSION['sucesso_sensor'] = true;
-            header('Location: cadastrar_sensores.php');    
+            header('Location: cadastrar_sensores.php');
+    
             exit();
         }
 
