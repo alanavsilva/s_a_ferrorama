@@ -27,8 +27,10 @@ if (!$editando && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $rota_encontrada = mysqli_query($conn, $sql);
 
     // in_array confere se o tipo enviado está na lista de tipos do banco.
-    if (mb_strlen($nome) < 3 || mb_strlen($nome) > 100 || !in_array($tipo, $tipos)) {
-        $mensagem = 'Informe um nome válido e selecione o tipo do sensor.';
+    if (mb_strlen($nome) < 3 || mb_strlen($nome) > 100) {
+        $mensagem = 'Informe um nome válido para o sensor';
+    } elseif (!in_array($tipo, $tipos)){
+        $mensagem = 'Selecione um tipo válido para o sensor.';
     } elseif (mysqli_num_rows($rota_encontrada) === 0) {
         $mensagem = 'Selecione uma rota cadastrada.';
     } else {
