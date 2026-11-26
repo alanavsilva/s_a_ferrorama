@@ -48,15 +48,13 @@ RF-23 — O sistema deve permitir que o administrador cadastre usuários.
 
 RF-24 — O sistema deve recusar o cadastro de usuário com e-mail já existente.
 
-RF-25 — O sistema deve recusar senhas de usuário com menos de oito caracteres.
-
 RF-26 — O sistema deve permitir que o administrador edite usuários cadastrados.
 
 RF-27 — O sistema deve preservar a senha atual quando ela não for informada durante a edição do usuário.
 
 RF-28 — O sistema deve permitir a busca de usuários por nome ou e-mail.
 
-RF-29 — O sistema deve impedir a exclusão de administradores e de usuários vinculados como responsáveis por trens.
+RF-29 — O sistema deve impedir a exclusão de usuários vinculados a trens ou falhas.
 
 RF-30 — O sistema deve listar os trens cadastrados.
 
@@ -120,8 +118,6 @@ RF-59 — O sistema deve exibir a última leitura registrada do sensor de veloci
 
 RF-60 — O sistema deve exibir a última leitura registrada do sensor de temperatura selecionado.
 
-RF-61 — O sistema deve indicar alerta de velocidade quando a velocidade exibida superar 100 km/h.
-
 RF-62 — O sistema deve atualizar os dados exibidos ao trocar o sensor monitorado.
 
 RF-63 — O sistema deve exibir o trem associado ao sensor monitorado.
@@ -148,11 +144,7 @@ RN-03 — O sistema aceita os perfis Administrador e Funcionário.
 
 RN-04 — O e-mail de cada usuário deve ser válido e único.
 
-RN-05 — A senha cadastrada deve ter pelo menos oito caracteres.
-
 RN-06 — Cada trem deve ter um usuário responsável existente.
-
-RN-07 — A velocidade média de um trem deve estar entre 1 e 600 km/h.
 
 RN-08 — A distância e a duração de uma rota devem ser positivas.
 
@@ -162,15 +154,11 @@ RN-10 — Cada sensor deve estar associado a uma rota existente, que identifica 
 
 RN-11 — Uma nova falha deve começar como não resolvida.
 
-RN-12 — Velocidade acima de 100 km/h deve ser indicada como alerta.
-
-RN-13 — Um alerta de velocidade não deve criar uma falha automaticamente.
+RN-13 — As falhas operacionais são registradas manualmente.
 
 RN-14 — O sistema deve impedir exclusões que deixem registros dependentes sem vínculo válido.
 
 RN-15 — O relatório deve considerar os registros do sensor selecionado dentro do dia escolhido.
-
-RN-16 — A temperatura acima de 40 °C deve ser indicada como alerta visual. Alertas de velocidade e temperatura não geram falhas automaticamente.
 
 ## Requisitos não funcionais
 

@@ -1,74 +1,52 @@
-
 <?php
-require_once "../../infra/conexao.php";
-require_once "../../infra/auth.php";
+// Procura trens ou falhas ligados à conta antes de excluir o registro e voltar à lista com o aviso.
+require_once '../../infra/conexao.php';
+require_once '../../infra/auth.php';
 
 exigir_administrador();
-verificar_csrf();
 
-$id = filter_input(INPUT_POST, "id", FILTER_VALIDATE_INT);
-
-if (!$id || $id < 1) {
-    $_SESSION["aviso_exclusao"] = "Usuário inválido.";
-    header("Location: cadastrar_usuario.php");
-    exit;
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id'])) {
+    header('Location: cadastrar_usuario.php');
+    exit();
 }
 
-$stmt = $conn->prepare(
-    "SELECT tipo FROM usuarios WHERE id_usuario = ?"
-);
-$stmt->bind_param("i", $id);
-$stmt->execute();
+// O formulário envia o ID. Uma ligação já basta para bloquear a exclusão.
+$id = (int) $_POST['id'];
+$trens = mysqli_query($conn, "SELECT id_trem FROM trens WHERE id_usuario = $id LIMIT 1");
+$falhas_operacionais = mysqli_query($conn, "SELECT id_falha FROM falhas_operacionais WHERE id_usuario = $id LIMIT 1");
 
-$usuario = $stmt->get_result()->fetch_assoc();
-$stmt->close();
+if (mysqli_num_rows($trens) > 0 || mysqli_num_rows($falhas_operacionais) > 0) {
+    $mensagem = 'Este usuário tem trens ou falhas vinculadas.';
+} else {
+    // O ? recebe o ID que veio do formulário. O tipo i indica um número inteiro.
+    $sql = "DELETE FROM usuarios WHERE id_usuario = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, 'i', $id);
 
-if (!$usuario) {
-    $_SESSION["aviso_exclusao"] = "Usuário não encontrado.";
-    header("Location: cadastrar_usuario.php");
-    exit;
+    try {
+        $excluiu = mysqli_stmt_execute($stmt);
+    } catch (mysqli_sql_exception $erro) {
+        $excluiu = false;
+    }
+
+    $linhas = mysqli_stmt_affected_rows($stmt);
+    mysqli_stmt_close($stmt);
+
+    if (!$excluiu) {
+        $mensagem = 'Não foi possível excluir o usuário.';
+    } elseif ($linhas === 0) {
+        $mensagem = 'Usuário não encontrado.';
+    } else {
+        if ($id === (int) $_SESSION['id_usuario']) {
+            header('Location: ../../logout.php');
+            exit();
+        }
+
+        $_SESSION['sucesso_usuario'] = true;
+        $mensagem = 'Usuário excluído com sucesso!';
+    }
 }
 
-if (strcasecmp($usuario["tipo"], "Administrador") === 0) {
-    $_SESSION["aviso_exclusao"] = "Não é permitido excluir um administrador.";
-    header("Location: cadastrar_usuario.php");
-    exit;
-}
-
-$stmt = $conn->prepare(
-    "SELECT id_trem FROM trens WHERE id_usuario = ? LIMIT 1"
-);
-$stmt->bind_param("i", $id);
-$stmt->execute();
-
-$temTremVinculado = $stmt->get_result()->num_rows > 0;
-$stmt->close();
-
-if ($temTremVinculado) {
-    $_SESSION["aviso_exclusao"] =
-        "Não é possível excluir este usuário porque ele está vinculado a um ou mais trens.";
-
-    header("Location: cadastrar_usuario.php");
-    exit;
-}
-
-try {
-    $stmt = $conn->prepare(
-        "DELETE FROM usuarios WHERE id_usuario = ?"
-    );
-
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $stmt->close();
-
-    $_SESSION["mensagem_cadastro"] = "Usuário excluído com sucesso!";
-
-} catch (mysqli_sql_exception $e) {
-    error_log("Erro ao excluir usuário: " . $e->getMessage());
-
-    $_SESSION["aviso_exclusao"] =
-        "Não foi possível excluir este usuário porque existem outros registros vinculados a ele.";
-}
-
-header("Location: cadastrar_usuario.php");
-exit;
+$_SESSION['mensagem_usuario'] = $mensagem;
+header('Location: cadastrar_usuario.php');
+exit();

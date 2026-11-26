@@ -108,7 +108,7 @@ Somente o Administrador pode cadastrar usuários.
 2. Clique em **Cadastrar usuário**.
 3. Preencha o nome.
 4. Informe um e-mail válido.
-5. Defina uma senha com pelo menos oito caracteres.
+5. Defina uma senha.
 6. Escolha o perfil: **Administrador** ou **Funcionário**.
 7. Clique em **CADASTRAR NOVO USUÁRIO**.
 8. Confira a mensagem e o registro na lista.
@@ -128,8 +128,7 @@ A lista apresenta o nome, o e-mail e o perfil dos usuários.
 - Para editar, clique no lápis, altere os dados e salve.
 - Se não quiser trocar a senha, deixe o campo de nova senha vazio.
 - Para excluir, clique na lixeira e confirme.
-- O sistema não permite excluir uma conta com perfil de Administrador.
-- Um usuário responsável por um trem também não pode ser excluído. Primeiro, altere o responsável no cadastro do trem.
+- Administradores podem excluir contas de qualquer perfil, desde que a conta não tenha trens ou falhas vinculados.
 
 ## 6. Como cadastrar e consultar trens
 
@@ -145,7 +144,7 @@ Somente o Administrador pode cadastrar trens.
 6. Clique em **CADASTRAR NOVO TREM**.
 7. Confira o registro na lista.
 
-A velocidade média deve ficar entre 1 e 600 km/h.
+Informe a velocidade média em km/h.
 
 ### Consultar trens
 
@@ -288,7 +287,7 @@ A consulta apenas apresenta o endereço. Ela não cadastra uma rota.
 1. Abra **Monitoramento**.
 2. Escolha o **Sensor de velocidade**.
 3. Escolha o **Sensor de temperatura**.
-4. Confira os valores, as datas e os status apresentados.
+4. Confira os valores e as datas das leituras.
 5. Escolha uma **Rota** para identificar o trem e o percurso apresentado.
 6. Consulte as falhas na mesma tela.
 
@@ -298,16 +297,12 @@ Os sensores e a rota são selecionados separadamente. Confira os nomes para sabe
 
 - Mostra a última leitura cadastrada para o sensor.
 - A unidade é km/h.
-- Acima de 100 km/h, aparece **Alerta**.
-- Até 100 km/h, aparece **Normal**.
 - O valor do cartão é arredondado para um número inteiro.
 
 ### Temperatura
 
 - Mostra a última leitura cadastrada para o sensor.
 - A unidade é °C.
-- Acima de 40 °C, aparece **Alerta**.
-- Até 40 °C, aparece **Normal**.
 - O cartão apresenta uma casa decimal.
 
 ### Data da leitura
@@ -320,7 +315,7 @@ Os sensores e a rota são selecionados separadamente. Confira os nomes para sabe
 ### Cartões com traços
 
 - Traços no lugar dos valores indicam ausência de leitura disponível.
-- Eles não significam valor zero ou situação normal.
+- Eles não significam valor zero.
 
 ### Percurso e localização
 
@@ -333,7 +328,7 @@ Os sensores e a rota são selecionados separadamente. Confira os nomes para sabe
 - O sistema não recebe medições de sensores físicos.
 - As leituras são registradas manualmente ou vêm dos dados de demonstração.
 - Atualize a página para consultar novos registros.
-- Um alerta de velocidade ou temperatura não cria uma falha automaticamente.
+- As falhas são registradas manualmente.
 - O filtro das falhas considera a situação da ocorrência, não os sensores ou a rota selecionados nos cartões.
 
 ## 11. Como registrar leituras ou falhas

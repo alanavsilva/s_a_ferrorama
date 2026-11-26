@@ -1,121 +1,224 @@
-function validar_usuario() {
-    const nome = document.getElementById("nome")?.value.trim() ?? "";
-    const email = document.getElementById("email")?.value.trim() ?? "";
-    const senha = document.getElementById("senha")?.value ?? "";
+// Cada bloco usa getElementById para encontrar o elemento que controla na tela.
+const botao_cadastro = document.getElementById("botao_abrir_cadastro");
+const cadastro = document.getElementById("cadastro");
 
-    if (!nome || !email || !senha) {
-        alert("Preencha todos os campos.");
-        return false;
-    }
-
-    if (nome.length < 3) {
-        alert("O nome deve ter pelo menos 3 caracteres.");
-        return false;
-    }
-
-    if (!email.includes("@")) {
-        alert("Digite um email válido.");
-        return false;
-    }
-
-    return true;
+// Este arquivo é usado em várias telas. Só prepara o clique se encontrou o botão e o formulário nesta página.
+if (botao_cadastro && cadastro) {
+    botao_cadastro.onclick = function () {
+        // Cadastrar alterna hidden: false mostra o formulário e true esconde.
+        if (cadastro.hidden) {
+            cadastro.hidden = false;
+        } else {
+            cadastro.hidden = true;
+        }
+    };
 }
 
-function validar_sensor() {
-    const nome = document.getElementById("nome_sensor")?.value.trim() ?? "";
-    const tipo = document.getElementById("tipo_dado")?.value ?? "";
-    const rota = document.getElementById("id_rotas")?.value ?? "";
+// Este formulário existe na Home. Em outras telas, este bloco é pulado.
+const form_cep = document.getElementById("form_cep");
 
-   if (!nome || !tipo || !rota) {
-        alert("Preencha todos os campos.");
-        return false;
-    }
-
-    return true;
-}
-
-function alternarCadastroUsuario() {
-    const formulario = document.getElementById("cadastro");
-    if (!formulario) return;
-
-    const abrir = formulario.hidden;
-    formulario.hidden = !abrir;
-    formulario.classList.toggle("ativo", abrir);
-
-    if (!abrir) {
-        const mensagem = formulario.querySelector(".mensagem-cadastro");
-        if (mensagem) mensagem.remove();
-    }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    const botao = document.getElementById("btnAbrirCadastro");
-    const formulario = document.getElementById("cadastro");
-
-    if (!botao || !formulario) return;
-
-    botao.addEventListener("click", () => {
-        alternarCadastroUsuario();
-        botao.setAttribute("aria-expanded", String(!formulario.hidden));
-    });
-});
-document.addEventListener("DOMContentLoaded", function () {
-    const formularioCep = document.getElementById("form_cep");
-
-    if (!formularioCep) return;
-
-    formularioCep.addEventListener("submit", async function (evento) {
+if (form_cep) {
+    // Enviar é clicar em Consultar CEP ou apertar Enter dentro do campo. onsubmit roda nos dois casos.
+    form_cep.onsubmit = function (evento) {
+        // O formulário normalmente recarregaria a Home. Aqui, o código faz a consulta sem recarregar.
         evento.preventDefault();
 
-        const campoCep = document.getElementById("cep");
+        // value é o que está escrito na caixa. Exemplo: se digitar 89201000, cep recebe 89201000.
+        const cep = document.getElementById("cep").value;
         const mensagem = document.getElementById("mensagem_cep");
-        const cep = campoCep.value.replace(/\D/g, "");
+        const rua = document.getElementById("logradouro");
+        const bairro = document.getElementById("bairro");
+        const cidade = document.getElementById("cidade");
+        const uf = document.getElementById("uf");
 
-        const campos = ["logradouro", "bairro", "cidade", "uf"];
+        // value é o texto dentro da caixa. Colocar "" apaga o endereço que estava lá antes.
+        rua.value = "";
+        bairro.value = "";
+        cidade.value = "";
+        uf.value = "";
 
-        campos.forEach(function (id) {
-            document.getElementById(id).value = "";
-        });
-
-        if (!/^\d{8}$/.test(cep)) {
-            mensagem.textContent = "Digite um CEP válido com 8 números.";
+        // length conta o que foi digitado. Se a quantidade estiver errada, innerText coloca o aviso na tela.
+        if (cep.length !== 8) {
+            mensagem.innerText = "Digite um CEP com 8 números.";
             return;
         }
 
-        mensagem.textContent = "Consultando CEP...";
-
-        try {
-            const resposta = await fetch(
-                "https://viacep.com.br/ws/" + cep + "/json/"
-            );
-
-            if (!resposta.ok) {
-                throw new Error("Falha na consulta");
-            }
-
-            const dados = await resposta.json();
-
-            if (dados.erro) {
-                mensagem.textContent = "CEP não encontrado.";
+        // O for verifica cada caractere do CEP e para a busca se encontrar algo que não seja número.
+        for (let i = 0; i < cep.length; i = i + 1) {
+            if (cep[i] < "0" || cep[i] > "9") {
+                mensagem.innerText = "Digite um CEP com 8 números.";
                 return;
             }
-
-            document.getElementById("logradouro").value =
-                dados.logradouro || "";
-
-            document.getElementById("bairro").value =
-                dados.bairro || "";
-
-            document.getElementById("cidade").value =
-                dados.localidade || "";
-
-            document.getElementById("uf").value =
-                dados.uf || "";
-
-            mensagem.textContent = "Endereço encontrado com sucesso!";
-        } catch (erro) {
-            mensagem.textContent =
-                "Erro ao consultar o CEP. Verifique sua internet e tente novamente.";
         }
-    });
-});
+
+        mensagem.innerText = "Consultando CEP...";
+
+        // fetch consulta o ViaCEP usando o CEP digitado no endereço da busca.
+        return fetch("https://viacep.com.br/ws/" + cep + "/json/")
+            // O primeiro then recebe a resposta do ViaCEP quando ela chegar.
+            .then(function (resposta) {
+                // json() lê a resposta e separa os dados que vieram, como rua e bairro.
+                return resposta.json();
+            })
+            // Quando os dados estiverem prontos, este then preenche as caixas de endereço.
+            .then(function (endereco) {
+                // O ViaCEP pode responder mesmo sem encontrar o CEP. Nesse caso, ele avisa com endereco.erro e os campos ficam vazios.
+                if (endereco.erro) {
+                    mensagem.innerText = "CEP não encontrado.";
+                    return;
+                }
+
+                rua.value = endereco.logradouro;
+                bairro.value = endereco.bairro;
+                cidade.value = endereco.localidade;
+                // Por exemplo, se a resposta vier com SC, uf.value escreve SC no campo de estado.
+                uf.value = endereco.uf;
+                mensagem.innerText = "Endereço encontrado.";
+            })
+            // Se o pedido falhar, por exemplo sem internet, mostra este aviso.
+            .catch(function () {
+                mensagem.innerText = "Erro ao consultar o CEP.";
+            });
+    };
+}
+
+// Troca o nome e a velocidade do trem a cada três segundos.
+const trens = document.getElementById("velocidades_trens");
+// O índice é a posição na lista. 0 é o primeiro trem, 1 é o segundo e assim por diante.
+let indice = 0;
+
+function mostrar_velocidade() {
+    // O índice escolhe um trem da lista da Home para mostrar seu nome e sua velocidade.
+    const trem_atual = trens.children[indice];
+    const campos = trem_atual.children;
+    // textContent lê o nome e a velocidade mesmo com a lista escondida.
+    document.getElementById("velocidade_titulo").innerText = "Velocidade média - " + campos[0].textContent;
+    document.getElementById("velocidade_valor").innerText = campos[1].textContent;
+
+    // A lista começa no número 0. Somar 1 escolhe o próximo trem; voltar a 0 escolhe o primeiro.
+    indice = indice + 1;
+    // Exemplo: se existem dois trens, as posições são 0 e 1. Quando o índice chega a 2, ele volta para 0.
+    if (indice === trens.children.length) {
+        indice = 0;
+    }
+}
+
+if (trens && trens.children.length > 0) {
+    mostrar_velocidade();
+    // setInterval chama mostrar_velocidade de novo a cada 3 segundos.
+    setInterval(mostrar_velocidade, 3000);
+}
+
+// Cada lixeira tem um formulário com o ID do registro que pode ser excluído.
+const formularios_exclusao = document.getElementsByClassName("confirmar_exclusao");
+const janela_exclusao = document.getElementById("janela_exclusao");
+
+if (janela_exclusao) {
+    let formulario_escolhido;
+
+    for (let i = 0; i < formularios_exclusao.length; i = i + 1) {
+        formularios_exclusao[i].onsubmit = function (evento) {
+            // Segura o envio e guarda o formulário da lixeira que a pessoa clicou.
+            evento.preventDefault();
+            formulario_escolhido = formularios_exclusao[i];
+            janela_exclusao.showModal();
+        };
+    }
+
+    // Cancelar só fecha a janela. Nenhum pedido de exclusão é enviado.
+    document.getElementById("cancelar_exclusao").onclick = function () {
+        janela_exclusao.close();
+    };
+
+    // Só quando a pessoa confirma, o formulário envia o ID escolhido ao PHP.
+    document.getElementById("confirmar_exclusao").onclick = function () {
+        janela_exclusao.close();
+        formulario_escolhido.submit();
+    };
+}
+
+// O link Sair e a janela de confirmação estão no HTML da página. Aqui ligamos os cliques aos botões.
+const link_sair = document.getElementById("link_sair");
+const janela_saida = document.getElementById("janela_saida");
+
+if (link_sair && janela_saida) {
+    link_sair.onclick = function (evento) {
+        evento.preventDefault();
+        // Impede a saída imediata e abre a janela de confirmação do menu.
+        janela_saida.showModal();
+    };
+
+    // Continuar no sistema fecha só a janela. A pessoa fica na mesma página e continua logada.
+    document.getElementById("cancelar_saida").onclick = function () {
+        janela_saida.close();
+    };
+
+    document.getElementById("confirmar_saida").onclick = function () {
+        // Só depois de confirmar, abre o endereço que encerra a sessão.
+        window.location.href = link_sair.href;
+    };
+}
+
+// Procura o formulário da tela atual. Ao mudar a escolha, manda os valores para o PHP carregar a lista.
+const filtro = document.getElementById("filtros_monitoramento") || document.getElementById("filtro_falhas");
+
+if (filtro) {
+    // Ao trocar uma opção, onchange roda e submit envia a escolha ao PHP.
+    filtro.onchange = function () {
+        // Exemplo: se a pessoa escolhe Resolvida, o formulário envia essa opção e a página mostra as falhas daquele grupo.
+        filtro.submit();
+    };
+}
+
+// Se escolher um sensor de Status, aparece Descrição. Para os outros tipos, aparece Valor.
+const sensor = document.getElementById("id_sensor");
+const campo_valor = document.getElementById("campo_valor");
+
+if (sensor && campo_valor) {
+    sensor.onchange = mostrar_campo_leitura;
+    // Também chama a função logo que a página abre. Assim, os campos ficam certos se já existir um sensor selecionado.
+    mostrar_campo_leitura();
+}
+
+function mostrar_campo_leitura() {
+    // Cada opção guarda no HTML o tipo do sensor. dataset.tipo lê esse texto quando a pessoa escolhe um sensor.
+    const tipo = sensor.options[sensor.selectedIndex].dataset.tipo;
+    const valor = document.getElementById("valor");
+    const unidade = document.getElementById("unidade");
+    const descricao = document.getElementById("descricao_falha");
+    const botao = document.getElementById("botao_salvar_informacao");
+
+    const campo_descricao = document.getElementById("campo_descricao_status");
+
+    if (tipo === "Status") {
+        // Para uma falha, esconde o número e pede uma descrição.
+        campo_valor.hidden = true;
+        valor.disabled = true;
+        valor.required = false;
+        campo_descricao.hidden = false;
+        descricao.required = true;
+        botao.innerText = "CADASTRAR FALHA";
+        return;
+    }
+
+    // Para uma leitura, mostra o número e esconde a descrição.
+    campo_valor.hidden = false;
+    valor.disabled = false;
+    valor.required = true;
+    campo_descricao.hidden = true;
+    descricao.required = false;
+    botao.innerText = "SALVAR LEITURA";
+
+    // O campo mostra km/h ou °C e max define o limite, que o PHP também confere.
+    if (tipo === "Velocidade") {
+        unidade.innerText = "(km/h)";
+        valor.max = 600;
+    } else if (tipo === "Temperatura") {
+        unidade.innerText = "(°C)";
+        valor.max = 150;
+    } else {
+        unidade.innerText = "";
+        valor.max = "";
+    }
+}
+

@@ -1,11 +1,51 @@
 <?php
+// O PHP carrega os dados da Home e o JavaScript controla a consulta de CEP e o cartão de velocidade.
 require_once "../../infra/conexao.php";
 require_once "../../infra/auth.php";
-require_once "../Tela_Sensores/visualizacao_sensores.php";
-require_once "../../infra/apis/clima.php";
 
-$dadosClima = consultarClima();
-$iconesClima = [
+// A página inicial só abre depois que a pessoa faz login.
+exigir_login();
+
+$nome = $_SESSION['nome'];
+$tipo = $_SESSION['tipo'];
+$eh_administrador = ($tipo === 'Administrador');
+$status_filtro = 'todas';
+
+if (isset($_GET['status'])) {
+    if ($_GET['status'] === 'resolvidas' || $_GET['status'] === 'nao_resolvidas') {
+        $status_filtro = $_GET['status'];
+    }
+}
+
+// Quando um administrador clica em Resolver ou Reabrir na Home, este trecho salva a nova situação da falha.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    exigir_administrador();
+
+    if (isset($_POST['resolver']) || isset($_POST['reabrir'])) {
+        $id_falha = (int) $_POST['id_falha'];
+
+        if (isset($_POST['resolver'])) {
+            $situacao = 'Resolvida';
+        } else {
+            $situacao = 'Não resolvida';
+        }
+
+        $sql = "UPDATE falhas_operacionais SET situacao = ? WHERE id_falha = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, 'si', $situacao, $id_falha);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+    }
+
+    header('Location: home.php?status=' . $status_filtro . '#falhas');
+    exit();
+}
+
+// A função em clima.php consulta a API do Open-Meteo.
+require_once "../../infra/apis/clima.php";
+$dados_clima = consultarClima();
+
+$icones_clima = [
     'Céu limpo' => '☀️',
     'Predominantemente limpo' => '🌤️',
     'Parcialmente nublado' => '⛅',
@@ -24,68 +64,52 @@ $iconesClima = [
     'Trovoadas com granizo' => '⛈️',
     'Trovoadas com granizo intenso' => '⛈️'
 ];
-$iconeClima = $iconesClima[$dadosClima['condicao'] ?? ''] ?? '☁️';
 
-exigir_login();
+$icone_clima = '☁️';
 
-$nome = $_SESSION['nome'] ?? 'Usuário';
-$ehAdministrador = strcasecmp((string) ($_SESSION['tipo'] ?? ''), 'Administrador') === 0;
-$statusFiltro = $_GET['status'] ?? 'todas';
+if (isset($dados_clima['condicao'])) {
+    $condicao = $dados_clima['condicao'];
 
-if (!in_array($statusFiltro, ['todas', 'resolvidas', 'nao_resolvidas'], true)) {
-    $statusFiltro = 'todas';
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao_falha'])) {
-    exigir_administrador();
-    verificar_csrf();
-    $idFalha = filter_input(INPUT_POST, 'id_falha', FILTER_VALIDATE_INT);
-    $acaoFalha = $_POST['acao_falha'];
-
-if ($idFalha && in_array($acaoFalha, ['resolver', 'reabrir'], true)) {
-        $resolvida = $acaoFalha === 'resolver' ? 1 : 0;
-        $stmtAtualizarFalha = $conn->prepare("UPDATE falhas_operacionais SET resolvida = ? WHERE id_falha = ?");
-
-        if ($stmtAtualizarFalha) {
-            $stmtAtualizarFalha->bind_param('ii', $resolvida, $idFalha);
-            $stmtAtualizarFalha->execute();
-            $stmtAtualizarFalha->close();
-        }
+    if (isset($icones_clima[$condicao])) {
+        $icone_clima = $icones_clima[$condicao];
     }
-
-    header('Location: home.php?status=' . urlencode($statusFiltro) . '#falhas');
-    exit;
 }
 
-$totalUsuarios = $conn->query( "SELECT COUNT(*) AS total FROM usuarios")->fetch_assoc()['total'];
-$totalSensores = $conn->query( "SELECT COUNT(*) AS total FROM sensores")->fetch_assoc()['total'];
-$totalTrens = $conn->query( "SELECT COUNT(*) AS total FROM trens")->fetch_assoc()['total'];
-$totalRotas = $conn->query( "SELECT COUNT(*) AS total FROM rotas")->fetch_assoc()['total'];
+$sql = "SELECT id_usuario, nome, email, tipo FROM usuarios ORDER BY nome";
+$usuarios = mysqli_query($conn, $sql);
+$total_usuarios = mysqli_num_rows($usuarios);
 
-$resultadoTrensVelocidade = $conn->query( "SELECT nome, velocidade_media FROM trens ORDER BY id_trem");
+$sql = "SELECT id_sensor, nome_sensor, tipo_dado, id_rotas
+        FROM sensores ORDER BY id_sensor DESC";
+$sensores = mysqli_query($conn, $sql);
+$total_sensores = mysqli_num_rows($sensores);
 
-$trensVelocidade = [];
+$sql = "SELECT nome, velocidade_media FROM trens ORDER BY id_trem";
+$trens = mysqli_query($conn, $sql);
+$total_trens = mysqli_num_rows($trens);
 
-while ($trem = $resultadoTrensVelocidade->fetch_assoc()) {
-    $trensVelocidade[] = $trem;
+$sql = "SELECT id_rotas FROM rotas";
+$rotas = mysqli_query($conn, $sql);
+$total_rotas = mysqli_num_rows($rotas);
+
+$sql = "SELECT id_falha FROM falhas_operacionais WHERE situacao = 'Resolvida'";
+$resultado = mysqli_query($conn, $sql);
+$total_resolvidas = mysqli_num_rows($resultado);
+
+$sql = "SELECT id_falha FROM falhas_operacionais WHERE situacao = 'Não resolvida'";
+$resultado = mysqli_query($conn, $sql);
+$total_nao_resolvidas = mysqli_num_rows($resultado);
+
+$sql = "SELECT * FROM falhas_operacionais";
+
+if ($status_filtro === 'resolvidas') {
+    $sql .= " WHERE situacao = 'Resolvida'";
+} elseif ($status_filtro === 'nao_resolvidas') {
+    $sql .= " WHERE situacao = 'Não resolvida'";
 }
 
-$totalResolvidas = (int) ($conn->query("SELECT COUNT(*) AS total FROM falhas_operacionais WHERE resolvida = 1")->fetch_assoc()['total'] ?? 0);
-$totalNaoResolvidas = (int) ($conn->query("SELECT COUNT(*) AS total FROM falhas_operacionais WHERE resolvida = 0")->fetch_assoc()['total'] ?? 0);
-$sqlFalhas = "SELECT f.id_falha, f.descricao, f.data_registro, f.resolvida, s.nome_sensor, t.nome AS nome_trem FROM falhas_operacionais AS f LEFT JOIN sensores AS s ON f.id_sensor = s.id_sensor LEFT JOIN rotas AS r ON s.id_rotas = r.id_rotas LEFT JOIN trens AS t ON r.id_trem = t.id_trem";
-
-if ($statusFiltro === 'resolvidas') {
-    $sqlFalhas .= " WHERE f.resolvida = 1";
-} elseif ($statusFiltro === 'nao_resolvidas') {
-    $sqlFalhas .= " WHERE f.resolvida = 0";
-}
-
-$sqlFalhas .= " ORDER BY f.data_registro DESC";
-$faltas = $conn->query($sqlFalhas);
-
-
-$usuarios = $conn->query("SELECT id_usuario, nome, email, tipo FROM usuarios ORDER BY nome");
-$sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, r.nome AS rota_vinculada FROM sensores AS s INNER JOIN rotas AS r ON s.id_rotas = r.id_rotas ORDER BY s.id_sensor DESC");
+$sql .= " ORDER BY data_registro DESC";
+$falhas = mysqli_query($conn, $sql);
 ?>
 
 <!DOCTYPE html>
@@ -94,349 +118,374 @@ $sensores = $conn->query("SELECT s.id_sensor, s.nome_sensor, s.tipo_dado, r.nome
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - TremTech</title>
+    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-direto-topo-1">
+</head>
 
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-layout4">
-    <script src="../../script/validacao.js"></script>
-  
+<body>
+    <!-- A classe ativo destaca o link da tela aberta. -->
+    <nav class="menu_topo" aria-label="Navegação do TremTech">
+        <a class="menu_topo_marca" href="../Tela_Home/home.php">
+            <img src="https://img.icons8.com/ios/100/701015/train.png" alt="">
+            <span>SISTEMA TREMTECH</span>
+        </a>
 
-<nav class="home_barra">
-    <a class="home_logo" href="home.php">
-        <img class="home-imagem-trem" src="https://img.icons8.com/ios/50/701015/train.png" alt="Ícone de trem">
-        SISTEMA TREMTECH
-    </a>
-
-    <a class="home_link" href="home.php">Home</a>
-
-    <a class="home_link" href="../../public/Tela_Usuario/cadastrar_usuario.php">Usuários</a>
-
-    <a class="home_link" href="../../public/Tela_Sensores/cadastrar_sensores.php">Sensores</a>
-    <a class="home_link" href="../../public/Tela_Rotas/cadastrar_rotas.php">Rotas</a>
-    <a class="home_link" href="../../public/Tela_Trens/cadastrar_trens.php">Trens</a>
-    <a class="home_link" href="../../public/Tela_Falhas/cadastrar_falha.php">Falhas</a>
-    <a class="home_link" href="../../public/Tela_Monitoramento/monitoramento.php">Monitoramento</a>
-    <a class="home_link" href="../../public/Tela_Relatorios/relatorios.php">Relatórios</a>
-
-    <a class="home-logout-link" href="../../logout.php" data-confirmar-logout>Logout</a>
-    <div class="home_usuario">
-        <div class="home_bolinha"></div>
-        <div class="home_nome_usuario">
-            <strong><?= escapar($_SESSION['tipo'] ?? 'Usuário') ?></strong><br>
-            <?= escapar($nome) ?>
-        </div>
-    </div>
-</nav>
-
-<main class="home_conteudo">
-
-
-
-
-
-
-    <section class="home_boas_vindas">
-        <div>
-            <p>Bem-vindo de volta!</p>
-            <h1>Monitore usuários, rotas e operações em um só lugar.</h1>
+        <div class="menu_topo_links">
+            <a class="ativo" href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
+            <a href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
+            <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
+            <a href="../Tela_Trens/cadastrar_trens.php"><img src="https://img.icons8.com/ios-filled/18/701015/train.png" alt=""> Trens</a>
+            <a href="../Tela_Rotas/cadastrar_rotas.php"><img src="https://img.icons8.com/ios-filled/18/701015/map.png" alt=""> Rotas</a>
+            <a href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
+            <a href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
+            <a href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
         </div>
 
-        <div class="home_status">
-    <div class="home_status_titulo" id="velocidade-titulo"> Velocidade média</div>
+        <a class="menu_topo_sair" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+    </nav>
 
-    <div class="home_status_valor" id="velocidade-valor"> 0 km/h</div>
-</div>
-    </section>
-
-    
-<section class="home_sobre">
-    <h2>Sobre o Ferrorama</h2>
-
-    <p>
-        O Ferrorama é um sistema de monitoramento ferroviário
-        desenvolvido para facilitar o gerenciamento de trens,
-        rotas, sensores e falhas operacionais.
-    </p>
-</section>
-
-    <section class="home_indicadores">
-
-        <div class="home_indicador">
-            <span class="home_indicador-icone" aria-hidden="true"><img src="https://img.icons8.com/ios-filled/50/701015/user.png" alt=""></span>
-            <div><div class="home_indicador_nome">Usuários cadastrados</div>
-            <div class="home_indicador_numero"><?= (int)$totalUsuarios ?></div></div>
-        </div>
-
-        <div class="home_indicador">
-            <span class="home_indicador-icone" aria-hidden="true"><img src="https://img.icons8.com/ios-filled/50/701015/map.png" alt=""></span>
-            <div><div class="home_indicador_nome">Rotas cadastradas</div>
-            <div class="home_indicador_numero"><?= (int)$totalRotas ?></div></div>
-        </div>
-
-        <div class="home_indicador">
-            <span class="home_indicador-icone" aria-hidden="true"><img src="https://img.icons8.com/ios-filled/50/701015/radio-waves.png" alt=""></span>
-            <div><div class="home_indicador_nome">Sensores cadastrados</div>
-            <div class="home_indicador_numero"><?= (int)$totalSensores ?></div></div>
-        </div> 
-
-        <div class="home_indicador">
-            <span class="home_indicador-icone" aria-hidden="true"><img src="https://img.icons8.com/ios-filled/50/701015/train.png" alt=""></span>
-            <div><div class="home_indicador_nome">Trens cadastrados</div>
-            <div class="home_indicador_numero"><?= (int)$totalTrens ?></div></div>
-        </div>
-
-    </section>
-
-
-    <section class="home_atalhos">
-    <h2>Acesso rápido</h2>
-    <p class="home_atalhos-descricao">Escolha uma área para consultar ou gerenciar as informações do sistema.</p>
-
-    <div class="home_atalhos_lista">
-        <?php if ($ehAdministrador): ?>
-        <a class="home_atalho" href="../Tela_Usuario/cadastrar_usuario.php"><strong>Usuários</strong><span>Organize as contas de acesso</span></a>
-        <a class="home_atalho" href="../Tela_Sensores/cadastrar_sensores.php"><strong>Sensores</strong><span>Cadastre e consulte sensores das rotas</span></a>
-        <a class="home_atalho" href="../Tela_Trens/cadastrar_trens.php"><strong>Trens</strong><span>Gerencie os trens e responsáveis</span></a>
-        <a class="home_atalho" href="../Tela_Rotas/cadastrar_rotas.php"><strong>Rotas</strong><span>Organize percursos e trens vinculados</span></a>
-        <a class="home_atalho" href="../Tela_Falhas/cadastrar_falha.php"><strong>Falhas</strong><span>Registre e acompanhe ocorrências</span></a>
-        <?php else: ?>
-        <a class="home_atalho" href="../Tela_Usuario/cadastrar_usuario.php"><strong>Usuários</strong><span>Consulte as contas cadastradas</span></a>
-        <a class="home_atalho" href="../Tela_Sensores/cadastrar_sensores.php"><strong>Sensores</strong><span>Consulte os sensores das rotas</span></a>
-        <a class="home_atalho" href="../Tela_Trens/cadastrar_trens.php"><strong>Trens</strong><span>Consulte trens e responsáveis</span></a>
-        <a class="home_atalho" href="../Tela_Rotas/cadastrar_rotas.php"><strong>Rotas</strong><span>Consulte percursos cadastrados</span></a>
-        <a class="home_atalho" href="../Tela_Falhas/cadastrar_falha.php#falhas"><strong>Falhas</strong><span>Acompanhe ocorrências registradas</span></a>
-        <?php endif; ?>
-        <a class="home_atalho" href="../Tela_Monitoramento/monitoramento.php"><strong>Monitoramento</strong><span>Acompanhe informações dos trens</span></a>
-        <a class="home_atalho home_atalho-destaque" href="../Tela_Relatorios/relatorios.php"><strong>Relatórios</strong><span>Consulte falhas por sensor e período</span></a>
-    </div>
-</section>
-
-    
-<section class="home_caixa_clima">
-    <h2>Clima em Joinville - SC</h2>
-
-    <?php if (isset($dadosClima['erro'])): ?>
-        <p class="clima-erro" role="alert"><?= htmlspecialchars($dadosClima['erro'], ENT_QUOTES, 'UTF-8') ?></p>
-    <?php else: ?>
-        <div class="clima-resumo">
-            <div class="clima-icone" aria-hidden="true"><?= $iconeClima ?></div>
-            <div class="clima-resumo-texto">
-                <span><?= htmlspecialchars($dadosClima['condicao'], ENT_QUOTES, 'UTF-8') ?></span>
-                <strong><?= htmlspecialchars((string) $dadosClima['temperatura'], ENT_QUOTES, 'UTF-8') ?>°C</strong>
-                <small>Temperatura atual</small>
+    <main class="home_conteudo">
+        <section class="home_boas_vindas">
+            <div>
+                <p>Bem-vindo de volta!</p>
+                <h1>Monitore usuários, rotas e operações em um só lugar.</h1>
+                <div class="home_usuario home_conta">
+                    <div class="home_bolinha"></div>
+                    <div class="home_nome_usuario">
+                        <strong><?php echo escapar($nome); ?></strong><br>
+                        <?php echo escapar($tipo); ?>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="clima-detalhes">
-            <div class="clima-dado">
-                <span>Sensação térmica</span>
-                <strong><?= htmlspecialchars((string) $dadosClima['sensacao'], ENT_QUOTES, 'UTF-8') ?>°C</strong>
+            <div class="home_status">
+                <div class="home_status_titulo" id="velocidade_titulo">Velocidade média</div>
+                <div class="home_status_valor" id="velocidade_valor">Nenhum trem cadastrado</div>
             </div>
-            <div class="clima-dado">
-                <span>Umidade</span>
-                <strong><?= htmlspecialchars((string) $dadosClima['umidade'], ENT_QUOTES, 'UTF-8') ?>%</strong>
+
+            <!-- O PHP coloca os nomes e as velocidades nesta lista escondida. O JavaScript lê a lista para trocar o trem do cartão. -->
+            <ul id="velocidades_trens" hidden>
+                <?php while ($trem = mysqli_fetch_assoc($trens)) { ?>
+                    <li>
+                        <span><?php echo escapar($trem['nome']); ?></span>
+                        <span><?php echo escapar($trem['velocidade_media']); ?> km/h</span>
+                    </li>
+                <?php } ?>
+            </ul>
+        </section>
+
+        <section class="home_sobre">
+            <h2>Sobre o Ferrorama</h2>
+            <p>
+                O Ferrorama é um sistema de monitoramento ferroviário
+                desenvolvido para facilitar o gerenciamento de trens,
+                rotas, sensores e falhas operacionais.
+            </p>
+        </section>
+
+        <!-- Totais dos cadastros consultados no banco no começo do arquivo. -->
+        <section class="home_indicadores">
+            <div class="home_indicador">
+                <span class="home_indicador_icone"><img src="https://img.icons8.com/ios-filled/50/701015/user.png" alt=""></span>
+                <div>
+                    <div class="home_indicador_nome">Usuários cadastrados</div>
+                    <div class="home_indicador_numero"><?php echo $total_usuarios; ?></div>
+                </div>
             </div>
-            <div class="clima-dado">
-                <span>Vento</span>
-                <strong><?= htmlspecialchars((string) $dadosClima['vento'], ENT_QUOTES, 'UTF-8') ?> km/h</strong>
+
+            <div class="home_indicador">
+                <span class="home_indicador_icone"><img src="https://img.icons8.com/ios-filled/50/701015/map.png" alt=""></span>
+                <div>
+                    <div class="home_indicador_nome">Rotas cadastradas</div>
+                    <div class="home_indicador_numero"><?php echo $total_rotas; ?></div>
+                </div>
             </div>
-            <div class="clima-dado">
-                <span>Precipitação</span>
-                <strong><?= htmlspecialchars((string) $dadosClima['precipitacao'], ENT_QUOTES, 'UTF-8') ?> mm</strong>
+
+            <div class="home_indicador">
+                <span class="home_indicador_icone"><img src="https://img.icons8.com/ios-filled/50/701015/radio-waves.png" alt=""></span>
+                <div>
+                    <div class="home_indicador_nome">Sensores cadastrados</div>
+                    <div class="home_indicador_numero"><?php echo $total_sensores; ?></div>
+                </div>
             </div>
-        </div>
 
-        <p class="clima-atualizado">
-            Atualizado: <?= htmlspecialchars((string) $dadosClima['atualizado'], ENT_QUOTES, 'UTF-8') ?>
-        </p>
-    <?php endif; ?>
+            <div class="home_indicador">
+                <span class="home_indicador_icone"><img src="https://img.icons8.com/ios-filled/50/701015/train.png" alt=""></span>
+                <div>
+                    <div class="home_indicador_nome">Trens cadastrados</div>
+                    <div class="home_indicador_numero"><?php echo $total_trens; ?></div>
+                </div>
+            </div>
+        </section>
 
-    <small>Fonte: Open-Meteo | Localização: Joinville, SC</small>
-</section>
+        <section class="home_atalhos">
+            <h2>Acesso rápido</h2>
+            <p class="home_atalhos_descricao">Escolha uma área para consultar ou gerenciar as informações do sistema.</p>
 
-<section class="home_caixa_cep">
-    <h2>Consultar endereço por CEP</h2>
+            <div class="home_atalhos_lista">
+                <?php if ($eh_administrador) { ?>
+                    <a class="home_atalho" href="../Tela_Usuario/cadastrar_usuario.php"><strong>Usuários</strong><span>Organize as contas de acesso</span></a>
+                    <a class="home_atalho" href="../Tela_Sensores/cadastrar_sensores.php"><strong>Sensores</strong><span>Cadastre e consulte sensores das rotas</span></a>
+                    <a class="home_atalho" href="../Tela_Trens/cadastrar_trens.php"><strong>Trens</strong><span>Gerencie os trens e responsáveis</span></a>
+                    <a class="home_atalho" href="../Tela_Rotas/cadastrar_rotas.php"><strong>Rotas</strong><span>Organize percursos e trens vinculados</span></a>
+                    <a class="home_atalho" href="../Tela_Falhas/cadastrar_falha.php"><strong>Falhas</strong><span>Registre e acompanhe ocorrências</span></a>
+                <?php } else { ?>
+                    <a class="home_atalho" href="../Tela_Usuario/cadastrar_usuario.php"><strong>Usuários</strong><span>Consulte as contas cadastradas</span></a>
+                    <a class="home_atalho" href="../Tela_Sensores/cadastrar_sensores.php"><strong>Sensores</strong><span>Consulte os sensores das rotas</span></a>
+                    <a class="home_atalho" href="../Tela_Trens/cadastrar_trens.php"><strong>Trens</strong><span>Consulte trens e responsáveis</span></a>
+                    <a class="home_atalho" href="../Tela_Rotas/cadastrar_rotas.php"><strong>Rotas</strong><span>Consulte percursos cadastrados</span></a>
+                    <a class="home_atalho" href="../Tela_Falhas/cadastrar_falha.php#falhas"><strong>Falhas</strong><span>Acompanhe ocorrências registradas</span></a>
+                <?php } ?>
 
-    <form id="form_cep" class="home-cep-form">
-        <label for="cep">CEP brasileiro</label>
+                <a class="home_atalho" href="../Tela_Monitoramento/monitoramento.php"><strong>Monitoramento</strong><span>Acompanhe informações dos trens</span></a>
+                <a class="home_atalho home_atalho_destaque" href="../Tela_Relatorios/relatorios.php"><strong>Relatórios</strong><span>Consulte falhas por sensor e período</span></a>
+            </div>
+        </section>
 
-        <input
-            type="text"
-            id="cep"
-            name="cep"
-            placeholder="Ex.: 89201-000"
-            maxlength="9"
-            inputmode="numeric"
-            required
-        >
+        <section class="home_caixa_clima">
+            <h2>Clima em Joinville - SC</h2>
 
-        <button type="submit">Consultar CEP</button>
-    </form>
+            <?php if (isset($dados_clima['erro'])) { ?>
+                <p class="clima_erro" role="alert"><?php echo escapar($dados_clima['erro']); ?></p>
+            <?php } else { ?>
+                <div class="clima_resumo">
+                    <div class="clima_icone" aria-hidden="true"><?php echo $icone_clima; ?></div>
+                    <div class="clima_resumo_texto">
+                        <span><?php echo escapar($dados_clima['condicao']); ?></span>
+                        <strong><?php echo escapar($dados_clima['temperatura']); ?>°C</strong>
+                        <small>Temperatura atual</small>
+                    </div>
+                </div>
 
-    <p id="mensagem_cep" role="status" aria-live="polite"></p>
+                <div class="clima_detalhes">
+                    <div class="clima_dado">
+                        <span>Sensação térmica</span>
+                        <strong><?php echo escapar($dados_clima['sensacao']); ?>°C</strong>
+                    </div>
+                    <div class="clima_dado">
+                        <span>Umidade</span>
+                        <strong><?php echo escapar($dados_clima['umidade']); ?>%</strong>
+                    </div>
+                    <div class="clima_dado">
+                        <span>Vento</span>
+                        <strong><?php echo escapar($dados_clima['vento']); ?> km/h</strong>
+                    </div>
+                    <div class="clima_dado">
+                        <span>Precipitação</span>
+                        <strong><?php echo escapar($dados_clima['precipitacao']); ?> mm</strong>
+                    </div>
+                </div>
 
-    <div class="home-cep-campos">
-        <div class="home-cep-campo">
-            <label for="logradouro">Logradouro</label>
-            <input type="text" id="logradouro" readonly>
-        </div>
-        <div class="home-cep-campo">
-            <label for="bairro">Bairro</label>
-            <input type="text" id="bairro" readonly>
-        </div>
-        <div class="home-cep-campo">
-            <label for="cidade">Cidade</label>
-            <input type="text" id="cidade" readonly>
-        </div>
-        <div class="home-cep-campo">
-            <label for="uf">Estado (UF)</label>
-            <input type="text" id="uf" readonly>
-        </div>
-    </div>
+                <p class="clima_atualizado">
+                    Atualizado: <?php echo escapar($dados_clima['atualizado']); ?>
+                </p>
+            <?php } ?>
 
-    <small>Fonte: ViaCEP</small>
-</section>
+            <small>Fonte: Open-Meteo | Localização: Joinville, SC</small>
+        </section>
 
+        <!-- O JavaScript consulta o ViaCEP e preenche os campos de endereço deste bloco. -->
+        <section class="home_caixa_cep">
+            <h2>Consultar endereço por CEP</h2>
 
-    <?php if ($ehAdministrador): ?>
-    <section class="home_botoes">
-        
-    </section>
-    <?php endif; ?>
-
-     <section class="home_caixa_falhas" id="falhas">
-        <div class="falhas_cabecalho">
-            <h2 class="home_titulo_tabela">Falhas operacionais</h2>
-
-    <form method="GET" class="falhas_filtro">
-        <label for="status">Status</label>
-            <select id="status" name="status" onchange="this.form.submit()">
-                <option value="todas" <?= $statusFiltro === 'todas' ? 'selected' : '' ?> > Todas </option>
-                <option value="resolvidas" <?= $statusFiltro === 'resolvidas' ? 'selected' : '' ?> > Resolvidas </option>
-                <option value="nao_resolvidas" <?= $statusFiltro === 'nao_resolvidas' ? 'selected' : '' ?> > Não resolvidas </option>
-                </select>
+            <form id="form_cep" class="home_cep_form">
+                <label for="cep">CEP brasileiro</label>
+                <input type="text" id="cep" name="cep" placeholder="Ex.: 89201000"
+                       maxlength="8" inputmode="numeric" required>
+                <button type="submit">Consultar CEP</button>
             </form>
-        </div>
 
-        <div class="falhas_resumo">
-            <div class="falha_contador">
-                <strong><?= $totalResolvidas ?></strong>
-                <span>Resolvidas</span>
+            <p id="mensagem_cep" role="status"></p>
+
+            <div class="home_cep_campos">
+                <div class="home_cep_campo">
+                    <label for="logradouro">Logradouro</label>
+                    <input type="text" id="logradouro" readonly>
+                </div>
+                <div class="home_cep_campo">
+                    <label for="bairro">Bairro</label>
+                    <input type="text" id="bairro" readonly>
+                </div>
+                <div class="home_cep_campo">
+                    <label for="cidade">Cidade</label>
+                    <input type="text" id="cidade" readonly>
+                </div>
+                <div class="home_cep_campo">
+                    <label for="uf">Estado (UF)</label>
+                    <input type="text" id="uf" readonly>
+                </div>
             </div>
 
-            <div class="falha_contador">
-                <strong><?= $totalNaoResolvidas ?></strong>
-                <span>Não resolvidas</span>
+            <small>Fonte: ViaCEP</small>
+        </section>
+
+        <section class="home_caixa_falhas" id="falhas">
+            <div class="falhas_cabecalho">
+                <h2 class="home_titulo_tabela">Falhas operacionais</h2>
+
+                <form action="home.php#falhas" method="GET" class="falhas_filtro">
+                    <label for="status">Situação</label>
+                    <select id="status" name="status">
+                        <option value="todas">Todas</option>
+                        <option value="resolvidas"
+                            <?php if ($status_filtro === 'resolvidas') { echo 'selected'; } ?>>
+                            Resolvidas
+                        </option>
+                        <option value="nao_resolvidas"
+                            <?php if ($status_filtro === 'nao_resolvidas') { echo 'selected'; } ?>>
+                            Não resolvidas
+                        </option>
+                    </select>
+                    <button type="submit" class="botao_resolver">Filtrar</button>
+                </form>
             </div>
-        </div>
 
-        <div class="falhas_lista">
-            <?php if ($faltas && $faltas->num_rows > 0): ?>
-            <?php while ($falha = $faltas->fetch_assoc()): ?>
-                <article class="falha_item">
-                    <div class="falha_dados">
-                    <h3><?= escapar($falha['descricao']) ?></h3>
+            <div class="falhas_resumo">
+                <div class="falha_contador">
+                    <strong><?php echo $total_resolvidas; ?></strong>
+                    <span>Resolvidas</span>
+                </div>
+                <div class="falha_contador">
+                    <strong><?php echo $total_nao_resolvidas; ?></strong>
+                    <span>Não resolvidas</span>
+                </div>
+            </div>
 
-        <p> Sensor: <?= escapar($falha['nome_sensor'] ?? 'Removido') ?>
-        - Trem: <?= escapar($falha['nome_trem'] ?? 'Não identificado') ?>
-        - <?= escapar(date('d/m/Y', strtotime($falha['data_registro']))) ?>
-       </p>
+            <div class="falhas_lista">
+                <?php if (mysqli_num_rows($falhas) === 0) { ?>
+                    <p class="falhas_vazias">Nenhuma falha encontrada.</p>
+                <?php } ?>
 
-        </div>
+                <?php
+                while ($falha = mysqli_fetch_assoc($falhas)) {
+                    // A falha tem o ID do sensor. Com ele encontramos a rota e, pela rota, chegamos ao trem.
+                    $id_sensor = (int) $falha['id_sensor'];
+                    $sql_sensor = "SELECT nome_sensor, id_rotas FROM sensores WHERE id_sensor = $id_sensor";
+                    $resultado_sensor = mysqli_query($conn, $sql_sensor);
+                    $sensor_da_falha = mysqli_fetch_assoc($resultado_sensor);
 
-    <?php if ($ehAdministrador): ?>
-    <form method="POST" class="falha_acao">
-        <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>" >
-        <input type="hidden" name="id_falha" value="<?= (int) $falha['id_falha'] ?>" >
+                    $id_rota = (int) $sensor_da_falha['id_rotas'];
+                    $sql_rota = "SELECT id_trem FROM rotas WHERE id_rotas = $id_rota";
+                    $resultado_rota = mysqli_query($conn, $sql_rota);
+                    $rota_da_falha = mysqli_fetch_assoc($resultado_rota);
 
-            <?php if ($falha['resolvida']): ?>
-             
-        <button type="submit" name="acao_falha" value="reabrir" class="botao_reabrir" > Reabrir </button>
-                            
-            <?php else: ?>
+                    $id_trem = (int) $rota_da_falha['id_trem'];
+                    $sql_trem = "SELECT nome FROM trens WHERE id_trem = $id_trem";
+                    $resultado_trem = mysqli_query($conn, $sql_trem);
+                    $trem_da_falha = mysqli_fetch_assoc($resultado_trem);
 
-        <button type="submit" name="acao_falha" value="resolver" class="botao_resolver" > Marcar como resolvida </button>
-                            
-            <?php endif; ?>
-                        
-     </form>
-     <?php endif; ?>
-        </article>
+                    // Mostra a data como dia/mês/ano.
+                    $data = date('d/m/Y', strtotime($falha['data_registro']));
+                ?>
+                    <article class="falha_item">
+                        <div class="falha_dados">
+                            <h3><?php echo escapar($falha['descricao']); ?></h3>
+                            <p>
+                                Sensor: <?php echo escapar($sensor_da_falha['nome_sensor']); ?>
+                                - Trem: <?php echo escapar($trem_da_falha['nome']); ?>
+                                - <?php echo $data; ?>
+                            </p>
+                        </div>
 
-                <?php endwhile; ?>
-            <?php else: ?>
-                <p class="falhas_vazias">Nenhuma falha encontrada.</p>
-            <?php endif; ?>
-        </div>
-    </section>
+                        <?php if ($eh_administrador) { ?>
+                            <form method="POST" class="falha_acao">
+                                <!-- Este campo indica qual falha o botão deve atualizar. -->
+                                <input type="hidden" name="id_falha" value="<?php echo $falha['id_falha']; ?>">
 
+                                <?php if ($falha['situacao'] === 'Resolvida') { ?>
+                                    <button type="submit" name="reabrir" class="botao_reabrir">Reabrir</button>
+                                <?php } else { ?>
+                                    <button type="submit" name="resolver" class="botao_resolver">Marcar como resolvida</button>
+                                <?php } ?>
+                            </form>
+                        <?php } ?>
+                    </article>
+                <?php } ?>
+            </div>
+        </section>
 
-<section class="home_caixa_sensores">
-    <h2 class="home_titulo_tabela">Usuários cadastrados</h2>
+        <section class="home_caixa_sensores">
+            <h2 class="home_titulo_tabela">Usuários cadastrados</h2>
 
-    <table class="home_tabela">
-        <thead>
-            <tr>
-                <th>ID Usuário</th>
-                <th>Nome</th>
-                <th>E-mail</th>
-                <th>Tipo</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            <?php if ($usuarios && $usuarios->num_rows > 0): ?>
-                <?php while ($usuario = $usuarios->fetch_assoc()): ?>
+            <table class="home_tabela">
+                <thead>
                     <tr>
-                        <td><?= (int) $usuario['id_usuario'] ?></td>
-                        <td><?= escapar($usuario['nome']) ?></td>
-                        <td><?= escapar($usuario['email']) ?></td>
-                        <td><?= escapar($usuario['tipo']) ?></td>
+                        <th>ID Usuário</th>
+                        <th>Nome</th>
+                        <th>E-mail</th>
+                        <th>Tipo</th>
                     </tr>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <tr>
-                    <td colspan="4">Nenhum usuário cadastrado.</td>
-                </tr>
-            <?php endif; ?>
-        </tbody>
-    </table>
-</section>
+                </thead>
+                <tbody>
+                    <?php if ($total_usuarios === 0) { ?>
+                        <tr><td colspan="4">Nenhum usuário cadastrado.</td></tr>
+                    <?php } ?>
 
-<section class="home_caixa_sensores">
-    <h2 class="home_titulo_tabela">Sensores cadastrados</h2>
-<div class="home_tabela_sensores">
-    <?php mostrar_sensores($sensores, false); ?>
-</div>
-</section>
+                    <?php while ($usuario = mysqli_fetch_assoc($usuarios)) { ?>
+                        <tr>
+                            <td><?php echo $usuario['id_usuario']; ?></td>
+                            <td><?php echo escapar($usuario['nome']); ?></td>
+                            <td><?php echo escapar($usuario['email']); ?></td>
+                            <td><?php echo escapar($usuario['tipo']); ?></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </section>
 
+        <section class="home_caixa_sensores">
+            <h2 class="home_titulo_tabela">Sensores cadastrados</h2>
 
-</main>
-<footer class="home_rodape">
-    <p>Ferrorama - Sistema de Monitoramento Ferroviário</p>
-    <p>2026 TremTech</p>
-</footer>
+            <div class="home_tabela_sensores">
+                <table class="home_tabela">
+                    <thead>
+                        <tr>
+                            <th>ID Sensor</th>
+                            <th>Nome</th>
+                            <th>Tipo de dado</th>
+                            <th>Rota vinculada</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if ($total_sensores === 0) { ?>
+                            <tr><td colspan="4">Nenhum sensor cadastrado.</td></tr>
+                        <?php } ?>
 
-<script>
-const trens = <?= json_encode($trensVelocidade) ?>;
-let indice = 0;
+                        <?php
+                        while ($sensor = mysqli_fetch_assoc($sensores)) {
+                            $id_rota = (int) $sensor['id_rotas'];
+                            $sql_rota = "SELECT nome FROM rotas WHERE id_rotas = $id_rota";
+                            $resultado_rota = mysqli_query($conn, $sql_rota);
+                            $rota = mysqli_fetch_assoc($resultado_rota);
+                        ?>
+                            <tr>
+                                <td><?php echo $sensor['id_sensor']; ?></td>
+                                <td><?php echo escapar($sensor['nome_sensor']); ?></td>
+                                <td><?php echo escapar($sensor['tipo_dado']); ?></td>
+                                <td><?php echo escapar($rota['nome']); ?></td>
+                            </tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
 
-function mostrarTrem() {
-    if (trens.length === 0) {
-        document.getElementById('velocidade-valor').textContent = 'Nenhum trem cadastrado';
-        return;
-    }
+    <footer class="home_rodape">
+        <p>Ferrorama - Sistema de Monitoramento Ferroviário</p>
+        <p>2026 TremTech</p>
+    </footer>
 
-    const trem = trens[indice];
+    <!-- A janela fica fechada até a pessoa clicar em Sair. -->
+    <dialog class="modal_confirmacao" id="janela_saida" aria-labelledby="tituloConfirmarSaida">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="tituloConfirmarSaida">Sair do sistema?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja sair da sua conta?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_saida">Continuar no sistema</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_saida">Sair</button>
+        </div>
+    </dialog>
 
-    document.getElementById('velocidade-titulo').textContent = 'Velocidade média - ' + trem.nome;
-
-    document.getElementById('velocidade-valor').textContent = trem.velocidade_media + ' km/h';
-
-    indice = (indice + 1) % trens.length;
-}
-
-mostrarTrem();
-setInterval(mostrarTrem, 3000);
-</script>
-
-<script src="../../script/confirmar_logout.js?v=20261107"></script>
+<script src="../../script/validacao.js?v=simples-8"></script>
 </body>
+</html>

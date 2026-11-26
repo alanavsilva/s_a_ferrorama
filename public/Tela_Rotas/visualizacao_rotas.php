@@ -1,89 +1,68 @@
 <?php
-function mostrar_rotas($resultado): void
-{
-    $ehAdministrador = strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
+// O while mostra cada registro em uma linha e usa seu ID nos botões Editar e Excluir.
+if (!isset($rotas)) {
+    exit();
+}
 
-    if ($resultado === false || $resultado === null) {
-        echo '<p role="alert">Não foi possível carregar as rotas.</p>';
-        return;
-    }
-    if ($resultado->num_rows === 0) {
-        echo '<p class="mensagem_vazia">Nenhuma rota encontrada.</p>';
-        return;
-    }
-    ?>
-    <table class="tabela-usuarios tabela-rotas">
-        <thead>
+$encontrou = false;
+?>
+
+<!-- O while monta uma linha por registro. Editar e Excluir aparecem apenas para administradores. -->
+<table class="tabela_usuarios tabela_rotas">
+    <thead>
+        <tr>
+            <th>Nome da rota</th>
+            <th>Trem vinculado</th>
+            <th>Descrição</th>
+            <th>Distância</th>
+            <th>Tempo estimado</th>
+            <?php if ($administrador) { ?>
+                <th>Ação</th>
+            <?php } ?>
+        </tr>
+    </thead>
+
+    <tbody>
+        <?php
+        while ($rota = mysqli_fetch_assoc($rotas)) {
+            // A rota guarda o ID. Este SELECT busca o nome do trem por esse ID.
+            $id_trem = (int) $rota['id_trem'];
+            $sql = "SELECT nome FROM trens WHERE id_trem = $id_trem";
+            $resultado = mysqli_query($conn, $sql);
+            $trem = mysqli_fetch_assoc($resultado);
+
+            // Se não encontrou o texto em nenhum campo, pula esta linha.
+            if ($busca !== ''
+                && stripos($rota['nome'], $busca) === false
+                && stripos($rota['descricao'], $busca) === false
+                && stripos($trem['nome'], $busca) === false
+            ) {
+                continue;
+            }
+            $encontrou = true;
+        ?>
             <tr>
-                <th>Nome da rota</th>
-                <th>Trem vinculado</th>
-                <th>Descrição</th>
-                <th>Distância</th>
-                <th>Tempo estimado</th>
-                <th>Data de criação</th>
-                <?php if ($ehAdministrador): ?><th>Ação</th><?php endif; ?>
-            </tr>
-        </thead>
-        <tbody>
-        <?php while ($rota = $resultado->fetch_assoc()): ?>
-            <tr>
-                <td><?= escapar($rota['nome'] ?? '') ?></td>
-                <td><?= escapar($rota['nome_trem'] ?? 'Trem não definido') ?></td>
-                <td><?= escapar($rota['descricao'] ?? '') ?></td>
-                <td><?= escapar(number_format((float)($rota['extensao'] ?? 0), 2, ',', '.')) ?> km</td>
-                <td><?= (int)($rota['tempo'] ?? 0) ?> min</td>
-                <td><?= !empty($rota['data_criacao']) ? escapar(date('d/m/Y H:i', strtotime($rota['data_criacao']))) : '-' ?></td>
-                <?php if ($ehAdministrador): ?>
+                <td><?php echo escapar($rota['nome']); ?></td>
+                <td><?php echo escapar($trem['nome']); ?></td>
+                <td><?php echo escapar($rota['descricao']); ?></td>
+                <td><?php echo $rota['extensao']; ?> km</td>
+                <td><?php echo $rota['tempo']; ?> min</td>
+
+                <?php if ($administrador) { ?>
                     <td class="acao_user">
-                        <a href="cadastrar_rotas.php?editar=<?= (int)$rota['id_rotas'] ?>#cadastro" class="acao-icone editar-user" aria-label="Editar rota">
-                            <img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt="">
-                        </a>
-                        <form method="POST" action="excluir_r.php" class="js-confirmar-exclusao" data-titulo="Excluir rota" data-mensagem="Sensores vinculados impedem a exclusão desta rota.">
-                            <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
-                            <input type="hidden" name="id" value="<?= (int)$rota['id_rotas'] ?>">
-                            <button type="submit" class="acao-icone excluir-user" aria-label="Excluir rota">
-                                <img src="https://img.icons8.com/ios-filled/18/701015/trash.png" alt="">
-                            </button>
+                        <a href="cadastrar_rotas.php?editar=<?php echo $rota['id_rotas']; ?>#cadastro" class="acao_icone editar_user" aria-label="Editar rota"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
+
+                        <form method="POST" action="excluir_r.php" class="confirmar_exclusao">
+                            <input type="hidden" name="id" value="<?php echo $rota['id_rotas']; ?>">
+                            <button type="submit" class="acao_icone excluir_user" aria-label="Excluir rota"><img src="https://img.icons8.com/ios-filled/18/701015/trash.png" alt=""></button>
                         </form>
                     </td>
-                <?php endif; ?>
-            </tr>
-        <?php endwhile; ?>
-        </tbody>
-    </table>
+                <?php } ?>
+                </tr>
+        <?php } ?>
+    </tbody>
+</table>
 
-    <?php if ($ehAdministrador): ?>
-    <dialog class="modal-confirmacao" aria-labelledby="tituloConfirmacaoRota">
-        <div class="modal-confirmacao-icone" aria-hidden="true">!</div>
-        <h2 id="tituloConfirmacaoRota">Excluir rota?</h2>
-        <p class="modal-confirmacao-mensagem">Essa ação não pode ser desfeita.</p>
-        <div class="modal-confirmacao-acoes">
-            <button type="button" class="modal-btn-cancelar">Cancelar</button>
-            <button type="button" class="modal-btn-excluir">Excluir rota</button>
-        </div>
-    </dialog>
-    <script>
-    (() => {
-        const modal = document.querySelector('.modal-confirmacao');
-        if (!modal) return;
-        let formularioPendente = null;
-        document.querySelectorAll('.js-confirmar-exclusao').forEach((form) => {
-            form.addEventListener('submit', (evento) => {
-                evento.preventDefault();
-                formularioPendente = form;
-                modal.querySelector('h2').textContent = form.dataset.titulo || 'Confirmar exclusão';
-                modal.querySelector('.modal-confirmacao-mensagem').textContent = form.dataset.mensagem || 'Essa ação não pode ser desfeita.';
-                modal.showModal();
-            });
-        });
-        modal.querySelector('.modal-btn-cancelar').addEventListener('click', () => modal.close());
-        modal.querySelector('.modal-btn-excluir').addEventListener('click', () => {
-            if (formularioPendente) formularioPendente.submit();
-        });
-        modal.addEventListener('close', () => { formularioPendente = null; });
-        modal.addEventListener('click', (evento) => { if (evento.target === modal) modal.close(); });
-    })();
-    </script>
-    <?php endif;
-}
-?>
+<?php if (!$encontrou) { ?>
+    <p class="mensagem_vazia">Nenhuma rota encontrada.</p>
+<?php } ?>

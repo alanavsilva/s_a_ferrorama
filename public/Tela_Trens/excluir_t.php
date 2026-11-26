@@ -1,75 +1,45 @@
-
 <?php
-
-require_once "../../infra/conexao.php";
-require_once "../../infra/auth.php";
+// Procura rotas ligadas ao trem antes de excluir o registro e voltar à lista com o aviso.
+require_once '../../infra/conexao.php';
+require_once '../../infra/auth.php';
 
 exigir_administrador();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id'])) {
     header('Location: cadastrar_trens.php');
-    exit;
+    exit();
 }
 
-verificar_csrf();
+// O formulário envia o ID. Uma ligação já basta para bloquear a exclusão.
+$id = (int) $_POST['id'];
+$rotas = mysqli_query($conn, "SELECT id_rotas FROM rotas WHERE id_trem = $id LIMIT 1");
 
-$id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if (mysqli_num_rows($rotas) > 0) {
+    $mensagem = 'Este trem tem rotas vinculadas.';
+} else {
+    // O ? recebe o ID que veio do formulário. O tipo i indica um número inteiro.
+    $sql = "DELETE FROM trens WHERE id_trem = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, 'i', $id);
 
-if (!$id || $id < 1) {
-    $_SESSION['aviso_exclusao'] = 'ID do trem inválido.';
-    header('Location: cadastrar_trens.php');
-    exit;
+    try {
+        $excluiu = mysqli_stmt_execute($stmt);
+    } catch (mysqli_sql_exception $erro) {
+        $excluiu = false;
+    }
+
+    $linhas = mysqli_stmt_affected_rows($stmt);
+    mysqli_stmt_close($stmt);
+
+    if (!$excluiu) {
+        $mensagem = 'Não foi possível excluir o trem.';
+    } elseif ($linhas === 0) {
+        $mensagem = 'Trem não encontrado.';
+    } else {
+        $_SESSION['sucesso_trem'] = true;        $mensagem = 'Trem excluído com sucesso!';
+    }
 }
 
-$stmt = $conn->prepare(
-    "SELECT id_trem FROM trens WHERE id_trem = ?"
-);
-$stmt->bind_param('i', $id);
-$stmt->execute();
-
-$trem = $stmt->get_result()->fetch_assoc();
-$stmt->close();
-
-if (!$trem) {
-    $_SESSION['aviso_exclusao'] = 'Trem não encontrado.';
-    header('Location: cadastrar_trens.php');
-    exit;
-}
-
-$stmt = $conn->prepare(
-    "SELECT s.id_sensor FROM sensores s INNER JOIN rotas r ON r.id_rotas = s.id_rotas WHERE r.id_trem = ? LIMIT 1"
-);
-$stmt->bind_param('i', $id);
-$stmt->execute();
-
-$temSensorVinculado = $stmt->get_result()->num_rows > 0;
-$stmt->close();
-
-if ($temSensorVinculado) {
-    $_SESSION['aviso_exclusao'] =
-        'Não é possível excluir este trem porque existem sensores vinculados a ele.';
-
-    header('Location: cadastrar_trens.php');
-    exit;
-}
-
-try {
-    $stmt = $conn->prepare(
-        "DELETE FROM trens WHERE id_trem = ?"
-    );
-
-    $stmt->bind_param('i', $id);
-    $stmt->execute();
-    $stmt->close();
-
-    $_SESSION['mensagem_cadastro'] = 'Trem excluído com sucesso!';
-
-} catch (mysqli_sql_exception $e) {
-    error_log('Erro ao excluir trem: ' . $e->getMessage());
-
-    $_SESSION['aviso_exclusao'] =
-        'Não foi possível excluir este trem porque existem outros registros vinculados a ele.';
-}
-
+$_SESSION['mensagem_trem'] = $mensagem;
 header('Location: cadastrar_trens.php');
-exit;
+exit();

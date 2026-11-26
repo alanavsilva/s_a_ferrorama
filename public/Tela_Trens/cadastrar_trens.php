@@ -1,463 +1,242 @@
-
 <?php
+// O PHP valida e salva o formulário, e a tabela mostra os registros do banco.
+require_once '../../infra/conexao.php';
+require_once '../../infra/auth.php';
 
-require_once "../../infra/conexao.php";
-require_once "../../infra/auth.php";
-require_once "visualizacao_trens.php";
-
+// Quem fez login pode ver a tabela. Somente administradores podem enviar o cadastro.
 exigir_login();
 
-$ehAdministrador = strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
+$administrador = $_SESSION['tipo'] === 'Administrador';
+$mensagem = $_SESSION['mensagem_trem'] ?? '';
+// A sessão guarda o recado até a página abrir. Depois, o recado é limpo.
+$sucesso = $_SESSION['sucesso_trem'] ?? false;
+unset($_SESSION['mensagem_trem'], $_SESSION['sucesso_trem']);
 
-$mensagemSucesso = $_SESSION['mensagem_cadastro'] ?? '';
-unset($_SESSION['mensagem_cadastro']);
+// O ID no endereço indica que o formulário está em modo de edição.
+$editando = isset($_GET['editar']);
 
-$avisoExclusao = $_SESSION['aviso_exclusao'] ?? '';
-unset($_SESSION['aviso_exclusao']);
+if (!$editando && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    exigir_administrador();
 
-if (isset($_GET['editado'])) {
-    $mensagemSucesso = 'Trem atualizado com sucesso!';
-} elseif (isset($_GET['excluido'])) {
-    $mensagemSucesso = 'Trem excluído com sucesso!';
-}
+    $nome = trim($_POST['nome'] ?? '');
+    $velocidade = $_POST['velocidade'] ?? '';
+    $id_usuario = (int) ($_POST['id_usuario'] ?? 0);
 
-$mensagem = '';
-$mensagemAcesso = '';
+    $sql = "SELECT id_usuario FROM usuarios WHERE id_usuario = $id_usuario";
+    $responsavel = mysqli_query($conn, $sql);
 
-$nome = '';
-$velocidade = '';
-$id_usuario = '';
-$erros = [];
-$idEdicao = filter_input(INPUT_GET, 'editar', FILTER_VALIDATE_INT) ?: 0;
-$tremEdicao = null;
-
-$usuarios = [];
-
-$resultadoUsuarios = $conn->query(
-    "SELECT id_usuario, nome FROM usuarios ORDER BY nome"
-);
-
-if ($resultadoUsuarios) {
-    while ($usuario = $resultadoUsuarios->fetch_assoc()) {
-        $usuarios[] = $usuario;
-    }
-}
-
-if ($idEdicao > 0 && $ehAdministrador) {
-    $stmtEdicao = $conn->prepare('SELECT id_trem, nome, velocidade_media, id_usuario FROM trens WHERE id_trem = ?');
-    $stmtEdicao->bind_param('i', $idEdicao);
-    $stmtEdicao->execute();
-    $tremEdicao = $stmtEdicao->get_result()->fetch_assoc();
-    $stmtEdicao->close();
-    if ($tremEdicao) {
-        $nome = $tremEdicao['nome'];
-        $velocidade = (string) $tremEdicao['velocidade_media'];
-        $id_usuario = (string) $tremEdicao['id_usuario'];
+    if (mb_strlen($nome) < 3 || mb_strlen($nome) > 100) {
+        $mensagem = 'O nome deve ter entre 3 e 100 caracteres.';
+    } elseif (!is_numeric($velocidade)) {
+        $mensagem = 'Informe a velocidade média em km/h.';
+    } elseif (mysqli_num_rows($responsavel) === 0) {
+        $mensagem = 'Selecione um responsável cadastrado.';
     } else {
-        $idEdicao = 0;
-        $mensagemAcesso = 'Trem não encontrado.';
-    }
-}
+        $sql = "INSERT INTO trens (nome, velocidade_media, id_usuario) VALUES (?, ?, ?)";
+        $stmt = mysqli_prepare($conn, $sql);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    if (!$ehAdministrador) {
-        http_response_code(403);
-        $mensagemAcesso = 'Você não tem permissão para cadastrar trens.';
-
-    } else {
-
-        verificar_csrf();
-
-        $acao = $_POST['acao'] ?? 'criar';
-        validar_acao_crud($conn, $acao, 'trens', 'id_trem', 'id_trem');
-        $idAtualizar = filter_input(INPUT_POST, 'id_trem', FILTER_VALIDATE_INT) ?: 0;
-
-        $nome = trim($_POST['nome'] ?? '');
-        $velocidade = trim($_POST['velocidade'] ?? '');
-        $id_usuario = filter_input(INPUT_POST, 'id_usuario', FILTER_VALIDATE_INT) ?: '';
-
-        if ($nome === '' || $velocidade === '' || $id_usuario === '') {
-            $mensagem = "Preencha todos os campos.";
-
-        } elseif (mb_strlen($nome) < 3 || mb_strlen($nome) > 100) {
-            $erros['nome'] = 'O nome deve ter entre 3 e 100 caracteres.';
-
-        } elseif (!is_numeric($velocidade) || $velocidade < 1 || $velocidade > 600) {
-            $erros['velocidade'] = 'Use um valor entre 1 e 600 km/h.';
-
-        } else {
-
-            $usuarioValido = false;
-
-            foreach ($usuarios as $usuario) {
-                if ((int)$usuario['id_usuario'] === (int)$id_usuario) {
-                    $usuarioValido = true;
-                    break;
-                }
-            }
-
-            if (!$usuarioValido) {
-                $mensagem = 'Selecione um responsável válido.';
-
-            } else {
-
-                $velocidadeBanco = (float)$velocidade;
-                $idUsuarioBanco = (int)$id_usuario;
-
-                $sql = $acao === 'editar'
-                    ? 'UPDATE trens SET nome = ?, velocidade_media = ?, id_usuario = ? WHERE id_trem = ?'
-                    : 'INSERT INTO trens (nome, velocidade_media, id_usuario) VALUES (?, ?, ?)';
-
-                $stmt = $conn->prepare($sql);
-
-                if (!$stmt) {
-                    $mensagem = "Não foi possível concluir o cadastro.";
-
-                } else {
-
-                    if ($acao === 'editar') {
-                        $stmt->bind_param('sdii', $nome, $velocidadeBanco, $idUsuarioBanco, $idAtualizar);
-                    } else {
-                        $stmt->bind_param('sdi', $nome, $velocidadeBanco, $idUsuarioBanco);
-                    }
-
-                    try {
-
-                        if ($stmt->execute()) {
-                            $_SESSION['mensagem_cadastro'] = $acao === 'editar' ? 'Trem atualizado com sucesso!' : 'Trem cadastrado com sucesso!';
-                            $stmt->close();
-
-                            header('Location: cadastrar_trens.php');
-                            exit;
-
-                        } else {
-                            error_log('Erro ao cadastrar trem: ' . $stmt->error);
-                            $mensagem = 'Não foi possível concluir o cadastro.';
-                        }
-
-                    } catch (mysqli_sql_exception $e) {
-                        error_log('Erro ao cadastrar trem: ' . $e->getMessage());
-                        $mensagem = 'Não foi possível concluir o cadastro.';
-                    }
-
-                    $stmt->close();
-                }
-            }
+        // Os tipos seguem a ordem dos valores enviados ao banco: s para texto, d para decimal e i para inteiro.
+        mysqli_stmt_bind_param($stmt, 'sdi', $nome, $velocidade, $id_usuario);
+        // Se o banco não conseguir gravar, mostra a mensagem abaixo do formulário.
+        try {
+            $salvou = mysqli_stmt_execute($stmt);
+        } catch (mysqli_sql_exception $erro) {
+            $salvou = false;
         }
+        mysqli_stmt_close($stmt);
+
+        if ($salvou) {
+            $_SESSION['mensagem_trem'] = 'Trem cadastrado com sucesso!';
+            $_SESSION['sucesso_trem'] = true;
+            header('Location: cadastrar_trens.php');
+            exit();
+        }
+
+        $mensagem = 'Não foi possível cadastrar o trem.';
     }
 }
 
-$manterFormularioAberto = $_SERVER['REQUEST_METHOD'] === 'POST' || $idEdicao > 0;
-
+// Listagem. Busca os dados para a tabela.
 $busca = trim($_GET['buscar'] ?? '');
-$textoBusca = "%" . $busca . "%";
-
-$sql = "SELECT
-            t.id_trem,
-            t.nome,
-            t.velocidade_media,
-            t.id_usuario,
-            u.nome AS nome_responsavel
-        FROM trens t
-        LEFT JOIN usuarios u ON u.id_usuario = t.id_usuario
-        WHERE t.nome LIKE ?
-           OR u.nome LIKE ?
-        ORDER BY t.nome";
-
-$stmtBusca = $conn->prepare($sql);
-
-if ($stmtBusca) {
-
-    $stmtBusca->bind_param("ss", $textoBusca, $textoBusca);
-
-    if ($stmtBusca->execute()) {
-        $resultado = $stmtBusca->get_result();
-
-    } else {
-        error_log("Erro ao consultar trens: " . $stmtBusca->error);
-        $resultado = false;
-        $mensagemAcesso = 'Não foi possível carregar os trens.';
-    }
-
-    $stmtBusca->close();
-
-} else {
-
-    error_log("Erro ao preparar consulta: " . $conn->error);
-    $resultado = false;
-    $mensagemAcesso = 'Não foi possível carregar os trens.';
+$usuarios = mysqli_query($conn, "SELECT id_usuario, nome FROM usuarios ORDER BY nome");
+$trens = mysqli_query($conn, "SELECT * FROM trens ORDER BY nome");
+// O PHP carrega ou salva a edição e mantém o formulário aberto se houver erro.
+if ($editando) {
+    $sucesso = false;
+    require 'editar_t.php';
 }
 
+$cadastro_aberto = $_SERVER['REQUEST_METHOD'] === 'POST' && $mensagem !== '';
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Cadastro Trens</title>
-
-    <link rel="stylesheet" href="../../assets/style/style.css?v=20261115-ui">
+    <title>Trens | TremTech</title>
+    <link rel="stylesheet" href="../../assets/style/style.css?v=menu-direto-topo-1">
 </head>
-
 <body class="body_geral">
-
-<div class="pagina">
-
-    <aside class="menu">
-
-        <img
-            class="logo-trem"
-            src="https://img.icons8.com/ios/100/701015/train.png"
-            alt="Logo TremTech"
-        >
-
-        <p class="marca">SISTEMA TREMTECH</p>
-
-        <a href="../../public/Tela_Home/home.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/home.png');"></span>
-            Home
+    <!-- A classe ativo destaca o link da tela aberta. -->
+    <nav class="menu_topo" aria-label="Navegação do TremTech">
+        <a class="menu_topo_marca" href="../Tela_Home/home.php">
+            <img src="https://img.icons8.com/ios/100/701015/train.png" alt="">
+            <span>SISTEMA TREMTECH</span>
         </a>
 
-        <a href="../../public/Tela_Usuario/cadastrar_usuario.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/user.png');"></span>
-            Usuários
-        </a>
-
-        <a href="../../public/Tela_Sensores/cadastrar_sensores.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/radio-waves.png');"></span>
-            Sensores
-        </a>
-
-        <a class="ativo" href="../../public/Tela_Trens/cadastrar_trens.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/train.png');"></span>
-            Trens
-        </a>
-
-        <a href="../../public/Tela_Rotas/cadastrar_rotas.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/map.png');"></span>
-            Rotas
-        </a>
-
-        <a href="../../public/Tela_Monitoramento/monitoramento.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/visible.png');"></span>
-            Monitoramento
-        </a>
-
-        <a href="../../public/Tela_Falhas/cadastrar_falha.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/701015/error.png');"></span>
-            Falhas
-        </a>
-
-        <a href="../../public/Tela_Relatorios/relatorios.php">
-            <span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/000000/report-card.png');"></span>
-            Relatórios
-        </a>
-
-
-        <a class="logout" href="../../logout.php" data-confirmar-logout><span class="icone" style="mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png'); -webkit-mask-image: url('https://img.icons8.com/ios-filled/18/ffffff/logout-rounded.png');"></span>Logout</a>
-    </aside>
-
-    <main class="content-user">
-
-        <p class="painel-user">PAINEL ADMINISTRATIVO</p>
-
-        <h1>Controle de trens cadastrados</h1>
-        <h2>Trens</h2>
-
-        <?php if ($mensagemSucesso !== ''): ?>
-            <p class="mensagem-sucesso" role="status">
-                <?= escapar($mensagemSucesso) ?>
-            </p>
-        <?php endif; ?>
-
-        <?php if ($mensagemAcesso !== ''): ?>
-            <p role="alert">
-                <?= escapar($mensagemAcesso) ?>
-            </p>
-        <?php endif; ?>
-
-        <?php foreach ($erros as $erroCampo): ?>
-            <p role="alert">
-                <?= escapar($erroCampo) ?>
-            </p>
-        <?php endforeach; ?>
-        <div class="admin-badge-user card-recuado">
-
-            <div class="avatar-user"></div>
-
-            <div>
-                <strong>
-                    <?= $ehAdministrador ? 'Administrador' : 'Funcionário' ?>
-                </strong>
-
-                <span>
-                    <?= escapar($_SESSION['nome'] ?? '') ?>
-                </span>
-            </div>
-
+        <div class="menu_topo_links">
+            <a href="../Tela_Home/home.php"><img src="https://img.icons8.com/ios-filled/18/701015/home.png" alt=""> Home</a>
+            <a href="../Tela_Usuario/cadastrar_usuario.php"><img src="https://img.icons8.com/ios-filled/18/701015/user.png" alt=""> Usuários</a>
+            <a href="../Tela_Sensores/cadastrar_sensores.php"><img src="https://img.icons8.com/ios-filled/18/701015/radio-waves.png" alt=""> Sensores</a>
+            <a class="ativo" href="../Tela_Trens/cadastrar_trens.php"><img src="https://img.icons8.com/ios-filled/18/701015/train.png" alt=""> Trens</a>
+            <a href="../Tela_Rotas/cadastrar_rotas.php"><img src="https://img.icons8.com/ios-filled/18/701015/map.png" alt=""> Rotas</a>
+            <a href="../Tela_Monitoramento/monitoramento.php"><img src="https://img.icons8.com/ios-filled/18/701015/visible.png" alt=""> Monitoramento</a>
+            <a href="../Tela_Falhas/cadastrar_falha.php"><img src="https://img.icons8.com/ios-filled/18/701015/error.png" alt=""> Falhas</a>
+            <a href="../Tela_Relatorios/relatorios.php"><img src="https://img.icons8.com/ios-filled/18/701015/report-card.png" alt=""> Relatórios</a>
         </div>
 
-        <?php if ($ehAdministrador): ?>
+        <a class="menu_topo_sair" href="../../logout.php" id="link_sair"><img src="https://img.icons8.com/ios-filled/18/701015/logout-rounded.png" alt=""> Sair</a>
+    </nav>
+    <div class="pagina">
 
-            <section
-                class="cadastro-usuario <?= $manterFormularioAberto ? 'ativo' : '' ?>"
-                id="cadastro"
-                <?= $manterFormularioAberto ? '' : 'hidden' ?>
-            >
 
-                <form class="form-cadastro-user" method="POST">
+        <main class="content_user">
+            <p class="painel_user">PAINEL ADMINISTRATIVO</p>
+            <h1>Controle de trens cadastrados</h1>
+            <h2>Trens</h2>
 
-                    <input
-                        type="hidden"
-                        name="csrf_token"
-                        value="<?= escapar(token_csrf()) ?>"
-                    >
-
-                    <div class="campo-user">
-
-                        <label for="nome">Nome do trem</label>
-
-                        <input
-                            type="text"
-                            id="nome"
-                            name="nome"
-                            placeholder="Nome do trem"
-                            value="<?= escapar($nome) ?>"
-                            required
-                        >
-
-                    </div>
-
-                    <div class="campo-user">
-
-                        <label for="velocidade">Velocidade média</label>
-
-                        <input
-                            type="number"
-                            id="velocidade"
-                            name="velocidade"
-                            placeholder="Velocidade média"
-                            min="1"
-                            max="600"
-                            step="any"
-                            value="<?= escapar($velocidade) ?>"
-                            required
-                        >
-
-                    </div>
-
-                    <div class="campo-user campo-responsavel-trem">
-
-                        <label for="id_usuario">Usuário responsável</label>
-
-                        <select id="id_usuario" name="id_usuario" required>
-
-                            <option value="">Selecione o responsável</option>
-
-                            <?php foreach ($usuarios as $usuario): ?>
-
-                                <option
-                                    value="<?= (int)$usuario['id_usuario'] ?>"
-                                    <?= (string)$id_usuario === (string)$usuario['id_usuario'] ? 'selected' : '' ?>
-                                >
-                                    <?= escapar($usuario['nome']) ?>
-                                </option>
-
-                            <?php endforeach; ?>
-
-                        </select>
-
-                    </div>
-
-                    <?php if ($mensagem !== ''): ?>
-                        <p class="mensagem-cadastro" role="alert">
-                            <?= escapar($mensagem) ?>
-                        </p>
-                    <?php endif; ?>
-
-                    <?php if ($idEdicao > 0): ?>
-                        <input type="hidden" name="acao" value="editar">
-                        <input type="hidden" name="id_trem" value="<?= (int) $idEdicao ?>">
-                        <div class="acoes-form-edicao modo-edicao">
-                            <button class="btn-cadastrar-form" type="submit">SALVAR ALTERAÇÕES</button>
-                            <a class="btn-cancelar-form" href="cadastrar_trens.php">Cancelar</a>
-                        </div>
-                    <?php else: ?>
-                        <input type="hidden" name="acao" value="criar">
-                        <button class="btn-cadastrar-form" type="submit">CADASTRAR NOVO TREM</button>
-                    <?php endif; ?>
-
-                </form>
-
-            </section>
-
-        <?php endif; ?>
-
-        <section class="buscar-box-user buscar-usuarios-linha">
-
-            <form method="GET">
-
-                <label for="buscar">Buscar</label>
-
-                <input
-                    type="text"
-                    id="buscar"
-                    name="buscar"
-                    placeholder="Nome ou responsável"
-                    value="<?= escapar($busca) ?>"
-                >
-
-                <button type="submit">Buscar</button>
-
-            </form>
-
-            <?php if ($ehAdministrador && $idEdicao === 0): ?>
-                <button class="btn-cadastrar-user btn-cadastrar-user-compacto" id="btnAbrirCadastro"
-                        type="button" aria-expanded="<?= $manterFormularioAberto ? 'true' : 'false' ?>"
-                        aria-controls="cadastro">
-                    Cadastrar trem
-                </button>
-            <?php endif; ?>
-
-        </section>
-
-        <?php mostrar_trens($resultado); ?>
-
-        <?php if ($avisoExclusao !== ''): ?>
-
-            <div id="modalErroExclusao" class="modal-overlay">
-
-                <div class="modal-conteudo">
-
-                    <div class="icone-alerta">!</div>
-
-                    <h2>Não foi possível excluir o trem</h2>
-
-                    <p><?= escapar($avisoExclusao) ?></p>
-
-                    <button
-                        type="button"
-                        onclick="document.getElementById('modalErroExclusao').remove()"
-                    >
-                        Voltar
-                    </button>
-
+            <div class="admin_badge_user card_recuado">
+                <div class="avatar_user"></div>
+                <div>
+                    <strong><?php echo escapar($_SESSION['tipo']); ?></strong>
+                    <span><?php echo escapar($_SESSION['nome']); ?></span>
                 </div>
-
             </div>
 
-        <?php endif; ?>
+            <?php if ($mensagem !== '') { ?>
+                <?php if ($sucesso) { ?>
+                    <p class="mensagem_sucesso"><?php echo escapar($mensagem); ?></p>
+                <?php } else { ?>
+                    <p class="mensagem_erro" role="alert"><?php echo escapar($mensagem); ?></p>
+                <?php } ?>
+            <?php } ?>
 
-    </main>
+            <?php if ($editando) { ?>
+                <section id="cadastro" class="cadastro_usuario ativo">
+                    <h2>Editar trem</h2>
+                    <!-- Cada campo junta o rótulo e a caixa de entrada. O CSS usa esse grupo para colocar o rótulo em cima. -->
+                    <form method="POST" class="form_cadastro_user">
+                        <div class="campo_user">
+                            <label for="nome">Nome do trem</label>
+                            <input type="text" id="nome" name="nome" minlength="3" maxlength="100"
+                                   value="<?php echo escapar($nome); ?>" required>
+                        </div>
 
-</div>
+                        <div class="campo_user">
+                            <label for="velocidade">Velocidade média em km/h</label>
+                            <input type="number" id="velocidade" name="velocidade"
+                                   step="any" value="<?php echo escapar($velocidade); ?>" required>
+                        </div>
 
-<script src="../../script/validacao.js"></script>
+                        <div class="campo_user campo_responsavel_trem">
+                            <label for="id_usuario">Usuário responsável</label>
+                            <select id="id_usuario" name="id_usuario" required>
+                                <option value="">Selecione o responsável</option>
 
-<script src="../../script/confirmar_logout.js?v=20261107"></script>
+                                <?php while ($usuario = mysqli_fetch_assoc($usuarios)) { ?>
+                                    <option value="<?php echo $usuario['id_usuario']; ?>"
+                                        <?php if ($usuario['id_usuario'] == $id_usuario) { echo 'selected'; } ?>>
+                                        <?php echo escapar($usuario['nome']); ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <div class="acoes_form_edicao modo_edicao">
+                            <button type="submit" class="btn_cadastrar_form">Salvar alterações</button>
+                            <a class="btn_cancelar_form" href="cadastrar_trens.php">Cancelar</a>
+                        </div>
+                    </form>
+                </section>
+            <?php } elseif ($administrador) { ?>
+                <section id="cadastro" class="cadastro_usuario ativo"
+                    <?php if (!$cadastro_aberto) { echo 'hidden'; } ?>>
+                    
+
+                    <form method="POST" class="form_cadastro_user">
+                        <div class="campo_user">
+                            <label for="nome">Nome do trem</label>
+                            <input placeholder="Nome do trem" type="text" id="nome" name="nome" minlength="3" maxlength="100" required>
+                        </div>
+
+                        <div class="campo_user">
+                            <label for="velocidade">Velocidade média</label>
+                            <input placeholder="Velocidade média" type="number" id="velocidade" name="velocidade"
+                                   step="any" required>
+                        </div>
+
+                        <div class="campo_user campo_responsavel_trem">
+                            <label for="id_usuario">Usuário responsável</label>
+                            <select id="id_usuario" name="id_usuario" required>
+                                <option value="">Selecione o responsável</option>
+    
+                                <?php while ($usuario = mysqli_fetch_assoc($usuarios)) { ?>
+                                    <option value="<?php echo $usuario['id_usuario']; ?>">
+                                        <?php echo escapar($usuario['nome']); ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <button class="btn_cadastrar_form" type="submit">CADASTRAR NOVO TREM</button>
+                    </form>
+                </section>
+            <?php } ?>
+
+            <!-- Nesta área, Buscar filtra a lista e o botão Cadastrar abre o formulário. -->
+            <section class="buscar_box_user buscar_usuarios_linha">
+                <form method="GET">
+                    <label for="buscar">Buscar</label>
+                    <input type="search" id="buscar" name="buscar" placeholder="Nome ou responsável"
+                           value="<?php echo escapar($busca); ?>">
+                    <button type="submit">Buscar</button>
+                </form>
+
+                <?php if ($administrador && !$editando) { ?>
+                    <button class="btn_cadastrar_user btn_cadastrar_user_compacto"
+                            id="botao_abrir_cadastro" type="button" aria-controls="cadastro">
+                        Cadastrar trem
+                    </button>
+                <?php } ?>
+            </section>
+
+            <?php include 'visualizacao_trens.php'; ?>
+        </main>
+    </div>
+
+    <!-- A janela fica fechada até a pessoa clicar em Sair. -->
+    <dialog class="modal_confirmacao" id="janela_saida" aria-labelledby="tituloConfirmarSaida">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="tituloConfirmarSaida">Sair do sistema?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja sair da sua conta?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_saida">Continuar no sistema</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_saida">Sair</button>
+        </div>
+    </dialog>
+
+    <!-- A janela só abre ao clicar na lixeira. Os botões usam o mesmo estilo da confirmação de saída. -->
+    <dialog class="modal_confirmacao" id="janela_exclusao" aria-labelledby="titulo_exclusao">
+        <div class="modal_confirmacao_icone" aria-hidden="true">?</div>
+        <h2 id="titulo_exclusao">Excluir registro?</h2>
+        <p class="modal_confirmacao_mensagem">Tem certeza de que deseja excluir este registro?</p>
+        <div class="modal_confirmacao_acoes">
+            <button type="button" class="modal_btn_cancelar" id="cancelar_exclusao">Cancelar</button>
+            <button type="button" class="modal_btn_sair" id="confirmar_exclusao">Excluir</button>
+        </div>
+    </dialog>
+
+<script src="../../script/validacao.js?v=simples-8"></script>
 </body>
 </html>

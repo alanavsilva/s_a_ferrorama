@@ -1,77 +1,71 @@
 <?php
-function mostrar_trens($resultado): void
-{
-    $ehAdministrador = strcasecmp($_SESSION['tipo'] ?? '', 'Administrador') === 0;
+// O while mostra cada registro em uma linha e usa seu ID nos botões Editar e Excluir.
+if (!isset($trens)) {
+    exit();
+}
 
-    if ($resultado === false || $resultado === null) {
-        echo '<p role="alert">Não foi possível carregar os trens.</p>';
-        return;
-    }
-    if ($resultado->num_rows === 0) {
-        echo '<p class="mensagem_vazia">Nenhum trem encontrado.</p>';
-        return;
-    }
-    ?>
-    <table class="tabela-usuarios tabela-trens">
-        <thead><tr>
-            <th>Nome</th><th>Velocidade média</th><th>Usuário responsável</th>
-            <?php if ($ehAdministrador): ?><th>Ação</th><?php endif; ?>
-        </tr></thead>
-        <tbody>
-        <?php while ($trem = $resultado->fetch_assoc()): ?>
+$encontrou = false;
+?>
+
+<!-- O while monta uma linha por registro. Editar e Excluir aparecem apenas para administradores. -->
+<table class="tabela_usuarios tabela_trens">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Velocidade média</th>
+            <th>Usuário responsável</th>
+            <?php if ($administrador) { ?>
+                <th>Ação</th>
+            <?php } ?>
+        </tr>
+    </thead>
+
+    <tbody>
+        <?php
+        while ($trem = mysqli_fetch_assoc($trens)) {
+            $nome_responsavel = '-';
+
+            // O trem guarda o ID do responsável. O SELECT busca o nome dele.
+            if (isset($trem['id_usuario'])) {
+                $id_usuario = (int) $trem['id_usuario'];
+                $sql = "SELECT nome FROM usuarios WHERE id_usuario = $id_usuario";
+                $resultado = mysqli_query($conn, $sql);
+                $usuario = mysqli_fetch_assoc($resultado);
+
+                if ($usuario) {
+                    $nome_responsavel = $usuario['nome'];
+                }
+            }
+
+            // Se não encontrou o texto em nenhum campo, pula esta linha.
+            if ($busca !== ''
+                && stripos($trem['nome'], $busca) === false
+                && stripos($nome_responsavel, $busca) === false
+            ) {
+                continue;
+            }
+            $encontrou = true;
+        ?>
             <tr>
-                <td><?= escapar($trem['nome'] ?? '') ?></td>
-                <td><?= escapar((string)($trem['velocidade_media'] ?? '')) ?> km/h</td>
-                <td><?= escapar($trem['nome_responsavel'] ?? '-') ?></td>
-                <?php if ($ehAdministrador): ?>
+                <td><?php echo escapar($trem['nome']); ?></td>
+                <td><?php echo $trem['velocidade_media']; ?> km/h</td>
+                <td><?php echo escapar($nome_responsavel); ?></td>
+
+                <?php if ($administrador) { ?>
                     <td class="acao_user">
-                        <a href="cadastrar_trens.php?editar=<?= (int)$trem['id_trem'] ?>#cadastro" class="acao-icone" aria-label="Editar trem">
-                            <img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt="">
-                        </a>
-                        <form method="POST" action="excluir_t.php" class="js-confirmar-exclusao" data-titulo="Excluir trem" data-mensagem="Tem certeza de que deseja excluir este trem? Essa ação não pode ser desfeita.">
-                            <input type="hidden" name="csrf_token" value="<?= escapar(token_csrf()) ?>">
-                            <input type="hidden" name="id" value="<?= (int)$trem['id_trem'] ?>">
-                            <button type="submit" class="acao-icone" aria-label="Excluir trem">
-                                <img src="https://img.icons8.com/ios-filled/18/701015/trash.png" alt="">
-                            </button>
+                        <a href="cadastrar_trens.php?editar=<?php echo $trem['id_trem']; ?>#cadastro" class="acao_icone editar_user" aria-label="Editar trem"><img src="https://img.icons8.com/ios-filled/18/701015/edit.png" alt=""></a>
+
+                        <form method="POST" action="excluir_t.php" class="confirmar_exclusao">
+                            <input type="hidden" name="id" value="<?php echo $trem['id_trem']; ?>">
+                            <button type="submit" class="acao_icone excluir_user" aria-label="Excluir trem"><img src="https://img.icons8.com/ios-filled/18/701015/trash.png" alt=""></button>
                         </form>
                     </td>
-                <?php endif; ?>
-            </tr>
-        <?php endwhile; ?>
-        </tbody>
-    </table>
-    <dialog class="modal-confirmacao" aria-labelledby="tituloConfirmacaoTrem">
-        <div class="modal-confirmacao-icone" aria-hidden="true">!</div>
-        <h2 id="tituloConfirmacaoTrem">Excluir trem?</h2>
-        <p class="modal-confirmacao-mensagem">Essa ação não pode ser desfeita.</p>
-        <div class="modal-confirmacao-acoes">
-            <button type="button" class="modal-btn-cancelar">Cancelar</button>
-            <button type="button" class="modal-btn-excluir">Excluir trem</button>
-        </div>
-    </dialog>
-    <script>
-    (() => {
-        const modal = document.querySelector('.modal-confirmacao');
-        if (!modal) return;
-        let formularioPendente = null;
-        document.querySelectorAll('.js-confirmar-exclusao').forEach((formulario) => {
-            formulario.addEventListener('submit', (evento) => {
-                evento.preventDefault();
-                formularioPendente = formulario;
-                modal.querySelector('h2').textContent = formulario.dataset.titulo || 'Confirmar exclusão';
-                modal.querySelector('.modal-confirmacao-mensagem').textContent = formulario.dataset.mensagem || 'Essa ação não pode ser desfeita.';
-                modal.showModal();
-            });
-        });
-        modal.querySelector('.modal-btn-cancelar').addEventListener('click', () => modal.close());
-        modal.querySelector('.modal-btn-excluir').addEventListener('click', () => {
-            if (formularioPendente) formularioPendente.submit();
-        });
-        modal.addEventListener('close', () => { formularioPendente = null; });
-        modal.addEventListener('click', (evento) => { if (evento.target === modal) modal.close(); });
-    })();
-    </script>
-    <?php
-}
-?>
+                <?php } ?>
+                </tr>
+        <?php } ?>
+    </tbody>
+</table>
+
+<?php if (!$encontrou) { ?>
+    <p class="mensagem_vazia">Nenhum trem encontrado.</p>
+<?php } ?>

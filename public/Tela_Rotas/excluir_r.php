@@ -1,49 +1,45 @@
 <?php
-require_once "../../infra/conexao.php";
-require_once "../../infra/auth.php";
+// Procura sensores ligados à rota antes de excluir o registro e voltar à lista com o aviso.
+require_once '../../infra/conexao.php';
+require_once '../../infra/auth.php';
 
 exigir_administrador();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    exit('Método não permitido.');
-}
-
-verificar_csrf();
-
-$id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-
-if (!$id || $id < 1) {
-    http_response_code(400);
-    exit('Rota inválida.');
-}
-
-$stmt = $conn->prepare('DELETE FROM rotas WHERE id_rotas = ?');
-if (!$stmt) {
-    error_log('Erro ao preparar exclusão de rota: ' . $conn->error);
-    $_SESSION['mensagem_erro'] = 'Não foi possível excluir a rota.';
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id'])) {
     header('Location: cadastrar_rotas.php');
-    exit;
-}
-$stmt->bind_param('i', $id);
-
-try {
-    if ($stmt->execute() && $stmt->affected_rows > 0) {
-        $_SESSION['mensagem_cadastro'] = 'Rota excluída com sucesso!';
-    } else {
-        $_SESSION['mensagem_erro'] = 'A rota não foi encontrada.';
-    }
-} catch (mysqli_sql_exception $e) {
-    if ((int) $e->getCode() === 1451) {
-        $_SESSION['mensagem_erro'] =
-            'Não foi possível excluir esta rota porque existem registros relacionados.';
-    } else {
-        error_log('Erro ao excluir rota: ' . $e->getMessage());
-        $_SESSION['mensagem_erro'] = 'Não foi possível excluir a rota.';
-    }
+    exit();
 }
 
-$stmt->close();
+// O formulário envia o ID. Uma ligação já basta para bloquear a exclusão.
+$id = (int) $_POST['id'];
+$sensores = mysqli_query($conn, "SELECT id_sensor FROM sensores WHERE id_rotas = $id LIMIT 1");
 
+if (mysqli_num_rows($sensores) > 0) {
+    $mensagem = 'Esta rota tem sensores vinculados.';
+} else {
+    // O ? recebe o ID que veio do formulário. O tipo i indica um número inteiro.
+    $sql = "DELETE FROM rotas WHERE id_rotas = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, 'i', $id);
+
+    try {
+        $excluiu = mysqli_stmt_execute($stmt);
+    } catch (mysqli_sql_exception $erro) {
+        $excluiu = false;
+    }
+
+    $linhas = mysqli_stmt_affected_rows($stmt);
+    mysqli_stmt_close($stmt);
+
+    if (!$excluiu) {
+        $mensagem = 'Não foi possível excluir a rota.';
+    } elseif ($linhas === 0) {
+        $mensagem = 'Rota não encontrada.';
+    } else {
+        $_SESSION['sucesso_rota'] = true;        $mensagem = 'Rota excluída com sucesso!';
+    }
+}
+
+$_SESSION['mensagem_rota'] = $mensagem;
 header('Location: cadastrar_rotas.php');
-exit;
+exit();
